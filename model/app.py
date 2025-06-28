@@ -61,9 +61,13 @@ def predict():
             return jsonify({'error': 'Field "transactions" harus berupa list dan tidak boleh kosong.'}), 400
 
         df = pd.DataFrame(transactions)
-        if 'amount' not in df.columns:
-            return jsonify({'error': "Data harus memiliki kolom 'amount'"}), 400
+        # --- Validasi kolom wajib ---
+        required_cols = ['amount', 'timestamp', 'merchant', 'location']
+        for col in required_cols:
+            if col not in df.columns:
+                return jsonify({'error': f"Data harus memiliki kolom '{col}'"}), 400
 
+        # --- Validasi numerik pada amount ---
         if not pd.api.types.is_numeric_dtype(df['amount']):
             try:
                 df['amount'] = pd.to_numeric(df['amount'], errors='coerce')
@@ -72,14 +76,20 @@ def predict():
             except:
                 return jsonify({'error': "Tidak dapat mengkonversi 'amount' ke format numerik"}), 400
 
+        # --- Prediksi anomaly ---
         amounts = df[['amount']]
         predictions = model.predict(amounts)
         scores = model.decision_function(amounts)
 
+        # --- Susun hasil prediksi, sertakan field input penting ---
         results = []
         for i in range(len(df)):
             results.append({
                 'id': df.iloc[i].get('id', i),
+                'timestamp': df.iloc[i].get('timestamp', None),
+                'merchant': df.iloc[i].get('merchant', None),
+                'location': df.iloc[i].get('location', None),
+                'amount': float(df.iloc[i]['amount']),
                 'isAnomaly': bool(predictions[i] == -1),
                 'anomalyScore': float(scores[i])
             })

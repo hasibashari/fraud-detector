@@ -11,6 +11,43 @@ const router = express.Router();
 // Konfigurasi Multer untuk menyimpan file di folder 'uploads/'
 const upload = multer({ dest: 'uploads/' });
 
+
+// Mapping kolom CSV ke kolom database
+const MAPPER_CONFIG = {
+    amount: ['transactionamount', 'amount', 'jumlah', 'nilai'],
+    timestamp: ['transactiondate', 'timestamp', 'waktu'],
+    merchant: ['merchantid', 'merchant'],
+    location: ['location'],
+    // tambahkan mapping lain jika perlu
+};
+
+function mapAndCleanRow(rawRow) {
+    const cleanRow = {};
+    const rawKeys = Object.keys(rawRow).reduce((acc, key) => {
+        acc[key.toLowerCase().replace(/\s/g, '')] = rawRow[key];
+        return acc;
+    }, {});
+    for (const targetField in MAPPER_CONFIG) {
+        for (const sourceField of MAPPER_CONFIG[targetField]) {
+            if (rawKeys[sourceField]) {
+                cleanRow[targetField] = rawKeys[sourceField];
+                break;
+            }
+        }
+    }
+    // Bersihkan amount
+    if (cleanRow.amount) {
+        let amountStr = String(cleanRow.amount).replace(/Rp|\s|\./g, '').replace(',', '.');
+        cleanRow.amount = parseFloat(amountStr);
+    }
+    // Bersihkan timestamp
+    if (cleanRow.timestamp) {
+        cleanRow.timestamp = new Date(cleanRow.timestamp);
+    }
+    // merchant dan location biarkan string
+    return cleanRow;
+}
+
 /**
  * @route   POST /transactions/upload
  * @desc    Upload file CSV transaksi
@@ -31,15 +68,19 @@ router.post('/upload', upload.single('file'), async (req, res) => {
         const results = [];
         fs.createReadStream(filePath)
             .pipe(csv())
-            .on('data', (data) => {
-                // Basic validation
-                if (data.amount && data.timestamp && data.merchant && data.location) {
+            .on('data', (rawRow) => {
+                const cleanRow = mapAndCleanRow(rawRow);
+                // Pastikan semua field wajib ada
+                if (
+                    typeof cleanRow.amount === 'number' && !isNaN(cleanRow.amount) &&
+                    cleanRow.timestamp && cleanRow.merchant && cleanRow.location
+                ) {
                     results.push({
-                        amount: parseFloat(data.amount),
-                        timestamp: new Date(data.timestamp),
-                        merchant: data.merchant,
-                        location: data.location,
-                        uploadBatchId: batchId, // update sesuai schema.prisma baru
+                        amount: cleanRow.amount,
+                        timestamp: cleanRow.timestamp,
+                        merchant: cleanRow.merchant,
+                        location: cleanRow.location,
+                        uploadBatchId: batchId,
                     });
                 }
             })
@@ -85,7 +126,13 @@ router.post('/analyze/:batchId', async (req, res) => {
         // 2. Kirim data ke API Flask untuk dianalisis
         console.log(`Mengirim ${transactions.length} transaksi ke model AI...`);
         const aiResponse = await axios.post('http://127.0.0.1:5000/predict', {
-            transactions: transactions.map(t => ({ id: t.id, amount: t.amount })),
+            transactions: transactions.map(t => ({
+                id: t.id,
+                amount: t.amount,
+                timestamp: t.timestamp,
+                merchant: t.merchant,
+                location: t.location
+            })),
         });
         const analysisResults = aiResponse.data;
 
@@ -166,5 +213,81 @@ router.get('/batches', async (req, res) => {
         res.status(500).json({ message: 'Gagal mengambil data batch.', error: error.message });
     }
 });
+
+/**
+ * @route   DELETE /api/transactions/batch/:batchId
+ * @desc    Menghapus satu batch beserta semua transaksinya
+ * @access  Public
+ */
+router.delete('/batch/:batchId', async (req, res) => {
+    const { batchId } = req.params;
+
+    try {
+        // prisma.$transaction memastikan kedua operasi ini harus berhasil.
+        // Jika salah satu gagal, keduanya akan dibatalkan (rollback).
+        // Ini menjaga konsistensi data.
+        const [deletedTransactions, deletedBatch] = await prisma.$transaction([
+            // 1. Hapus dulu semua transaksi yang memiliki uploadBatchId ini
+            prisma.transaction.deleteMany({
+                where: { uploadBatchId: batchId },
+            }),
+            // 2. Baru hapus batch induknya
+            prisma.uploadBatch.delete({
+                where: { id: batchId },
+            }),
+        ]);
+
+        res.status(200).json({
+            message: `Batch berhasil dihapus.`,
+            deletedTransactionsCount: deletedTransactions.count,
+            deletedBatchInfo: deletedBatch,
+        });
+
+    } catch (error) {
+        // Tangani jika batch tidak ditemukan atau ada error lain
+        if (error.code === 'P2025') { // Kode error Prisma untuk 'Record to delete does not exist.'
+            return res.status(404).json({ message: 'Batch tidak ditemukan.' });
+        }
+        console.error("Error saat menghapus batch:", error.message);
+        res.status(500).json({ message: 'Terjadi kesalahan pada server.' });
+    }
+});
+
+
+/**
+ * @route   GET /api/transactions/batch/:batchId
+ * @desc    Ambil SEMUA transaksi (anomali dan normal) untuk satu batch
+ * @access  Public
+ */
+router.get('/batch/:batchId', async (req, res) => {
+    const { batchId } = req.params;
+
+    try {
+        const transactions = await prisma.transaction.findMany({
+            where: {
+                uploadBatchId: batchId,
+            },
+            orderBy: {
+                timestamp: 'asc', // atau 'desc' sesuai kebutuhan
+            },
+        });
+
+        if (transactions.length === 0) {
+            return res.status(404).json({
+                message: 'Tidak ada transaksi ditemukan untuk batch ini.',
+            });
+        }
+
+        res.status(200).json(transactions);
+
+    } catch (error) {
+        console.error("Error saat mengambil transaksi batch:", error.message);
+        res.status(500).json({
+            message: 'Terjadi kesalahan pada server.',
+            error: error.message,
+        });
+    }
+});
+
 
 module.exports = router;

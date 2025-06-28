@@ -1,73 +1,93 @@
-body {
-    font-family: sans-serif;
-    line-height: 1.6;
-    margin: 0;
-    padding: 20px;
-    background-color: #f4f4f4;
+:root {
+    --fd-primary: #005A9C;
+    --fd-warning: #FFC107;
+    --fd-danger: #ff4f70;
+    --fd-anomaly-row: #fff2f6;
 }
 
-header {
-    text-align: center;
-    margin-bottom: 2rem;
+/* Custom bootstrap theme color */
+.bg-fd-primary {
+    background: var(--fd-primary) !important;
 }
 
-main {
-    max-width: 800px;
-    margin: auto;
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+.bg-fd-warning {
+    background: var(--fd-warning) !important;
 }
 
-section {
-    margin-bottom: 1.5rem;
+.bg-fd-danger {
+    background: var(--fd-danger) !important;
 }
 
-button {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    background-color: #005A9C;
-    color: white;
+.text-fd-primary {
+    color: var(--fd-primary) !important;
+}
+
+.text-fd-warning {
+    color: var(--fd-warning) !important;
+}
+
+.text-fd-danger {
+    color: var(--fd-danger) !important;
+}
+
+.btn-fd-primary {
+    background: var(--fd-primary);
+    color: #fff;
     border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
 }
 
-button:hover {
-    background-color: #004170;
+.btn-fd-primary:hover,
+.btn-fd-primary:focus {
+    background: #003c6e;
+    color: #fff;
 }
 
-input[type="file"] {
-    margin-bottom: 10px;
+.table-fd-primary>tr>th,
+.table-fd-primary>th {
+    background: var(--fd-primary);
+    color: #fff;
 }
 
-#statusText {
-    padding: 10px;
-    background-color: #e3e3e3;
-    border-radius: 5px;
+.table-fd-warning>tr>th,
+.table-fd-warning>th {
+    background: var(--fd-warning);
+    color: #333;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th,
-td {
-    padding: 12px;
-    border: 1px solid #ddd;
-    text-align: left;
-}
-
-th {
-    background-color: #005A9C;
-    color: white;
-}
-
-.anomaly-row {
-    background-color: #ffe8e8;
+.table .anomaly-row {
+    background: var(--fd-anomaly-row) !important;
+    color: var(--fd-danger) !important;
     font-weight: bold;
+    animation: highlightAnomaly 1.5s;
+}
+
+@keyframes highlightAnomaly {
+    from {
+        background: #ffe5ee;
+    }
+
+    to {
+        background: var(--fd-anomaly-row);
+    }
+}
+
+.card {
+    border-radius: 1.1rem;
+}
+
+header,
+footer {
+    border-radius: 0 0 1.1rem 1.1rem;
+}
+
+@media (max-width: 700px) {
+
+    header,
+    footer {
+        border-radius: 0;
+    }
+
+    .card {
+        border-radius: 0.7rem;
+    }
 }

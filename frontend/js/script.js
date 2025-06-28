@@ -16,16 +16,18 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(`${API_BASE_URL}/batches`);
             const batches = await res.json();
-            batchBody.innerHTML = ''; // Kosongkan tabel
+            batchBody.innerHTML = '';
             batches.forEach(batch => {
                 const row = document.createElement('tr');
+                row.dataset.batchId = batch.id; // Tambahkan ID ke elemen <tr>
                 row.innerHTML = `
                     <td>${batch.id}</td>
                     <td>${batch.fileName}</td>
                     <td>${new Date(batch.createdAt).toLocaleString('id-ID')}</td>
-                    <td>
+                    <td class="actions">
                         <button class="analyze-btn" data-batchid="${batch.id}">▶️ Analisis</button>
                         <button class="results-btn" data-batchid="${batch.id}">📄 Lihat Hasil</button>
+                        <button class="delete-btn" data-batchid="${batch.id}">🗑️ Hapus</button>
                     </td>
                 `;
                 batchBody.appendChild(row);
@@ -100,7 +102,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 resultStatus.textContent = `Error mengambil hasil: ${error.message}`;
             }
         }
+
+        // Jika tombol "Hapus" ditekan
+        if (target.classList.contains('delete-btn')) {
+            if (confirm('Apakah Anda yakin ingin menghapus batch ini?')) {
+                try {
+                    // Perbaiki endpoint: gunakan 'batch' bukan 'batches'
+                    const res = await fetch(`${API_BASE_URL}/batch/${batchId}`, { method: 'DELETE' });
+                    if (!res.ok) {
+                        // Coba ambil pesan error dari JSON, jika gagal fallback ke text
+                        let errorMsg = 'Gagal menghapus batch.';
+                        try {
+                            const data = await res.json();
+                            errorMsg = data.message || errorMsg;
+                        } catch {
+                            const text = await res.text();
+                            errorMsg = text || errorMsg;
+                        }
+                        throw new Error(errorMsg);
+                    }
+                    fetchAndDisplayBatches();
+                    resultsBody.innerHTML = '';
+                    resultStatus.textContent = 'Batch berhasil dihapus.';
+                } catch (error) {
+                    resultStatus.textContent = `Error menghapus batch: ${error.message}`;
+                }
+            }
+        }
     }
+
 
     // Fungsi untuk menampilkan hasil anomali di tabel bawah
     function displayAnomalies(anomalies) {

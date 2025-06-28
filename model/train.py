@@ -16,7 +16,7 @@ logging.basicConfig(
 
 # 3. Muat Dataset
 script_dir = os.path.dirname(os.path.abspath(__file__))
-data_path = os.path.join(script_dir, 'data', 'unsupervised_train.csv')
+data_path = os.path.join(script_dir, 'data', 'transactions_large.csv')
 try:
     df = pd.read_csv(data_path)
     logging.info(f"Dataset berhasil dimuat dari {data_path}")
@@ -49,7 +49,7 @@ logging.info(
     f"Fitur yang digunakan untuk training: {features.columns.tolist()}")
 
 # 6. Inisialisasi dan Latih Model
-model = IsolationForest(n_estimators=100, contamination=0.25, random_state=42)
+model = IsolationForest(n_estimators=100, contamination=0.05, random_state=42)
 model.fit(features)
 logging.info("Model berhasil dilatih.")
 

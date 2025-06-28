@@ -16,3 +16,6 @@ venv/
 # System files
 .DS_Store
 Thumbs.db
+
+# lainnya
+/backend/uploads

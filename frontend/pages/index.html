@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fraud Detection</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <header>
+        <h1>Sistem Deteksi Transaksi Mencurigakan</h1>
+        <p>Demo MVP untuk Hackathon BI 2025</p>
+    </header>
+    <main>
+        <section class="upload-section">
+            <h2>1. Unggah File Transaksi Baru</h2>
+            <input type="file" id="csvFile" accept=".csv">
+            <button id="uploadBtn">Unggah File</button>
+            <p id="uploadStatus" class="status-text"></p>
+        </section>
+
+        <section class="dashboard-section">
+            <h2>2. Dashboard Batch Upload</h2>
+            <table id="batchTable">
+                <thead>
+                    <tr>
+                        <th>ID Batch</th>
+                        <th>Nama File</th>
+                        <th>Waktu Upload</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="batchBody"></tbody>
+            </table>
+        </section>
+
+        <section class="results-section">
+            <h2>3. Hasil Deteksi Anomali</h2>
+            <p id="resultStatus" class="status-text">Pilih "Lihat Hasil" dari batch di atas.</p>
+            <table id="resultsTable">
+                <tbody id="resultsBody"></tbody>
+            </table>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 Tim Fraud Detection</p>
+        <p>Hackathon BI 2025</p>
+    </footer>
+    <script src="../js/script.js"></script>
+</body>
+
+</html>

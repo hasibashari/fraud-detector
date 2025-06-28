@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Tambahkan Enum ini di atas model
+enum BatchStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+// Model baru untuk mencatat setiap sesi upload
+model UploadBatch {
+  id        String      @id @default(cuid())
+  fileName  String
+  status    BatchStatus @default(PENDING)
+  createdAt DateTime    @default(now())
+
+  // Relasi: Satu batch memiliki banyak transaksi
+  transactions Transaction[]
+}
+
+// Model untuk menyimpan data transaksi asli
+model Transaction {
+  id        String   @id @default(cuid()) // ID unik
+  amount    Float // Jumlah transaksi
+  timestamp DateTime // Waktu transaksi
+  merchant  String // Nama merchant/toko
+  location  String // Lokasi transaksi
+
+  // Informasi Anomali (opsional)
+  isAnomaly    Boolean? @default(false) // Apakah ini anomali?
+  anomalyScore Float? // Skor risiko dari model AI
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  UploadBatch   UploadBatch? @relation(fields: [uploadBatchId], references: [id])
+  uploadBatchId String?
+}

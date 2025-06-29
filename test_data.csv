@@ -1,0 +1,4 @@
+TransactionAmount,TransactionDate,MerchantID,Location,AccountID
+100.50,2025-06-29 14:30:00,Amazon,Online,user123
+25.00,2025-06-29 15:45:00,Starbucks,New York,user456
+1500.00,2025-06-29 16:00:00,Unknown,Unknown,user789

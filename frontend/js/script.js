@@ -14,9 +14,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Fungsi untuk mengambil dan menampilkan semua batch
     async function fetchAndDisplayBatches() {
         try {
+            console.log('Fetching batches from:', `${API_BASE_URL}/batches`);
             const res = await fetch(`${API_BASE_URL}/batches`);
+
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            }
+
             const batches = await res.json();
+            console.log('Fetched batches:', batches);
+
             batchBody.innerHTML = '';
+
+            if (!Array.isArray(batches) || batches.length === 0) {
+                batchBody.innerHTML = `<tr><td colspan="4">Tidak ada batch yang ditemukan.</td></tr>`;
+                return;
+            }
+
             batches.forEach(batch => {
                 const row = document.createElement('tr');
                 row.dataset.batchId = batch.id; // Tambahkan ID ke elemen <tr>
@@ -33,7 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 batchBody.appendChild(row);
             });
         } catch (error) {
-            batchBody.innerHTML = `<tr><td colspan="4">Gagal memuat data batch.</td></tr>`;
+            console.error('Error fetching batches:', error);
+            batchBody.innerHTML = `<tr><td colspan="4">Gagal memuat data batch: ${error.message}</td></tr>`;
         }
     }
 
@@ -44,20 +59,51 @@ document.addEventListener('DOMContentLoaded', () => {
             uploadStatus.textContent = 'Pilih file terlebih dahulu.';
             return;
         }
+
+        // Validasi tipe file
+        if (!file.name.toLowerCase().endsWith('.csv')) {
+            uploadStatus.textContent = 'Error: Hanya file CSV yang diperbolehkan.';
+            return;
+        }
+
         uploadStatus.textContent = 'Mengunggah...';
+        console.log('Starting upload for file:', file.name);
 
         const formData = new FormData();
         formData.append('file', file);
 
         try {
-            const res = await fetch(`${API_BASE_URL}/upload`, { method: 'POST', body: formData });
+            console.log('Sending request to:', `${API_BASE_URL}/upload`);
+
+            const res = await fetch(`${API_BASE_URL}/upload`, {
+                method: 'POST',
+                body: formData
+            });
+
+            console.log('Response status:', res.status);
+            console.log('Response headers:', res.headers);
+
+            // Cek content type response
+            const contentType = res.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const responseText = await res.text();
+                console.error('Non-JSON response:', responseText);
+                throw new Error(`Server returned non-JSON response: ${responseText.substring(0, 100)}`);
+            }
+
             const data = await res.json();
-            if (!res.ok) throw new Error(data.message);
+            console.log('Response data:', data);
+
+            if (!res.ok) {
+                throw new Error(data.message || `HTTP ${res.status}: ${data.error || 'Unknown error'}`);
+            }
 
             uploadStatus.textContent = `Sukses! File "${file.name}" telah diunggah.`;
             csvFileInput.value = ''; // Reset input file
             fetchAndDisplayBatches(); // Refresh daftar batch
+
         } catch (error) {
+            console.error('Upload error:', error);
             uploadStatus.textContent = `Error: ${error.message}`;
         }
     }

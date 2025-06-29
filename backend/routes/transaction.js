@@ -14,10 +14,11 @@ const upload = multer({ dest: 'uploads/' });
 
 // Mapping kolom CSV ke kolom database
 const MAPPER_CONFIG = {
-    amount: ['transactionamount', 'amount', 'jumlah', 'nilai'],
-    timestamp: ['transactiondate', 'timestamp', 'waktu'],
-    merchant: ['merchantid', 'merchant'],
-    location: ['location'],
+    amount: ['transactionamount', 'amount', 'jumlah', 'nilai', "TransactionAmount"],
+    timestamp: ['transactiondate', 'timestamp', 'waktu', "TransactionDate"],
+    merchant: ['merchantid', 'merchant', "MerchantID"],
+    location: ['location', "Location"],
+    user_id: ['accountid', 'user_id', 'userid', "AccountID"],
     // tambahkan mapping lain jika perlu
 };
 
@@ -131,7 +132,8 @@ router.post('/analyze/:batchId', async (req, res) => {
                 amount: t.amount,
                 timestamp: t.timestamp,
                 merchant: t.merchant,
-                location: t.location
+                location: t.location,
+                // user_id and hour will be generated automatically by the Flask API
             })),
         });
         const analysisResults = aiResponse.data;

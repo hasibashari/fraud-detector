@@ -1,4 +1,6 @@
-// backend/routes/transaction.js
+// =========================
+// Import Library & Modul
+// =========================
 const express = require('express');
 const multer = require('multer');
 const csv = require('csv-parser');
@@ -9,6 +11,9 @@ const { protect } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
+// =========================
+// Konfigurasi Upload & Mapping CSV
+// =========================
 // Konfigurasi Multer untuk menyimpan file di folder 'uploads/'
 const upload = multer({ dest: 'uploads/' });
 
@@ -22,12 +27,15 @@ const MAPPER_CONFIG = {
   // tambahkan mapping lain jika perlu
 };
 
+// Fungsi untuk mapping dan membersihkan data per baris CSV
 function mapAndCleanRow(rawRow) {
   const cleanRow = {};
+  // Normalisasi key agar lowercase dan tanpa spasi
   const rawKeys = Object.keys(rawRow).reduce((acc, key) => {
     acc[key.toLowerCase().replace(/\s/g, '')] = rawRow[key];
     return acc;
   }, {});
+  // Mapping field dari CSV ke field database
   for (const targetField in MAPPER_CONFIG) {
     for (const sourceField of MAPPER_CONFIG[targetField]) {
       if (rawKeys[sourceField]) {
@@ -36,14 +44,14 @@ function mapAndCleanRow(rawRow) {
       }
     }
   }
-  // Bersihkan amount
+  // Bersihkan amount (hilangkan Rp, spasi, titik, ganti koma jadi titik)
   if (cleanRow.amount) {
     let amountStr = String(cleanRow.amount)
       .replace(/Rp|\s|\./g, '')
       .replace(',', '.');
     cleanRow.amount = parseFloat(amountStr);
   }
-  // Bersihkan timestamp
+  // Bersihkan timestamp (ubah ke Date)
   if (cleanRow.timestamp) {
     cleanRow.timestamp = new Date(cleanRow.timestamp);
   }
@@ -51,28 +59,29 @@ function mapAndCleanRow(rawRow) {
   return cleanRow;
 }
 
+// =========================
+// ROUTE: Upload Transaksi CSV
+// =========================
 /**
  * @route   POST /transactions/upload
  * @desc    Upload file CSV transaksi
- * @access  Public
+ * @access  Private (butuh token)
  */
-// Endpoint UPLOAD (dengan modifikasi respons)
 router.post('/upload', protect, upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'File tidak diunggah.' });
-
   const filePath = req.file.path;
-
   try {
+    // Buat batch upload baru
     const newBatch = await prisma.uploadBatch.create({
       data: {
         fileName: req.file.originalname,
         status: 'PENDING',
-        userId: req.user.id, // Tambahkan userId dari user yang login
+        userId: req.user.id, // User yang login
       },
     });
     const batchId = newBatch.id;
-
     const results = [];
+    // Baca dan proses file CSV
     fs.createReadStream(filePath)
       .pipe(csv())
       .on('data', rawRow => {
@@ -96,34 +105,33 @@ router.post('/upload', protect, upload.single('file'), async (req, res) => {
       })
       .on('end', async () => {
         try {
+          // Simpan transaksi ke database
           await prisma.transaction.createMany({ data: results, skipDuplicates: true });
+          // Update status batch
           await prisma.uploadBatch.update({
             where: { id: batchId },
             data: { status: 'COMPLETED' },
           });
-          fs.unlinkSync(filePath);
+          fs.unlinkSync(filePath); // Hapus file upload
           res.status(201).json({ message: 'File berhasil diunggah.', batch: newBatch });
         } catch (error) {
-          try {
-            fs.unlinkSync(filePath);
-          } catch {}
+          try { fs.unlinkSync(filePath); } catch {}
           res.status(500).json({ message: 'Gagal memproses file.', error: error.message });
         }
       })
       .on('error', err => {
-        try {
-          fs.unlinkSync(filePath);
-        } catch {}
+        try { fs.unlinkSync(filePath); } catch {}
         res.status(500).json({ message: 'Gagal membaca file.', error: err.message });
       });
   } catch (error) {
-    try {
-      fs.unlinkSync(filePath);
-    } catch {}
+    try { fs.unlinkSync(filePath); } catch {}
     res.status(500).json({ message: 'Gagal memproses file.', error: error.message });
   }
 });
 
+// =========================
+// ROUTE: Analisis AI Batch Transaksi
+// =========================
 /**
  * @route   POST /api/transactions/analyze/:batchId
  * @desc    Memicu analisis AI untuk satu batch milik user yang login
@@ -131,31 +139,21 @@ router.post('/upload', protect, upload.single('file'), async (req, res) => {
  */
 router.post('/analyze/:batchId', protect, async (req, res) => {
   const { batchId } = req.params;
-
   try {
     // Pastikan batch milik user yang login
     const batch = await prisma.uploadBatch.findFirst({
-      where: {
-        id: batchId,
-        userId: req.user.id,
-      },
+      where: { id: batchId, userId: req.user.id },
     });
-
     if (!batch) {
-      return res.status(404).json({
-        message: 'Batch tidak ditemukan atau tidak memiliki akses.',
-      });
+      return res.status(404).json({ message: 'Batch tidak ditemukan atau tidak memiliki akses.' });
     }
-
     // 1. Ambil transaksi dari DB untuk batch ini
     const transactions = await prisma.transaction.findMany({
       where: { uploadBatchId: batchId },
     });
-
     if (transactions.length === 0) {
       return res.status(404).json({ message: 'Tidak ada transaksi untuk batch ID ini.' });
     }
-
     // 2. Kirim data ke API Flask untuk dianalisis
     console.log(`Mengirim ${transactions.length} transaksi ke model AI...`);
     const aiResponse = await axios.post('http://127.0.0.1:5000/predict', {
@@ -169,7 +167,6 @@ router.post('/analyze/:batchId', protect, async (req, res) => {
       })),
     });
     const analysisResults = aiResponse.data;
-
     // 3. Update setiap transaksi di DB dengan hasil analisis
     for (const result of analysisResults) {
       await prisma.transaction.update({
@@ -180,7 +177,6 @@ router.post('/analyze/:batchId', protect, async (req, res) => {
         },
       });
     }
-
     res.status(200).json({
       message: 'Analisis berhasil diselesaikan.',
       batchId: batchId,
@@ -192,6 +188,9 @@ router.post('/analyze/:batchId', protect, async (req, res) => {
   }
 });
 
+// =========================
+// ROUTE: Ambil Anomali Batch
+// =========================
 /**
  * @route   GET /api/transactions/anomalies/:batchId
  * @desc    Ambil semua transaksi anomali untuk satu batch milik user yang login
@@ -199,45 +198,26 @@ router.post('/analyze/:batchId', protect, async (req, res) => {
  */
 router.get('/anomalies/:batchId', protect, async (req, res) => {
   const { batchId } = req.params;
-
   try {
     // Pastikan batch milik user yang login
     const batch = await prisma.uploadBatch.findFirst({
-      where: {
-        id: batchId,
-        userId: req.user.id,
-      },
+      where: { id: batchId, userId: req.user.id },
     });
-
     if (!batch) {
-      return res.status(404).json({
-        message: 'Batch tidak ditemukan atau tidak memiliki akses.',
-      });
+      return res.status(404).json({ message: 'Batch tidak ditemukan atau tidak memiliki akses.' });
     }
-
     // Ambil total transaksi untuk batch ini
     const totalTransaksi = await prisma.transaction.count({
-      where: {
-        uploadBatchId: batchId,
-      },
+      where: { uploadBatchId: batchId },
     });
-
+    // Ambil transaksi anomali
     const anomalies = await prisma.transaction.findMany({
-      where: {
-        uploadBatchId: batchId,
-        isAnomaly: true, // Hanya ambil yang ditandai sebagai anomali
-      },
-      orderBy: {
-        anomalyScore: 'desc', // Urutkan dari skor tertinggi (paling anomali)
-      },
+      where: { uploadBatchId: batchId, isAnomaly: true }, // Hanya anomali
+      orderBy: { anomalyScore: 'desc' }, // Urutkan dari skor tertinggi
     });
-
     if (anomalies.length === 0) {
-      return res.status(404).json({
-        message: 'Tidak ada anomali yang ditemukan untuk batch ini.',
-      });
+      return res.status(404).json({ message: 'Tidak ada anomali yang ditemukan untuk batch ini.' });
     }
-
     // Kirim objek dengan anomalies dan totalTransaksi
     res.status(200).json({
       anomalies: anomalies,
@@ -246,13 +226,13 @@ router.get('/anomalies/:batchId', protect, async (req, res) => {
     });
   } catch (error) {
     console.error('Error saat mengambil anomali:', error.message);
-    res.status(500).json({
-      message: 'Terjadi kesalahan pada server.',
-      error: error.message,
-    });
+    res.status(500).json({ message: 'Terjadi kesalahan pada server.', error: error.message });
   }
 });
 
+// =========================
+// ROUTE: Ambil Semua Batch User
+// =========================
 /**
  * @route   GET /api/transactions/batches
  * @desc    Ambil semua batch upload yang pernah ada untuk user yang login
@@ -261,19 +241,10 @@ router.get('/anomalies/:batchId', protect, async (req, res) => {
 router.get('/batches', protect, async (req, res) => {
   try {
     const batches = await prisma.uploadBatch.findMany({
-      where: {
-        userId: req.user.id, // Filter berdasarkan user yang login
-      },
-      orderBy: {
-        createdAt: 'desc', // Tampilkan yang terbaru di atas
-      },
+      where: { userId: req.user.id }, // Filter berdasarkan user yang login
+      orderBy: { createdAt: 'desc' }, // Tampilkan yang terbaru di atas
       include: {
-        user: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
+        user: { select: { name: true, email: true } },
       },
     });
     res.status(200).json(batches);
@@ -282,6 +253,9 @@ router.get('/batches', protect, async (req, res) => {
   }
 });
 
+// =========================
+// ROUTE: Hapus Batch & Transaksi
+// =========================
 /**
  * @route   DELETE /api/transactions/batch/:batchId
  * @desc    Menghapus satu batch beserta semua transaksinya (hanya milik user yang login)
@@ -289,36 +263,21 @@ router.get('/batches', protect, async (req, res) => {
  */
 router.delete('/batch/:batchId', protect, async (req, res) => {
   const { batchId } = req.params;
-
   try {
     // Pastikan batch milik user yang login
     const batch = await prisma.uploadBatch.findFirst({
-      where: {
-        id: batchId,
-        userId: req.user.id,
-      },
+      where: { id: batchId, userId: req.user.id },
     });
-
     if (!batch) {
-      return res.status(404).json({
-        message: 'Batch tidak ditemukan atau tidak memiliki akses.',
-      });
+      return res.status(404).json({ message: 'Batch tidak ditemukan atau tidak memiliki akses.' });
     }
-
-    // prisma.$transaction memastikan kedua operasi ini harus berhasil.
-    // Jika salah satu gagal, keduanya akan dibatalkan (rollback).
-    // Ini menjaga konsistensi data.
+    // prisma.$transaction memastikan kedua operasi ini harus berhasil (atomic)
     const [deletedTransactions, deletedBatch] = await prisma.$transaction([
-      // 1. Hapus dulu semua transaksi yang memiliki uploadBatchId ini
-      prisma.transaction.deleteMany({
-        where: { uploadBatchId: batchId },
-      }),
-      // 2. Baru hapus batch induknya
-      prisma.uploadBatch.delete({
-        where: { id: batchId },
-      }),
+      // 1. Hapus semua transaksi batch ini
+      prisma.transaction.deleteMany({ where: { uploadBatchId: batchId } }),
+      // 2. Hapus batch induknya
+      prisma.uploadBatch.delete({ where: { id: batchId } }),
     ]);
-
     res.status(200).json({
       message: `Batch berhasil dihapus.`,
       deletedTransactionsCount: deletedTransactions.count,
@@ -335,6 +294,9 @@ router.delete('/batch/:batchId', protect, async (req, res) => {
   }
 });
 
+// =========================
+// ROUTE: Ambil Semua Transaksi Batch
+// =========================
 /**
  * @route   GET /api/transactions/batch/:batchId
  * @desc    Ambil SEMUA transaksi (anomali dan normal) untuk satu batch
@@ -342,33 +304,24 @@ router.delete('/batch/:batchId', protect, async (req, res) => {
  */
 router.get('/batch/:batchId', async (req, res) => {
   const { batchId } = req.params;
-
   try {
     const transactions = await prisma.transaction.findMany({
-      where: {
-        uploadBatchId: batchId,
-      },
-      orderBy: {
-        timestamp: 'asc', // atau 'desc' sesuai kebutuhan
-      },
+      where: { uploadBatchId: batchId },
+      orderBy: { timestamp: 'asc' }, // atau 'desc' sesuai kebutuhan
     });
-
     if (transactions.length === 0) {
-      return res.status(404).json({
-        message: 'Tidak ada transaksi ditemukan untuk batch ini.',
-      });
+      return res.status(404).json({ message: 'Tidak ada transaksi ditemukan untuk batch ini.' });
     }
-
     res.status(200).json(transactions);
   } catch (error) {
     console.error('Error saat mengambil transaksi batch:', error.message);
-    res.status(500).json({
-      message: 'Terjadi kesalahan pada server.',
-      error: error.message,
-    });
+    res.status(500).json({ message: 'Terjadi kesalahan pada server.', error: error.message });
   }
 });
 
+// =========================
+// ROUTE: Info User Login
+// =========================
 /**
  * @route   GET /api/transactions/me
  * @desc    Mendapatkan informasi user yang sedang login
@@ -386,4 +339,7 @@ router.get('/me', protect, async (req, res) => {
   }
 });
 
+// =========================
+// Export Router
+// =========================
 module.exports = router;

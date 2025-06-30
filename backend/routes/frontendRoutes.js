@@ -1,25 +1,44 @@
+// =========================
+// Import Library
+// =========================
 const express = require('express');
 const router = express.Router();
 const path = require('path');
 
+// =========================
+// Konfigurasi Path Dasar Halaman Frontend
+// =========================
 const basePath = path.join(__dirname, '../../frontend/pages');
 
-// Route to serve the dashboard page
+// =========================
+// ROUTE: Halaman Dashboard (Setelah Login)
+// =========================
 router.get('/dashboard', (req, res) => {
   res.sendFile(path.join(basePath, 'index.html'));
 });
 
-// Route
+// =========================
+// ROUTE: Halaman Login
+// =========================
 router.get('/login', (req, res) => {
   res.sendFile(path.join(basePath, 'login.html'));
 });
 
+// =========================
+// ROUTE: Halaman Register
+// =========================
 router.get('/register', (req, res) => {
   res.sendFile(path.join(basePath, 'register.html'));
 });
 
+// =========================
+// ROUTE: Halaman Auth Success (setelah login Google)
+// =========================
 router.get('/auth-success', (req, res) => {
   res.sendFile(path.join(basePath, 'auth-success.html'));
 });
 
+// =========================
+// Export Router
+// =========================
 module.exports = router;

@@ -1,3 +1,6 @@
+/* =========================
+   VARIABEL WARNA UTAMA
+   ========================= */
 :root {
     --fd-primary: #005a9c;
     --fd-warning: #ffc107;
@@ -5,7 +8,9 @@
     --fd-anomaly-row: #fff2f6;
 }
 
-/* Custom bootstrap theme color */
+/* =========================
+   THEME COLOR UTILITY (Bootstrap Custom)
+   ========================= */
 .bg-fd-primary {
     background: var(--fd-primary) !important;
 }
@@ -30,6 +35,9 @@
     color: var(--fd-danger) !important;
 }
 
+/* =========================
+   BUTTONS
+   ========================= */
 .btn-fd-primary {
     background: var(--fd-primary);
     color: #fff;
@@ -42,6 +50,9 @@
     color: #fff;
 }
 
+/* =========================
+   TABLES
+   ========================= */
 .table-fd-primary>tr>th,
 .table-fd-primary>th {
     background: var(--fd-primary);
@@ -65,12 +76,14 @@
     from {
         background: #ffe5ee;
     }
-
     to {
         background: var(--fd-anomaly-row);
     }
 }
 
+/* =========================
+   CARD & LAYOUT
+   ========================= */
 .card {
     border-radius: 1.1rem;
 }
@@ -81,19 +94,18 @@ footer {
 }
 
 @media (max-width: 700px) {
-
     header,
     footer {
         border-radius: 0;
     }
-
     .card {
         border-radius: 0.7rem;
     }
 }
 
-
-/* Style untuk summary anomaly */
+/* =========================
+   ANOMALY SUMMARY BOX
+   ========================= */
 #anomalySummary .status-box {
     margin-bottom: 1rem;
     padding: 12px 18px;
@@ -109,7 +121,9 @@ footer {
     color: #005a9c;
 }
 
-/* Style untuk kontrol hasil */
+/* =========================
+   HASIL & SORTING KONTROL
+   ========================= */
 .results-controls {
     margin-bottom: 1rem;
     padding: 10px;
@@ -134,7 +148,9 @@ footer {
     background-color: #5a6268;
 }
 
-/* Style untuk sort icon pada header tabel */
+/* =========================
+   TABEL SORT ICON & HEADER
+   ========================= */
 #resultsTable th.sortable {
     cursor: pointer;
     user-select: none;
@@ -152,7 +168,6 @@ footer {
     background: #e3f2fd !important;
 }
 
-/* Style untuk header yang sedang di-sort */
 #resultsTable th.sorted-asc,
 #resultsTable th.sorted-desc {
     background: #f0f8ff !important;
@@ -164,7 +179,6 @@ footer {
     color: #005a9c;
 }
 
-/* Default sort icon untuk yang tidak aktif */
 #resultsTable th.sortable:not(.sorted-asc):not(.sorted-desc) .sort-icon {
     color: #ccc;
 }
@@ -173,7 +187,6 @@ footer {
     color: #005a9c;
 }
 
-/* Penyesuaian lain */
 .actions-header {
     text-align: center;
 }
@@ -182,7 +195,9 @@ td.actions {
     text-align: center;
 }
 
-/* Style untuk Google Login Button */
+/* =========================
+   GOOGLE LOGIN BUTTON
+   ========================= */
 .google-btn {
     display: inline-block;
     background: #db4437;
@@ -207,7 +222,9 @@ td.actions {
     margin-right: 8px;
 }
 
-/* Style untuk login form dengan Google button */
+/* =========================
+   LOGIN & REGISTER FORM
+   ========================= */
 #login-form {
     max-width: 400px;
     margin: 0 auto;
@@ -248,7 +265,6 @@ td.actions {
     background: #003c6e;
 }
 
-/* Style untuk register form - sama dengan login form */
 #register-form {
     max-width: 400px;
     margin: 0 auto;
@@ -289,7 +305,6 @@ td.actions {
     background: #003c6e;
 }
 
-/* Style untuk link di form login dan register */
 #login-form p a,
 #register-form p a {
     color: var(--fd-primary);
@@ -301,14 +316,15 @@ td.actions {
     text-decoration: underline;
 }
 
-/* Style untuk pesan error/sukses */
+/* =========================
+   MESSAGE & CONTAINER
+   ========================= */
 .message {
     text-align: center;
     margin: 0.5rem 0;
     font-size: 14px;
 }
 
-/* Style untuk container utama */
 .container {
     display: flex;
     justify-content: center;
@@ -317,7 +333,9 @@ td.actions {
     background: #f5f5f5;
 }
 
-/* Style khusus untuk header dashboard */
+/* =========================
+   DASHBOARD HEADER & USER INFO
+   ========================= */
 .dashboard-header {
     background: var(--fd-primary) !important;
 }
@@ -337,7 +355,6 @@ td.actions {
     padding: 0.375rem 0.75rem;
 }
 
-/* Style untuk user info section */
 .user-info {
     display: flex;
     flex-direction: column;
@@ -367,7 +384,9 @@ td.actions {
     border-color: rgba(255, 255, 255, 0.8);
 }
 
-/* Style untuk logo dan title section */
+/* =========================
+   LOGO & TITLE SECTION
+   ========================= */
 .logo-title-section {
     display: flex;
     align-items: center;
@@ -397,17 +416,17 @@ td.actions {
     }
 }
 
-/* Responsive adjustments untuk header */
+/* =========================
+   RESPONSIVE HEADER
+   ========================= */
 @media (max-width: 767px) {
     .dashboard-header .container {
         flex-direction: column;
         gap: 1.5rem;
     }
-
     .dashboard-header h1 {
         font-size: 1.5rem;
     }
-
     .user-info {
         width: 100%;
         align-items: center;

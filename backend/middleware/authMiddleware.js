@@ -1,9 +1,14 @@
-// Import the necessary modules
+// =========================
+// Import Library
+// =========================
 const jwt = require('jsonwebtoken');
 const prisma = require('../lib/prisma');
 
-// Middleware untuk melindungi route yang memerlukan otentikasi
-// Middleware ini akan memeriksa apakah ada token di header Authorization
+// =========================
+// Middleware: Proteksi Route dengan JWT
+// =========================
+// Middleware ini akan memeriksa token JWT pada header Authorization.
+// Jika valid, data user akan diambil dari database dan ditempelkan ke req.user.
 exports.protect = async (req, res, next) => {
   let token;
 
@@ -30,6 +35,7 @@ exports.protect = async (req, res, next) => {
         },
       });
 
+      // Jika user tidak ditemukan di database
       if (!req.user) {
         return res.status(401).json({ message: 'Not authorized, user not found' });
       }
@@ -37,6 +43,7 @@ exports.protect = async (req, res, next) => {
       // 5. Lanjutkan ke middleware atau route selanjutnya
       next();
     } catch (error) {
+      // Jika token tidak valid atau error lain
       console.error('Error in authMiddleware:', error);
       return res.status(401).json({ message: 'Not authorized, token failed' });
     }

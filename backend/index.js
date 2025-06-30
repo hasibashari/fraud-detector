@@ -7,7 +7,7 @@ const frontendRoutes = require('./routes/frontendRoutes');
 
 // Import Prisma Client
 const prisma = require('./lib/prisma');
-const transactionRoutes = require('./routes/transaction');
+const transactionRoutes = require('./routes/transactionRoutes');
 const authRoutes = require('./routes/authRoutes'); // Tambahkan ini
 
 // Import Passport setup untuk Google OAuth

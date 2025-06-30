@@ -76,6 +76,7 @@
     from {
         background: #ffe5ee;
     }
+
     to {
         background: var(--fd-anomaly-row);
     }
@@ -94,10 +95,12 @@ footer {
 }
 
 @media (max-width: 700px) {
+
     header,
     footer {
         border-radius: 0;
     }
+
     .card {
         border-radius: 0.7rem;
     }
@@ -424,9 +427,11 @@ td.actions {
         flex-direction: column;
         gap: 1.5rem;
     }
+
     .dashboard-header h1 {
         font-size: 1.5rem;
     }
+
     .user-info {
         width: 100%;
         align-items: center;

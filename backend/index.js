@@ -1,63 +1,81 @@
-// Import library yang dibutuhkan
+// =========================
+// Import Library & Konfigurasi Awal
+// =========================
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 require('dotenv').config(); // Memuat variabel dari .env
-const frontendRoutes = require('./routes/frontendRoutes');
 
-// Import Prisma Client
+// =========================
+// Import Route & Modul Internal
+// =========================
+const frontendRoutes = require('./routes/frontendRoutes');
 const prisma = require('./lib/prisma');
 const transactionRoutes = require('./routes/transactionRoutes');
-const authRoutes = require('./routes/authRoutes'); // Tambahkan ini
+const authRoutes = require('./routes/authRoutes');
 
-// Import Passport setup untuk Google OAuth
-require('./config/passport-setup'); // Tambahkan ini
-const passport = require('passport'); // Tambahkan ini
+// Passport setup untuk Google OAuth
+require('./config/passport-setup');
+const passport = require('passport');
 
-// Inisialisasi aplikasi Express
+// =========================
+// Inisialisasi Express App
+// =========================
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Gunakan middleware
+// =========================
+// Middleware Global
+// =========================
 app.use(cors()); // Mengizinkan request dari origin lain
-app.use(bodyParser.json()); // Mem-parsing body request JSON
-app.use(bodyParser.urlencoded({ extended: true })); // Mem-parsing body request URL-encoded
+app.use(bodyParser.json()); // Parsing body JSON
+app.use(bodyParser.urlencoded({ extended: true })); // Parsing body URL-encoded
+app.use(passport.initialize()); // Inisialisasi Passport
 
-// Initialize Passport (untuk Google OAuth)
-app.use(passport.initialize());
-
-// Gunakan route untuk frontend
+// =========================
+// Static File Serving (Frontend)
+// =========================
 app.use('/css', express.static(__dirname + '/../frontend/css'));
 app.use('/js', express.static(__dirname + '/../frontend/js'));
 app.use('/pages', express.static(__dirname + '/../frontend/pages'));
 
-// Gunakan route untuk transaksi
-app.use('/api/transactions', transactionRoutes);
-// Gunakan route untuk auth
-app.use('/auth', authRoutes); // Tambahkan ini
-// Gunakan route untuk frontend
-app.use('/', frontendRoutes);
+// =========================
+// Routing API & Auth
+// =========================
+app.use('/api/transactions', transactionRoutes); // Route transaksi
+app.use('/auth', authRoutes); // Route autentikasi
 
-// Definisikan route sederhana untuk testing
+// =========================
+// Routing Utama (Frontend)
+// =========================
+// Redirect root ke halaman login
+app.get('/', (req, res) => {
+  res.redirect('/login');
+});
+app.use('/', frontendRoutes); // Route frontend lain
+
+// =========================
+// Route Testing & Koneksi
+// =========================
+// Route sederhana untuk testing API
 app.get('/api', (req, res) => {
   res.send('Selamat datang di API Fraud Detector!');
 });
 
-// route untuk cek koneksi Prisma
+// Route untuk cek koneksi Prisma ke database
 app.get('/cek-prisma', async (req, res) => {
   try {
     // Query sederhana, misal cek jumlah data di tabel 'transaction'
-    // Ganti 'transaction' dengan nama tabel yang ada di schema.prisma kamu
     const count = await prisma.transaction.count();
     res.json({ status: 'OK', message: 'Prisma terhubung ke database', total: count });
   } catch (error) {
-    res
-      .status(500)
-      .json({ status: 'ERROR', message: 'Prisma gagal terhubung', error: error.message });
+    res.status(500).json({ status: 'ERROR', message: 'Prisma gagal terhubung', error: error.message });
   }
 });
 
-// Jalankan server
+// =========================
+// Jalankan Server
+// =========================
 app.listen(PORT, () => {
   console.log(`Server berjalan di http://localhost:${PORT}`);
 });

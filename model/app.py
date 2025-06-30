@@ -1,3 +1,6 @@
+# =========================
+# Import Library & Setup Logging
+# =========================
 import os
 import logging
 import joblib
@@ -19,9 +22,15 @@ logging.basicConfig(
     handlers=[logging.StreamHandler()]
 )
 
+# =========================
+# Inisialisasi Flask App & CORS
+# =========================
 app = Flask(__name__)
 CORS(app)
 
+# =========================
+# Load Model & Preprocessor
+# =========================
 script_dir = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(script_dir, 'autoencoder_model.keras')
 preprocessor_path = os.path.join(script_dir, 'preprocessor_pipeline.joblib')
@@ -39,6 +48,10 @@ except Exception as e:
     logging.error(f"Gagal memuat preprocessor: {e}")
     preprocessor = None
 
+# =========================
+# Endpoint Health Check
+# =========================
+
 
 @app.route('/health', methods=['GET'])
 def health_check():
@@ -48,6 +61,10 @@ def health_check():
         'model_status': model_status,
         'message': 'Fraud Detection AI Service is running'
     })
+
+# =========================
+# Endpoint Prediksi Anomali
+# =========================
 
 
 @app.route('/predict', methods=['POST'])
@@ -66,7 +83,7 @@ def predict():
 
         if 'transactions' not in json_data:
             logging.error("Missing 'transactions' field in JSON data")
-            return jsonify({'error': 'Format data tidak valid. Harus memiliki field "transactions".'}), 400
+            return jsonify({'error': 'Format data tidak valid. Harus memiliki field \"transactions\".'}), 400
 
         transactions = json_data['transactions']
         logging.info(
@@ -74,11 +91,11 @@ def predict():
 
         if not isinstance(transactions, list):
             logging.error("'transactions' field is not a list")
-            return jsonify({'error': 'Field "transactions" harus berupa list.'}), 400
+            return jsonify({'error': 'Field \"transactions\" harus berupa list.'}), 400
 
         if len(transactions) == 0:
             logging.error("Empty transactions list")
-            return jsonify({'error': 'Field "transactions" tidak boleh kosong.'}), 400
+            return jsonify({'error': 'Field \"transactions\" tidak boleh kosong.'}), 400
 
         df = pd.DataFrame(transactions)
         logging.info(f"DataFrame columns: {list(df.columns)}")
@@ -205,6 +222,10 @@ def predict():
         logging.error(f"Error dalam prediksi: {str(e)}")
         return jsonify({'error': f'Terjadi kesalahan saat memproses data: {str(e)}'}), 500
 
+# =========================
+# Endpoint Contoh Format Data
+# =========================
+
 
 @app.route('/test-format', methods=['GET'])
 def test_format():
@@ -274,6 +295,10 @@ def test_format():
             "anomalyScore": "Float - reconstruction error score"
         }
     })
+
+# =========================
+# Main Entrypoint
+# =========================
 
 
 def main():

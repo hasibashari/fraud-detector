@@ -1,19 +1,27 @@
-// authRoutes.js
+// =========================
+// Import Library & Modul
+// =========================
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
-const passport = require('passport'); // Aktifkan kembali
-const jwt = require('jsonwebtoken');
+const passport = require('passport'); // Untuk Google OAuth
+const jwt = require('jsonwebtoken'); // Untuk membuat JWT
 
-// Definisikan route untuk POST /auth/register
+// =========================
+// Route Autentikasi Manual (Register & Login)
+// =========================
+// Register user baru
 router.post('/register', authController.register);
-// Definisikan route untuk POST /auth/login
+// Login user
 router.post('/login', authController.login);
-// Definisikan route untuk GET /auth/me yang dilindungi oleh middleware 'protect'
+// Mendapatkan data user yang sedang login (dilindungi token)
 router.get('/me', protect, authController.getMe);
 
-// Route untuk memulai autentikasi Google
+// =========================
+// Route Autentikasi Google OAuth
+// =========================
+// Memulai proses login dengan Google
 router.get(
   '/google',
   passport.authenticate('google', {
@@ -21,7 +29,7 @@ router.get(
   })
 );
 
-// Route callback setelah user login di Google
+// Callback setelah autentikasi Google berhasil/gagal
 router.get(
   '/google/callback',
   passport.authenticate('google', { session: false, failureRedirect: '/login' }),
@@ -42,4 +50,7 @@ router.get(
   }
 );
 
+// =========================
+// Export Router
+// =========================
 module.exports = router;

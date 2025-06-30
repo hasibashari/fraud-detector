@@ -5,6 +5,7 @@ const csv = require('csv-parser');
 const fs = require('fs');
 const prisma = require('../lib/prisma');
 const axios = require('axios');
+const { protect } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
@@ -56,14 +57,18 @@ function mapAndCleanRow(rawRow) {
  * @access  Public
  */
 // Endpoint UPLOAD (dengan modifikasi respons)
-router.post('/upload', upload.single('file'), async (req, res) => {
+router.post('/upload', protect, upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'File tidak diunggah.' });
 
   const filePath = req.file.path;
 
   try {
     const newBatch = await prisma.uploadBatch.create({
-      data: { fileName: req.file.originalname, status: 'PENDING' },
+      data: {
+        fileName: req.file.originalname,
+        status: 'PENDING',
+        userId: req.user.id, // Tambahkan userId dari user yang login
+      },
     });
     const batchId = newBatch.id;
 
@@ -121,13 +126,27 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 
 /**
  * @route   POST /api/transactions/analyze/:batchId
- * @desc    Memicu analisis AI untuk satu batch
- * @access  Public
+ * @desc    Memicu analisis AI untuk satu batch milik user yang login
+ * @access  Private
  */
-router.post('/analyze/:batchId', async (req, res) => {
+router.post('/analyze/:batchId', protect, async (req, res) => {
   const { batchId } = req.params;
 
   try {
+    // Pastikan batch milik user yang login
+    const batch = await prisma.uploadBatch.findFirst({
+      where: {
+        id: batchId,
+        userId: req.user.id,
+      },
+    });
+
+    if (!batch) {
+      return res.status(404).json({
+        message: 'Batch tidak ditemukan atau tidak memiliki akses.',
+      });
+    }
+
     // 1. Ambil transaksi dari DB untuk batch ini
     const transactions = await prisma.transaction.findMany({
       where: { uploadBatchId: batchId },
@@ -175,13 +194,27 @@ router.post('/analyze/:batchId', async (req, res) => {
 
 /**
  * @route   GET /api/transactions/anomalies/:batchId
- * @desc    Ambil semua transaksi anomali untuk satu batch
- * @access  Public
+ * @desc    Ambil semua transaksi anomali untuk satu batch milik user yang login
+ * @access  Private
  */
-router.get('/anomalies/:batchId', async (req, res) => {
+router.get('/anomalies/:batchId', protect, async (req, res) => {
   const { batchId } = req.params;
 
   try {
+    // Pastikan batch milik user yang login
+    const batch = await prisma.uploadBatch.findFirst({
+      where: {
+        id: batchId,
+        userId: req.user.id,
+      },
+    });
+
+    if (!batch) {
+      return res.status(404).json({
+        message: 'Batch tidak ditemukan atau tidak memiliki akses.',
+      });
+    }
+
     // Ambil total transaksi untuk batch ini
     const totalTransaksi = await prisma.transaction.count({
       where: {
@@ -222,14 +255,25 @@ router.get('/anomalies/:batchId', async (req, res) => {
 
 /**
  * @route   GET /api/transactions/batches
- * @desc    Ambil semua batch upload yang pernah ada
- * @access  Public
+ * @desc    Ambil semua batch upload yang pernah ada untuk user yang login
+ * @access  Private
  */
-router.get('/batches', async (req, res) => {
+router.get('/batches', protect, async (req, res) => {
   try {
     const batches = await prisma.uploadBatch.findMany({
+      where: {
+        userId: req.user.id, // Filter berdasarkan user yang login
+      },
       orderBy: {
         createdAt: 'desc', // Tampilkan yang terbaru di atas
+      },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
       },
     });
     res.status(200).json(batches);
@@ -240,13 +284,27 @@ router.get('/batches', async (req, res) => {
 
 /**
  * @route   DELETE /api/transactions/batch/:batchId
- * @desc    Menghapus satu batch beserta semua transaksinya
- * @access  Public
+ * @desc    Menghapus satu batch beserta semua transaksinya (hanya milik user yang login)
+ * @access  Private
  */
-router.delete('/batch/:batchId', async (req, res) => {
+router.delete('/batch/:batchId', protect, async (req, res) => {
   const { batchId } = req.params;
 
   try {
+    // Pastikan batch milik user yang login
+    const batch = await prisma.uploadBatch.findFirst({
+      where: {
+        id: batchId,
+        userId: req.user.id,
+      },
+    });
+
+    if (!batch) {
+      return res.status(404).json({
+        message: 'Batch tidak ditemukan atau tidak memiliki akses.',
+      });
+    }
+
     // prisma.$transaction memastikan kedua operasi ini harus berhasil.
     // Jika salah satu gagal, keduanya akan dibatalkan (rollback).
     // Ini menjaga konsistensi data.
@@ -308,6 +366,23 @@ router.get('/batch/:batchId', async (req, res) => {
       message: 'Terjadi kesalahan pada server.',
       error: error.message,
     });
+  }
+});
+
+/**
+ * @route   GET /api/transactions/me
+ * @desc    Mendapatkan informasi user yang sedang login
+ * @access  Private
+ */
+router.get('/me', protect, async (req, res) => {
+  try {
+    res.status(200).json({
+      message: 'User data retrieved successfully',
+      user: req.user,
+    });
+  } catch (error) {
+    console.error('Error getting user data:', error.message);
+    res.status(500).json({ message: 'Terjadi kesalahan pada server.' });
   }
 });
 

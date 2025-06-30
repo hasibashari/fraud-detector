@@ -1,5 +1,43 @@
+// Fungsi logout global untuk dipanggil dari onclick
+window.logout = function () {
+  localStorage.removeItem('token');
+  window.location.href = '/login';
+};
+
 document.addEventListener('DOMContentLoaded', () => {
-  const API_BASE_URL = 'http://localhost:3000/api/transactions';
+  const API_BASE_URL = 'http://localhost:3001/api/transactions'; // Update port ke 3001
+  const AUTH_API_URL = 'http://localhost:3001/auth'; // Tambahkan auth URL
+
+  // Fungsi untuk mendapatkan token dari localStorage
+  function getAuthToken() {
+    return localStorage.getItem('token'); // Gunakan 'token' sesuai app.js
+  }
+
+  // Fungsi untuk mengecek apakah user sudah login
+  function isAuthenticated() {
+    return getAuthToken() !== null;
+  }
+
+  // Fungsi untuk logout
+  function logout() {
+    localStorage.removeItem('token'); // Gunakan 'token' sesuai app.js
+    window.location.href = '/login'; // Sesuai dengan app.js
+  }
+
+  // Fungsi untuk membuat headers dengan authorization
+  function getAuthHeaders() {
+    const token = getAuthToken();
+    return {
+      Authorization: token ? `Bearer ${token}` : '',
+      'Content-Type': 'application/json',
+    };
+  }
+
+  // Cek authentication saat halaman dimuat
+  if (!isAuthenticated()) {
+    window.location.href = '/login';
+    return;
+  }
 
   // Elemen UI
   const uploadBtn = document.getElementById('uploadBtn');
@@ -15,7 +53,14 @@ document.addEventListener('DOMContentLoaded', () => {
   async function fetchAndDisplayBatches() {
     try {
       console.log('Fetching batches from:', `${API_BASE_URL}/batches`);
-      const res = await fetch(`${API_BASE_URL}/batches`);
+      const res = await fetch(`${API_BASE_URL}/batches`, {
+        headers: getAuthHeaders(),
+      });
+
+      if (res.status === 401) {
+        logout();
+        return;
+      }
 
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}: ${res.statusText}`);
@@ -79,8 +124,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const res = await fetch(`${API_BASE_URL}/upload`, {
         method: 'POST',
+        headers: {
+          Authorization: getAuthToken() ? `Bearer ${getAuthToken()}` : '',
+        },
         body: formData,
       });
+
+      if (res.status === 401) {
+        logout();
+        return;
+      }
 
       console.log('Response status:', res.status);
       console.log('Response headers:', res.headers);
@@ -121,7 +174,15 @@ document.addEventListener('DOMContentLoaded', () => {
       resultStatus.textContent = `Menganalisis Batch ID: ${batchId}...`;
       resultsBody.innerHTML = '';
       try {
-        const res = await fetch(`${API_BASE_URL}/analyze/${batchId}`, { method: 'POST' });
+        const res = await fetch(`${API_BASE_URL}/analyze/${batchId}`, {
+          method: 'POST',
+          headers: getAuthHeaders(),
+        });
+
+        if (res.status === 401) {
+          logout();
+          return;
+        }
         const data = await res.json();
         if (!res.ok) throw new Error(data.message);
         resultStatus.textContent = `Analisis untuk Batch ID: ${batchId} selesai. Klik "Lihat Hasil".`;
@@ -134,7 +195,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (target.classList.contains('results-btn')) {
       resultStatus.textContent = `Mengambil hasil untuk Batch ID: ${batchId}...`;
       try {
-        const res = await fetch(`${API_BASE_URL}/anomalies/${batchId}`);
+        const res = await fetch(`${API_BASE_URL}/anomalies/${batchId}`, {
+          headers: getAuthHeaders(),
+        });
+
+        if (res.status === 401) {
+          logout();
+          return;
+        }
         if (res.status === 404) {
           resultStatus.textContent = 'Tidak ada anomali yang ditemukan untuk batch ini.';
           resultsBody.innerHTML = '';
@@ -166,7 +234,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (confirm('Apakah Anda yakin ingin menghapus batch ini?')) {
         try {
           // Perbaiki endpoint: gunakan 'batch' bukan 'batches'
-          const res = await fetch(`${API_BASE_URL}/batch/${batchId}`, { method: 'DELETE' });
+          const res = await fetch(`${API_BASE_URL}/batch/${batchId}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders(),
+          });
+
+          if (res.status === 401) {
+            logout();
+            return;
+          }
           if (!res.ok) {
             // Coba ambil pesan error dari JSON, jika gagal fallback ke text
             let errorMsg = 'Gagal menghapus batch.';
@@ -215,9 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     summaryDiv.innerHTML = `
             <div class="status-box status-info" style="display:block;">
-                <strong>Ditemukan ${jumlahAnomali} anomali</strong> dari <strong>${transaksiText} transaksi</strong> yang dianalisis<br>
-                ${tingkat}<br>
-                Menampilkan transaksi paling mencurigakan di atas.
+                Berdasarkan hasil analisis terhadap<strong> ${transaksiText} transaksi</strong>, sistem berhasil mengidentifikasi <strong>${jumlahAnomali} transaksi yang menunjukan pola anomali,</strong> dengan tingkat anomali sebesar ${tingkat} Persentase ini merepresentasikan sekelompok kecil transaksi yang  secara statistik menyimpang dari perilaku mayoritas data, sehingga dapat dikategorikan sebagai <strong>indikasi awal potensi aktivitas fraud.</strong>.
             </div>
         `;
   }
@@ -370,10 +444,37 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log(`Displayed ${currentAnomalies.length} anomalies`);
   }
 
+  // --- FUNGSI TAMBAHAN UNTUK USER DATA ---
+  // Fetch dan tampilkan nama user di dashboard
+  async function fetchUserData() {
+    try {
+      const res = await fetch(`${AUTH_API_URL}/me`, {
+        headers: getAuthHeaders(),
+      });
+
+      if (res.status === 401) {
+        logout();
+        return;
+      }
+
+      if (res.ok) {
+        const data = await res.json();
+        // Update header dengan nama user (sesuai dengan ID yang ada di index.html)
+        const userNameElement = document.getElementById('user-name');
+        if (userNameElement) {
+          userNameElement.textContent = data.name;
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  }
+
   // --- EVENT LISTENERS ---
   uploadBtn.addEventListener('click', handleUpload);
   batchBody.addEventListener('click', handleBatchTableClick); // Satu event listener untuk semua tombol di tabel
 
   // Muat daftar batch saat halaman pertama kali dibuka
   fetchAndDisplayBatches();
+  fetchUserData(); // Tambahkan pemanggilan fungsi untuk mengambil data user
 });

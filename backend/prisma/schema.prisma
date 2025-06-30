@@ -28,6 +28,10 @@ model UploadBatch {
   status    BatchStatus @default(PENDING)
   createdAt DateTime    @default(now())
 
+  // Relasi dengan User
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   // Relasi: Satu batch memiliki banyak transaksi
   transactions Transaction[]
 }
@@ -49,4 +53,18 @@ model Transaction {
 
   UploadBatch   UploadBatch? @relation(fields: [uploadBatchId], references: [id])
   uploadBatchId String?
+}
+
+// Define your data model here
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  googleId  String?  @unique // Optional field for Google authentication
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relasi dengan UploadBatch
+  uploadBatches UploadBatch[]
 }

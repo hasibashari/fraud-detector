@@ -7,7 +7,32 @@
 ![Python](https://img.shields.io/badge/python-%3E%3D%203.8-brightgreen.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
-## 📋 Deskripsi
+> **⚡ Quick Start**: Clone repo → Setup .env → `npm install` → `python app.py` → `npm start` → Open http://localhost:3001
+
+## 📚 Table of Contents
+
+- [📋 Deskripsi](#-deskripsi)
+- [✨ Fitur Utama](#-fitur-utama)
+- [🏗️ Arsitektur Sistem](#️-arsitektur-sistem)
+- [🛠️ Teknologi yang Digunakan](#️-teknologi-yang-digunakan)
+- [📁 Struktur Proyek](#-struktur-proyek)
+- [🚀 Instalasi dan Setup](#-instalasi-dan-setup)
+- [📊 Database Schema](#-database-schema)
+- [🔗 API Documentation](#-api-documentation)
+- [🤖 AI Model Details](#-ai-model-details)
+- [💡 Cara Penggunaan](#-cara-penggunaan)
+- [⚙️ Konfigurasi](#️-konfigurasi)
+- [🧪 Testing](#-testing)
+- [🛡️ Security](#️-security-considerations)
+- [🔧 Troubleshooting](#-troubleshooting)
+- [📈 Performance](#-performance--scalability)
+- [🤝 Contributing](#-contributing)
+- [🚀 Deployment](#-deployment-guide)
+- [📧 Contact & Support](#-contact--support)
+
+---
+
+## �📋 Deskripsi
 
 Sistem Deteksi Fraud adalah aplikasi web full-stack berbasis AI yang dirancang untuk mendeteksi transaksi keuangan yang mencurigakan menggunakan teknik machine learning autoencoder. Sistem ini dilengkapi dengan autentikasi pengguna yang lengkap, manajemen batch upload, dan dapat menganalisis data transaksi dalam format CSV untuk mengidentifikasi pola anomali yang berpotensi menunjukkan aktivitas penipuan.
 
@@ -679,6 +704,9 @@ jumlah,waktu,merchant,Location,userid
 
 ## 🧪 Testing
 
+<details>
+<summary><strong>Click to expand testing guide</strong></summary>
+
 ### 1. Authentication Testing
 
 #### Manual Registration/Login
@@ -773,6 +801,8 @@ File sample tersedia di `model/data/`:
 5. ❌ Analisis batch yang tidak ada
 6. ❌ Akses batch milik user lain
 
+</details>
+
 ## 🛡️ Security Considerations
 
 ### Authentication Security
@@ -815,6 +845,9 @@ File sample tersedia di `model/data/`:
 - **Memory Management**: Efficient memory usage untuk large datasets
 
 ## 🔧 Troubleshooting
+
+<details>
+<summary><strong>Click to expand troubleshooting guide</strong></summary>
 
 ### Common Issues
 
@@ -985,6 +1018,8 @@ python app.py
 npx prisma migrate reset
 npx prisma db push
 ```
+
+</details>
 
 ## 🤝 Contributing
 

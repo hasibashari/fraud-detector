@@ -1,6 +1,6 @@
 :root {
-    --fd-primary: #005A9C;
-    --fd-warning: #FFC107;
+    --fd-primary: #005a9c;
+    --fd-warning: #ffc107;
     --fd-danger: #ff4f70;
     --fd-anomaly-row: #fff2f6;
 }
@@ -90,4 +90,94 @@ footer {
     .card {
         border-radius: 0.7rem;
     }
+}
+
+
+/* Style untuk summary anomaly */
+#anomalySummary .status-box {
+    margin-bottom: 1rem;
+    padding: 12px 18px;
+    border-radius: 6px;
+    background: #e3f2fd;
+    border: 1px solid #90caf9;
+    color: #0d47a1;
+    font-size: 1.05rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+#anomalySummary strong {
+    color: #005a9c;
+}
+
+/* Style untuk kontrol hasil */
+.results-controls {
+    margin-bottom: 1rem;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 5px;
+}
+
+#sortControls {
+    margin-top: 10px;
+}
+
+#sortControls button {
+    display: inline-block;
+    width: auto;
+    padding: 5px 10px;
+    font-size: 12px;
+    background-color: #6c757d;
+}
+
+#sortControls button:hover {
+    background-color: #5a6268;
+}
+
+/* Style untuk sort icon pada header tabel */
+#resultsTable th.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    transition: background-color 0.2s ease;
+}
+
+#resultsTable th .sort-icon {
+    margin-left: 6px;
+    font-size: 1em;
+    vertical-align: middle;
+}
+
+#resultsTable th.sortable:hover {
+    background: #e3f2fd !important;
+}
+
+/* Style untuk header yang sedang di-sort */
+#resultsTable th.sorted-asc,
+#resultsTable th.sorted-desc {
+    background: #f0f8ff !important;
+    font-weight: bold;
+}
+
+#resultsTable th.sorted-asc .sort-icon,
+#resultsTable th.sorted-desc .sort-icon {
+    color: #005a9c;
+}
+
+/* Default sort icon untuk yang tidak aktif */
+#resultsTable th.sortable:not(.sorted-asc):not(.sorted-desc) .sort-icon {
+    color: #ccc;
+}
+
+#resultsTable th.sortable:not(.sorted-asc):not(.sorted-desc):hover .sort-icon {
+    color: #005a9c;
+}
+
+/* Penyesuaian lain */
+.actions-header {
+    text-align: center;
+}
+
+td.actions {
+    text-align: center;
 }

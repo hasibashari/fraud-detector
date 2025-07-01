@@ -1,16 +1,22 @@
 {
-  "name": "backend",
-  "version": "1.0.0",
+  "name": "fraud-detection-backend",
+  "version": "2.1.0",
+  "description": "Enterprise-grade fraud detection backend with AI integration",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": [
+    "fraud-detection",
+    "ai",
+    "machine-learning",
+    "security",
+    "fintech"
+  ],
+  "author": "Hasib Ashari",
+  "license": "MIT",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^6.10.1",

@@ -53,6 +53,8 @@ model Transaction {
 
   UploadBatch   UploadBatch? @relation(fields: [uploadBatchId], references: [id])
   uploadBatchId String?
+
+  aiExplanation String? @db.Text
 }
 
 // Define your data model here

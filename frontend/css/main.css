@@ -1,0 +1,1026 @@
+/* ===================================
+   FRAUD DETECTION SYSTEM - MAIN CSS
+   Minimal custom CSS to enhance Tailwind CSS
+   Priority: Tailwind first, custom CSS only when necessary
+   ================================= */
+
+/* =============================================================================
+   CSS VARIABLES FOR TAILWIND INTEGRATION
+   ============================================================================= */
+:root {
+    /* Brand Colors - Sync with Tailwind config */
+    --fraud-primary: #1e3a8a;
+    --fraud-secondary: #1d4ed8;
+    --fraud-accent: #6366f1;
+    --fraud-success: #16a34a;
+    --fraud-warning: #f59e0b;
+    --fraud-danger: #dc2626;
+    --fraud-teal: #059669;
+    --fraud-gray: #64748b;
+    --fraud-light: #f8fafc;
+
+    /* Animations */
+    --animation-fast: 0.2s ease-in-out;
+    --animation-normal: 0.3s ease-in-out;
+    --animation-slow: 0.5s ease-in-out;
+}
+
+/* =============================================================================
+   ESSENTIAL CUSTOM STYLES (Only what Tailwind cannot do)
+   ============================================================================= */
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--fraud-gray);
+    border-radius: 4px;
+    transition: background var(--animation-fast);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--fraud-primary);
+}
+
+/* =============================================================================
+   ESSENTIAL ANIMATIONS (Cannot be done with Tailwind alone)
+   ============================================================================= */
+
+/* Loading Spinner */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.fraud-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid var(--fraud-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Fade In Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fraud-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Typing Dots for Chat */
+@keyframes typingDots {
+
+    0%,
+    80%,
+    100% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.typing-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--fraud-gray);
+    animation: typingDots 1.4s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+/* Chat bubble tails (cannot be done with Tailwind) */
+.chat-bubble-user::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: -8px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid var(--fraud-secondary);
+    border-bottom: 8px solid transparent;
+}
+
+.chat-bubble-ai::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: -8px;
+    width: 0;
+    height: 0;
+    border-right: 8px solid white;
+    border-bottom: 8px solid transparent;
+}
+
+/* Button shine effect (advanced animation) */
+.btn-shine::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left var(--animation-slow);
+}
+
+.btn-shine:hover::before {
+    left: 100%;
+}
+
+/* Progress bar shimmer */
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.progress-shimmer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+/* =============================================================================
+   RESPONSIVE DESIGN HELPERS
+   ============================================================================= */
+
+/* Hide scrollbar but keep functionality */
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+/* =============================================================================
+   DARK MODE SUPPORT (Future)
+   ============================================================================= */
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --fraud-text-primary: #f8fafc;
+        --fraud-text-secondary: #cbd5e1;
+        --fraud-bg-primary: #0f172a;
+        --fraud-bg-secondary: #1e293b;
+    }
+}
+
+/* =============================================================================
+   GLOBAL STYLES & IMPROVEMENTS
+   ============================================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--fraud-gray);
+    border-radius: 4px;
+    transition: background var(--animation-fast);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--fraud-primary);
+}
+
+/* =============================================================================
+   ENHANCED COMPONENTS
+   ============================================================================= */
+
+/* Glass Morphism Effect */
+.glass-morphism {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Enhanced Cards */
+.fraud-card {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+    border: 1px solid #e2e8f0;
+    transition: all var(--animation-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.fraud-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+    transform: scaleX(0);
+    transition: transform var(--animation-normal);
+}
+
+.fraud-card:hover::before {
+    transform: scaleX(1);
+}
+
+.fraud-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--fraud-primary);
+}
+
+/* Statistics Cards */
+.stat-card {
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid #e2e8f0;
+    transition: all var(--animation-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient-primary);
+}
+
+.stat-card.success::before {
+    background: var(--gradient-success);
+}
+
+.stat-card.warning::before {
+    background: linear-gradient(135deg, var(--fraud-warning) 0%, #fbbf24 100%);
+}
+
+.stat-card.danger::before {
+    background: var(--gradient-danger);
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+}
+
+/* Enhanced Buttons */
+.fraud-btn {
+    position: relative;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    transition: all var(--animation-normal);
+    cursor: pointer;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    overflow: hidden;
+}
+
+.fraud-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left var(--animation-slow);
+}
+
+.fraud-btn:hover::before {
+    left: 100%;
+}
+
+.fraud-btn-primary {
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+.fraud-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.fraud-btn-secondary {
+    background: white;
+    color: var(--fraud-primary);
+    border: 2px solid var(--fraud-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.fraud-btn-secondary:hover {
+    background: var(--fraud-primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.fraud-btn-danger {
+    background: var(--gradient-danger);
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+.fraud-btn-success {
+    background: var(--gradient-success);
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+/* Enhanced Forms */
+.fraud-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    transition: all var(--animation-normal);
+    background: white;
+}
+
+.fraud-input:focus {
+    outline: none;
+    border-color: var(--fraud-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    transform: translateY(-1px);
+}
+
+.fraud-input.error {
+    border-color: var(--fraud-danger);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.fraud-input.success {
+    border-color: var(--fraud-success);
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+}
+
+/* Enhanced Tables */
+.fraud-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: white;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+}
+
+.fraud-table thead {
+    background: var(--gradient-primary);
+}
+
+.fraud-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: white;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.fraud-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    transition: background var(--animation-fast);
+}
+
+.fraud-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.fraud-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* =============================================================================
+   NAVIGATION ENHANCEMENTS
+   ============================================================================= */
+
+.fraud-nav {
+    background: var(--gradient-primary);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-lg);
+}
+
+.fraud-nav-item {
+    position: relative;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    transition: all var(--animation-normal);
+    text-decoration: none;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.fraud-nav-item::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: white;
+    transition: all var(--animation-normal);
+    transform: translateX(-50%);
+}
+
+.fraud-nav-item:hover::after,
+.fraud-nav-item.active::after {
+    width: 80%;
+}
+
+.fraud-nav-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+/* =============================================================================
+   LOADING & ANIMATION STATES
+   ============================================================================= */
+
+/* Loading Spinner */
+.fraud-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid var(--fraud-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Pulse Animation */
+.fraud-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Fade In Animation */
+.fraud-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Slide Up Animation */
+.fraud-slide-up {
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* =============================================================================
+   TOAST NOTIFICATIONS
+   ============================================================================= */
+
+.fraud-toast {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-lg);
+    color: white;
+    font-weight: 500;
+    box-shadow: var(--shadow-xl);
+    transform: translateX(100%);
+    transition: transform var(--animation-normal);
+    z-index: 1000;
+    max-width: 350px;
+    backdrop-filter: blur(10px);
+}
+
+.fraud-toast.show {
+    transform: translateX(0);
+}
+
+.fraud-toast.success {
+    background: var(--gradient-success);
+    border-left: 4px solid #16a34a;
+}
+
+.fraud-toast.error {
+    background: var(--gradient-danger);
+    border-left: 4px solid #dc2626;
+}
+
+.fraud-toast.warning {
+    background: linear-gradient(135deg, var(--fraud-warning) 0%, #fbbf24 100%);
+    border-left: 4px solid var(--fraud-warning);
+}
+
+.fraud-toast.info {
+    background: var(--gradient-primary);
+    border-left: 4px solid var(--fraud-primary);
+}
+
+/* =============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================= */
+
+/* Mobile First Approach */
+@media (max-width: 640px) {
+    .fraud-card {
+        margin: 0.5rem;
+        border-radius: var(--radius-md);
+    }
+
+    .fraud-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .fraud-table {
+        font-size: 0.875rem;
+    }
+
+    .fraud-table th,
+    .fraud-table td {
+        padding: 0.5rem;
+    }
+}
+
+/* Tablet */
+@media (min-width: 641px) and (max-width: 1024px) {
+    .fraud-card {
+        margin: 0.75rem;
+    }
+}
+
+/* Desktop */
+@media (min-width: 1025px) {
+    .fraud-card:hover {
+        transform: translateY(-4px);
+    }
+}
+
+/* =============================================================================
+   UTILITY CLASSES
+   ============================================================================= */
+
+/* Text Gradients */
+.text-gradient-primary {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.text-gradient-secondary {
+    background: var(--gradient-secondary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Background Patterns */
+.bg-pattern-dots {
+    background-image: radial-gradient(circle, #e2e8f0 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.bg-pattern-grid {
+    background-image:
+        linear-gradient(#e2e8f0 1px, transparent 1px),
+        linear-gradient(90deg, #e2e8f0 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+/* Status Indicators */
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.status-success {
+    background: rgba(22, 163, 74, 0.1);
+    color: var(--fraud-success);
+    border: 1px solid rgba(22, 163, 74, 0.2);
+}
+
+.status-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--fraud-warning);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.status-danger {
+    background: rgba(220, 38, 38, 0.1);
+    color: var(--fraud-danger);
+    border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.status-info {
+    background: rgba(30, 58, 138, 0.1);
+    color: var(--fraud-primary);
+    border: 1px solid rgba(30, 58, 138, 0.2);
+}
+
+/* =============================================================================
+   DARK MODE SUPPORT (Future Enhancement)
+   ============================================================================= */
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --fraud-text-primary: #f8fafc;
+        --fraud-text-secondary: #cbd5e1;
+        --fraud-bg-primary: #0f172a;
+        --fraud-bg-secondary: #1e293b;
+    }
+
+    .fraud-card {
+        background: var(--fraud-bg-secondary);
+        border-color: #334155;
+        color: var(--fraud-text-primary);
+    }
+
+    .fraud-input {
+        background: var(--fraud-bg-secondary);
+        border-color: #334155;
+        color: var(--fraud-text-primary);
+    }
+}
+
+/* =============================================================================
+   AI CHAT SPECIFIC STYLES
+   ============================================================================= */
+
+/* Chat Container */
+.chat-container {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 1rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: var(--radius-lg);
+    border: 1px solid #e2e8f0;
+    position: relative;
+}
+
+.chat-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(180deg, rgba(248, 250, 252, 0.8) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.chat-container::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(0deg, rgba(248, 250, 252, 0.8) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Chat Messages */
+.chat-message {
+    margin-bottom: 1rem;
+    animation: slideInUp 0.3s ease-out;
+    max-width: 85%;
+}
+
+.chat-message.user {
+    margin-left: auto;
+}
+
+.chat-message.ai {
+    margin-right: auto;
+}
+
+.chat-bubble {
+    padding: 1rem 1.5rem;
+    border-radius: 1.5rem;
+    position: relative;
+    box-shadow: var(--shadow-sm);
+    word-wrap: break-word;
+    line-height: 1.5;
+}
+
+.chat-bubble.user {
+    background: var(--gradient-primary);
+    color: white;
+    border-bottom-right-radius: 0.5rem;
+}
+
+.chat-bubble.ai {
+    background: white;
+    color: var(--fraud-text-primary);
+    border: 1px solid #e2e8f0;
+    border-bottom-left-radius: 0.5rem;
+}
+
+.chat-bubble::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    width: 0;
+    height: 0;
+}
+
+.chat-bubble.user::before {
+    right: -8px;
+    border-left: 8px solid var(--fraud-secondary);
+    border-bottom: 8px solid transparent;
+}
+
+.chat-bubble.ai::before {
+    left: -8px;
+    border-right: 8px solid white;
+    border-bottom: 8px solid transparent;
+}
+
+/* Chat Input */
+.chat-input-container {
+    background: white;
+    border-radius: var(--radius-xl);
+    border: 2px solid #e2e8f0;
+    padding: 1rem;
+    box-shadow: var(--shadow-lg);
+    transition: all var(--animation-normal);
+}
+
+.chat-input-container:focus-within {
+    border-color: var(--fraud-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), var(--shadow-lg);
+}
+
+.chat-input {
+    width: 100%;
+    border: none;
+    outline: none;
+    resize: none;
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.5;
+    min-height: 60px;
+    max-height: 120px;
+}
+
+.chat-send-btn {
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--animation-normal);
+    box-shadow: var(--shadow-md);
+}
+
+.chat-send-btn:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-lg);
+}
+
+.chat-send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Typing Indicator */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: white;
+    border-radius: 1.5rem;
+    border-bottom-left-radius: 0.5rem;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 1rem;
+    max-width: 85%;
+    box-shadow: var(--shadow-sm);
+}
+
+.typing-dots {
+    display: flex;
+    gap: 4px;
+}
+
+.typing-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--fraud-gray);
+    animation: typingDots 1.4s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+@keyframes typingDots {
+
+    0%,
+    80%,
+    100% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Quick Action Buttons */
+.quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.quick-action-btn {
+    background: white;
+    border: 2px solid var(--fraud-primary);
+    color: var(--fraud-primary);
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--animation-normal);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.quick-action-btn:hover {
+    background: var(--fraud-primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Chat Status */
+.chat-status {
+    text-align: center;
+    padding: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--fraud-gray);
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.chat-status.online {
+    color: var(--fraud-success);
+}
+
+.chat-status.offline {
+    color: var(--fraud-danger);
+}

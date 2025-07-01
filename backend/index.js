@@ -7,6 +7,30 @@ const bodyParser = require('body-parser');
 require('dotenv').config(); // Memuat variabel dari .env
 
 // =========================
+// Validasi Environment Variables
+// =========================
+const requiredEnvVars = [
+  'DATABASE_URL',
+  'JWT_SECRET',
+  'GOOGLE_CLIENT_ID',
+  'GOOGLE_CLIENT_SECRET',
+  'GEMINI_API_KEY',
+];
+
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+  console.error('❌ Missing required environment variables:');
+  missingEnvVars.forEach(envVar => {
+    console.error(`   - ${envVar}`);
+  });
+  console.error('Please check your .env file and ensure all required variables are set.');
+  process.exit(1);
+}
+
+console.log('✅ All required environment variables are present.');
+
+// =========================
 // Import Route & Modul Internal
 // =========================
 const frontendRoutes = require('./routes/frontendRoutes');
@@ -50,7 +74,25 @@ app.use('/auth', authRoutes); // Route autentikasi
 // =========================
 // Redirect root ke halaman login
 app.get('/', (req, res) => {
-  res.redirect('/login');
+  // Check if user has valid token in header
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (token) {
+    // If token exists, try to verify it
+    const jwt = require('jsonwebtoken');
+    try {
+      jwt.verify(token, process.env.JWT_SECRET);
+      // Token valid, redirect to dashboard
+      res.redirect('/dashboard');
+    } catch (err) {
+      // Token invalid, redirect to login
+      res.redirect('/login');
+    }
+  } else {
+    // No token, redirect to login
+    res.redirect('/login');
+  }
 });
 app.use('/', frontendRoutes); // Route frontend lain
 
@@ -69,13 +111,49 @@ app.get('/cek-prisma', async (req, res) => {
     const count = await prisma.transaction.count();
     res.json({ status: 'OK', message: 'Prisma terhubung ke database', total: count });
   } catch (error) {
-    res.status(500).json({ status: 'ERROR', message: 'Prisma gagal terhubung', error: error.message });
+    res
+      .status(500)
+      .json({ status: 'ERROR', message: 'Prisma gagal terhubung', error: error.message });
   }
 });
 
 // =========================
 // Jalankan Server
 // =========================
-app.listen(PORT, () => {
-  console.log(`Server berjalan di http://localhost:${PORT}`);
+const server = app.listen(PORT, () => {
+  console.log(`✅ Server berjalan di http://localhost:${PORT}`);
+  console.log(`📊 Dashboard tersedia di http://localhost:${PORT}/dashboard`);
+  console.log(`🔐 Login di http://localhost:${PORT}/login`);
 });
+
+// =========================
+// Graceful Shutdown Handling
+// =========================
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
+
+function gracefulShutdown(signal) {
+  console.log(`\n⚠️  Received ${signal}. Shutting down gracefully...`);
+
+  server.close(() => {
+    console.log('✅ HTTP server closed.');
+
+    // Close Prisma connection
+    prisma
+      .$disconnect()
+      .then(() => {
+        console.log('✅ Database connection closed.');
+        process.exit(0);
+      })
+      .catch(err => {
+        console.error('❌ Error closing database connection:', err);
+        process.exit(1);
+      });
+  });
+
+  // Force close after 10 seconds
+  setTimeout(() => {
+    console.error('❌ Could not close connections in time, forcefully shutting down');
+    process.exit(1);
+  }, 10000);
+}

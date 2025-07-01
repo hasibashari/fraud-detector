@@ -1,9 +1,10 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// =========================
+// PRISMA SCHEMA: FRAUD DETECTION SYSTEM
+// =========================
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
+// ----------
+// GENERATOR & DATASOURCE
+// ----------
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -14,21 +15,27 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Tambahkan Enum ini di atas model
+// ----------
+// ENUM: Status Batch Upload
+// Digunakan untuk menandai status proses upload batch transaksi
+// ----------
 enum BatchStatus {
   PENDING
   COMPLETED
   FAILED
 }
 
-// Model baru untuk mencatat setiap sesi upload
+// ----------
+// MODEL: UploadBatch
+// Mencatat setiap sesi upload file transaksi oleh user
+// ----------
 model UploadBatch {
   id        String      @id @default(cuid())
   fileName  String
   status    BatchStatus @default(PENDING)
   createdAt DateTime    @default(now())
 
-  // Relasi dengan User
+  // Relasi ke User (setiap batch dimiliki satu user)
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -36,28 +43,36 @@ model UploadBatch {
   transactions Transaction[]
 }
 
-// Model untuk menyimpan data transaksi asli
+// ----------
+// MODEL: Transaction
+// Menyimpan data transaksi asli dan hasil analisis anomali
+// ----------
 model Transaction {
-  id        String   @id @default(cuid()) // ID unik
+  id        String   @id @default(cuid()) // ID unik transaksi
   amount    Float // Jumlah transaksi
   timestamp DateTime // Waktu transaksi
   merchant  String // Nama merchant/toko
   location  String // Lokasi transaksi
 
-  // Informasi Anomali (opsional)
+  // Informasi Anomali (opsional, hasil AI)
   isAnomaly    Boolean? @default(false) // Apakah ini anomali?
   anomalyScore Float? // Skor risiko dari model AI
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Relasi ke UploadBatch
   UploadBatch   UploadBatch? @relation(fields: [uploadBatchId], references: [id])
   uploadBatchId String?
 
+  // Penjelasan AI (opsional, hasil Gemini)
   aiExplanation String? @db.Text
 }
 
-// Define your data model here
+// ----------
+// MODEL: User
+// Menyimpan data user aplikasi (termasuk Google OAuth)
+// ----------
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -67,6 +82,6 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relasi dengan UploadBatch
+  // Relasi: Satu user bisa punya banyak upload batch
   uploadBatches UploadBatch[]
 }

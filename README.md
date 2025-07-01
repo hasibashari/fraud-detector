@@ -139,17 +139,25 @@ fraud-detector/
 │   │   └── migrations/       # Database migrations
 │   └── uploads/              # Temporary file storage
 │
-├── frontend/                  # Frontend web application
-│   ├── pages/
+├── frontend/                  # Frontend web application (MODULAR ARCHITECTURE)
+│   ├── pages/                # HTML pages
+│   │   ├── index.html        # Dashboard page
+│   │   ├── ai-chat.html      # AI Chat interface (NEW)
 │   │   ├── login.html        # Login page
 │   │   ├── register.html     # Registration page
-│   │   ├── auth-success.html # OAuth success page
-│   │   └── index.html        # Main dashboard (protected)
-│   ├── css/
-│   │   └── style.css         # Custom styles
-│   └── js/
-│       ├── authApp.js        # Authentication JavaScript
-│       └── script.js         # Main dashboard JavaScript
+│   │   └── auth-success.html # OAuth success page
+│   ├── css/                  # Modular stylesheets
+│   │   ├── main.css          # Global styles and variables (NEW)
+│   │   ├── index.css         # Dashboard-specific styles
+│   │   ├── ai-chat.css       # AI Chat page styles (NEW)
+│   │   └── auth.css          # Authentication pages styles
+│   ├── js/                   # Modular JavaScript
+│   │   ├── main.js           # Global utilities and functions (NEW)
+│   │   ├── index.js          # Dashboard page logic
+│   │   ├── ai-chat.js        # AI Chat page logic (NEW)
+│   │   └── auth.js           # Authentication logic
+│   ├── legacy-backup/        # Backup of old files (legacy system)
+│   └── README.md             # Frontend structure documentation
 │
 ├── model/                     # AI/ML Python components
 │   ├── app.py                # Flask API server
@@ -160,6 +168,20 @@ fraud-detector/
 │
 └── README.md                 # Comprehensive documentation
 ```
+
+> **🎯 New Modular Frontend**: The frontend has been completely refactored into a modular architecture for better maintainability, performance, and scalability. Each page now has its own dedicated CSS and JavaScript files, with global utilities shared through `main.js` and `main.css`.
+> 
+> **🆕 Modular Frontend & AI Chat**
+> 
+> - Frontend kini sepenuhnya modular: setiap halaman (dashboard, AI chat, login, register, OAuth success) memiliki file HTML, CSS, dan JS sendiri.
+> - Fitur **AI Chat** memungkinkan interaksi dengan model AI secara langsung dari web (lihat `ai-chat.html`, `ai-chat.js`, `ai-chat.css`).
+> - Folder `legacy-backup/` menyimpan file lama sebelum refactor, sehingga pengembangan baru tetap aman dan backward compatible.
+> - Dokumentasi struktur frontend tersedia di `frontend/README.md`.
+> 
+> **Tips Pengembangan Modular:**
+> - Setiap halaman = 1 file HTML, 1 CSS, 1 JS → mudah dikembangkan & scalable.
+> - Global utility dan style diletakkan di `main.js` dan `main.css`.
+> - Penambahan fitur baru cukup tambahkan file baru tanpa mengganggu halaman lain.
 
 ## 🚀 Instalasi dan Setup
 

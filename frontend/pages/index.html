@@ -308,6 +308,14 @@
                     <option value="low">Low Risk</option>
                   </select>
                   <button
+                    class="border border-blue-300 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors"
+                    id="toggleAdvancedBtn"
+                    title="Toggle Advanced Filters"
+                  >
+                    <i class="fas fa-filter mr-2"></i>
+                    Advanced Filters
+                  </button>
+                  <button
                     class="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
                     id="exportBtn"
                   >
@@ -349,7 +357,10 @@
               </div>
 
               <!-- Advanced Search and Filters -->
-              <div id="searchFilterContainer" class="hidden mb-6 space-y-4">
+              <div
+                id="searchFilterContainer"
+                class="hidden mb-6 space-y-4 border border-gray-200 rounded-lg p-4 bg-gray-50"
+              >
                 <!-- Search Bar -->
                 <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                   <div class="flex-1 relative">

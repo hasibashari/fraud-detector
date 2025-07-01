@@ -624,6 +624,14 @@ class DashboardManager {
         this.exportResults();
       });
     }
+
+    // Setup toggle button for advanced filters
+    const toggleAdvancedBtn = document.getElementById('toggleAdvancedBtn');
+    if (toggleAdvancedBtn) {
+      toggleAdvancedBtn.addEventListener('click', () => {
+        this.toggleAdvancedFilters();
+      });
+    }
   }
 
   // =============================
@@ -820,6 +828,7 @@ class DashboardManager {
 
       this.filteredResults = filteredResults;
       this.renderFilteredResults();
+      this.updateFilterSummary();
 
       // Update filter indicator
       this.updateFilterIndicator(Object.keys(filters).length);
@@ -903,6 +912,7 @@ class DashboardManager {
     // Reset filtered results and render original data
     this.filteredResults = [];
     this.renderFilteredResults();
+    this.updateFilterSummary();
 
     window.AppUtils.showToast('success', 'All filters cleared');
   }
@@ -952,14 +962,14 @@ class DashboardManager {
 
     if (dataToRender.length === 0) {
       resultsTableContainer.classList.add('hidden');
-      searchFilterContainer.classList.add('hidden');
+      // Don't auto-hide search filters - let user control visibility
       resultStatus.classList.remove('hidden');
       return;
     }
 
     resultStatus.classList.add('hidden');
     resultsTableContainer.classList.remove('hidden');
-    searchFilterContainer.classList.remove('hidden');
+    // Advanced filters visibility is now controlled by toggle button
 
     resultsBody.innerHTML = dataToRender
       .map(
@@ -1000,18 +1010,25 @@ class DashboardManager {
   // Update ringkasan hasil filter
   // =============================
   updateFilterSummary() {
-    const dataToShow = this.filteredResults.length > 0 ? this.filteredResults : this.currentResults;
-    const total = dataToShow.length;
-    const anomalies = dataToShow.filter(r => r.isAnomaly || (r.anomalyScore || 0) > 0.5).length;
-    const riskPercentage = total > 0 ? ((anomalies / total) * 100).toFixed(1) : 0;
+    const resultsInfo = document.getElementById('resultsInfo');
+    if (!resultsInfo) return;
 
-    const summaryTotal = document.getElementById('summaryTotal');
-    const summaryAnomalies = document.getElementById('summaryAnomalies');
-    const summaryRisk = document.getElementById('summaryRisk');
+    const totalResults = this.currentResults.length;
+    const filteredCount = this.filteredResults.length;
 
-    if (summaryTotal) summaryTotal.textContent = total;
-    if (summaryAnomalies) summaryAnomalies.textContent = anomalies;
-    if (summaryRisk) summaryRisk.textContent = riskPercentage + '%';
+    if (filteredCount > 0 && filteredCount < totalResults) {
+      resultsInfo.textContent = `Showing ${filteredCount} of ${totalResults} results`;
+      resultsInfo.classList.remove('hidden');
+    } else if (filteredCount === 0 && totalResults > 0) {
+      resultsInfo.textContent = 'No results match current filters';
+      resultsInfo.classList.remove('hidden');
+      resultsInfo.classList.add('text-orange-600', 'bg-orange-50');
+      resultsInfo.classList.remove('text-blue-600', 'bg-blue-50');
+    } else {
+      resultsInfo.classList.add('hidden');
+      resultsInfo.classList.add('text-blue-600', 'bg-blue-50');
+      resultsInfo.classList.remove('text-orange-600', 'bg-orange-50');
+    }
   }
 
   // =============================
@@ -1374,6 +1391,29 @@ class DashboardManager {
         skeleton.style.display = 'none';
       }
     }, 2000);
+  }
+
+  // =============================
+  // Toggle Advanced Filters visibility
+  // =============================
+  toggleAdvancedFilters() {
+    const searchFilterContainer = document.getElementById('searchFilterContainer');
+    const toggleBtn = document.getElementById('toggleAdvancedBtn');
+
+    if (!searchFilterContainer || !toggleBtn) return;
+
+    const isHidden = searchFilterContainer.classList.contains('hidden');
+
+    if (isHidden) {
+      searchFilterContainer.classList.remove('hidden');
+      toggleBtn.innerHTML = '<i class="fas fa-filter mr-2"></i>Hide Filters';
+      toggleBtn.classList.add('bg-blue-50', 'border-blue-400');
+      window.AppUtils.showToast('info', 'Advanced filters are now visible');
+    } else {
+      searchFilterContainer.classList.add('hidden');
+      toggleBtn.innerHTML = '<i class="fas fa-filter mr-2"></i>Advanced Filters';
+      toggleBtn.classList.remove('bg-blue-50', 'border-blue-400');
+    }
   }
 }
 

@@ -26,33 +26,35 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="../css/main.css" />
   </head>
-  <body class="bg-fraud-light font-inter text-gray-900">
-    <header class="bg-fraud-primary shadow-lg">
+  <body class="bg-gray-50 font-inter text-gray-900 min-h-screen">
+    <header
+      class="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-800 shadow-lg backdrop-blur-sm border-b border-white/10"
+    >
       <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
           <div class="flex items-center">
-            <a href="/" class="flex items-center space-x-3">
+            <a href="/" class="flex items-center space-x-3 hover:opacity-90 transition-opacity">
               <i class="fas fa-shield-alt text-white text-2xl"></i>
               <span class="text-white text-xl font-bold">Fraud Detection System</span>
             </a>
           </div>
-          <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-2">
             <a
               href="/dashboard"
-              class="text-white border border-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-white hover:text-fraud-primary transition-colors"
+              class="relative px-4 py-2 rounded-md text-white/80 font-medium transition-all duration-300 hover:text-white hover:bg-white/10"
             >
               <i class="fas fa-home mr-2"></i>Dashboard
             </a>
             <a
               href="/ai-chat"
-              class="bg-fraud-secondary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
+              class="relative px-4 py-2 rounded-md text-white font-medium transition-all duration-300 bg-white/10 border-b-2 border-white"
               aria-current="page"
             >
               <i class="fas fa-robot mr-2"></i>AI Chat
             </a>
             <button
               onclick="logout()"
-              class="text-white border border-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-white hover:text-fraud-primary transition-colors"
+              class="relative px-4 py-2 rounded-md text-white/80 font-medium transition-all duration-300 hover:text-white hover:bg-red-500/20 border border-transparent hover:border-red-400/30"
             >
               <i class="fas fa-sign-out-alt mr-2"></i>Logout
             </button>
@@ -128,49 +130,48 @@
                 <div class="space-y-3">
                   <button
                     class="w-full text-left border border-blue-200 text-blue-700 py-3 px-4 rounded-lg text-sm hover:bg-blue-50 hover:border-blue-300 focus:bg-blue-50 focus:border-blue-300 focus:ring-2 focus:ring-blue-200 transition-all duration-200 quick-btn group"
-                    data-question="What percentage of anomalous transactions were detected?"
+                    data-question="Berapa persentase transaksi anomali yang terdeteksi?"
                     aria-label="Ask about anomaly statistics"
                   >
-                    <i class="fas fa-chart-pie mr-3 group-hover:text-blue-600"></i>Anomaly
-                    Statistics
+                    <i class="fas fa-chart-pie mr-3 group-hover:text-blue-600"></i>Statistik Anomali
                   </button>
                   <button
                     class="w-full text-left border border-amber-200 text-amber-700 py-3 px-4 rounded-lg text-sm hover:bg-amber-50 hover:border-amber-300 focus:bg-amber-50 focus:border-amber-300 focus:ring-2 focus:ring-amber-200 transition-all duration-200 quick-btn group"
-                    data-question="Which merchants are the most risky?"
+                    data-question="Merchant mana yang paling berisiko?"
                     aria-label="Ask about risky merchants"
                   >
-                    <i class="fas fa-store mr-3 group-hover:text-amber-600"></i>Risky Merchants
+                    <i class="fas fa-store mr-3 group-hover:text-amber-600"></i>Merchant Berisiko
                   </button>
                   <button
                     class="w-full text-left border border-teal-200 text-teal-700 py-3 px-4 rounded-lg text-sm hover:bg-teal-50 hover:border-teal-300 focus:bg-teal-50 focus:border-teal-300 focus:ring-2 focus:ring-teal-200 transition-all duration-200 quick-btn group"
-                    data-question="At what time do anomalies occur most frequently?"
+                    data-question="Pada jam berapa anomali paling sering terjadi?"
                     aria-label="Ask about time patterns of anomalies"
                   >
-                    <i class="fas fa-clock mr-3 group-hover:text-teal-600"></i>Time Patterns
+                    <i class="fas fa-clock mr-3 group-hover:text-teal-600"></i>Pola Waktu
                   </button>
                   <button
                     class="w-full text-left border border-green-200 text-green-700 py-3 px-4 rounded-lg text-sm hover:bg-green-50 hover:border-green-300 focus:bg-green-50 focus:border-green-300 focus:ring-2 focus:ring-green-200 transition-all duration-200 quick-btn group"
-                    data-question="What are the recommended actions to prevent fraud?"
+                    data-question="Apa rekomendasi tindakan untuk mencegah fraud?"
                     aria-label="Ask for fraud prevention recommendations"
                   >
-                    <i class="fas fa-shield-alt mr-3 group-hover:text-green-600"></i>Prevention
-                    Recommendations
+                    <i class="fas fa-shield-alt mr-3 group-hover:text-green-600"></i>Rekomendasi
+                    Pencegahan
                   </button>
                   <button
                     class="w-full text-left border border-red-200 text-red-700 py-3 px-4 rounded-lg text-sm hover:bg-red-50 hover:border-red-300 focus:bg-red-50 focus:border-red-300 focus:ring-2 focus:ring-red-200 transition-all duration-200 quick-btn group"
-                    data-question="Which locations have the most suspicious transactions?"
+                    data-question="Lokasi mana yang memiliki transaksi paling mencurigakan?"
                     aria-label="Ask about location analysis for suspicious transactions"
                   >
-                    <i class="fas fa-map-marker-alt mr-3 group-hover:text-red-600"></i>Location
-                    Analysis
+                    <i class="fas fa-map-marker-alt mr-3 group-hover:text-red-600"></i>Analisis
+                    Lokasi
                   </button>
                   <button
                     class="w-full text-left border border-gray-200 text-gray-700 py-3 px-4 rounded-lg text-sm hover:bg-gray-50 hover:border-gray-300 focus:bg-gray-50 focus:border-gray-300 focus:ring-2 focus:ring-gray-200 transition-all duration-200 quick-btn group"
-                    data-question="How do normal vs anomalous transaction values compare?"
+                    data-question="Bagaimana perbandingan nilai transaksi normal vs anomali?"
                     aria-label="Ask about value comparison between normal and anomalous transactions"
                   >
-                    <i class="fas fa-balance-scale mr-3 group-hover:text-gray-600"></i>Value
-                    Comparison
+                    <i class="fas fa-balance-scale mr-3 group-hover:text-gray-600"></i>Perbandingan
+                    Nilai
                   </button>
                 </div>
               </div>

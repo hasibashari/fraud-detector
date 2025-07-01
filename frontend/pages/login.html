@@ -29,10 +29,8 @@
 
   <body class="bg-fraud-light font-inter min-h-screen flex items-center justify-center p-4">
     <div class="w-full max-w-md fraud-fade-in">
-      <div class="fraud-card overflow-hidden">
-        <div
-          class="bg-gradient-to-r from-fraud-primary to-fraud-secondary text-white p-8 text-center"
-        >
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="bg-fraud-primary text-white p-8 text-center">
           <i class="fas fa-shield-alt text-4xl mb-4"></i>
           <h1 class="text-2xl font-bold mb-2">Welcome Back</h1>
           <p class="text-blue-100">Sign in to your fraud detection dashboard</p>
@@ -46,11 +44,11 @@
               </label>
               <input
                 type="email"
-                class="fraud-input"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fraud-primary focus:border-transparent transition-colors"
                 id="login-email"
                 required
                 autocomplete="username"
-                placeholder="Enter your email"
+                placeholder="Enter your email address"
               />
               <div class="text-red-500 text-sm mt-1 hidden" id="email-error">
                 Please provide a valid email address.
@@ -63,7 +61,7 @@
               </label>
               <input
                 type="password"
-                class="fraud-input"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fraud-primary focus:border-transparent transition-colors"
                 id="login-password"
                 required
                 autocomplete="current-password"
@@ -74,8 +72,11 @@
               </div>
             </div>
 
-            <button type="submit" class="fraud-btn fraud-btn-primary w-full">
-              <i class="fas fa-sign-in-alt"></i>
+            <button
+              type="submit"
+              class="w-full bg-fraud-primary text-white py-3 rounded-lg font-medium hover:bg-fraud-secondary transition-colors"
+            >
+              <i class="fas fa-sign-in-alt mr-2"></i>
               Sign In
             </button>
 
@@ -85,10 +86,10 @@
 
             <button
               type="button"
-              class="fraud-btn fraud-btn-secondary w-full"
+              class="w-full border border-red-300 text-red-600 py-3 rounded-lg font-medium hover:bg-red-50 transition-colors"
               onclick="handleGoogleLogin()"
             >
-              <i class="fab fa-google"></i>
+              <i class="fab fa-google mr-2"></i>
               Continue with Google
             </button>
           </form>

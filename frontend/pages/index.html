@@ -3,152 +3,536 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fraud Detection</title>
-    <!-- Bootstrap 5 -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <!-- FontAwesome -->
+    <title>Fraud Detection Dashboard</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     />
-    <!-- Custom style -->
-    <link rel="stylesheet" href="../css/style.css" />
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Custom Tailwind Configuration -->
+    <script src="../js/tailwind-config.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/main.css" />
   </head>
 
-  <body class="bg-light">
+  <body class="bg-gray-50 font-inter text-gray-900 min-h-screen">
     <!-- HEADER -->
-    <header class="py-4 mb-4 shadow dashboard-header text-white">
-      <div
-        class="container d-flex flex-column flex-md-row align-items-center justify-content-between gap-3"
-      >
-        <!-- Logo & Title Section -->
-        <div class="logo-title-section">
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/2099/2099079.png"
-            width="56"
-            height="56"
-            alt="Fraud Logo"
-            class="rounded"
-          />
-          <div class="title-content">
-            <h1 class="h3 mb-1 fw-bold">Sistem Deteksi Transaksi Mencurigakan</h1>
-            <span class="badge bg-fd-warning text-dark">FRAUD DETECTION SYSTEM</span>
+    <header
+      class="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-800 shadow-lg backdrop-blur-sm border-b border-white/10"
+    >
+      <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <div class="flex items-center">
+            <a href="/" class="flex items-center space-x-3 hover:opacity-90 transition-opacity">
+              <i class="fas fa-shield-alt text-white text-2xl"></i>
+              <span class="text-white text-xl font-bold">Fraud Detection System</span>
+            </a>
+          </div>
+          <div class="flex items-center space-x-2">
+            <a
+              href="/dashboard"
+              class="relative px-4 py-2 rounded-md text-white font-medium transition-all duration-300 bg-white/10 border-b-2 border-white"
+              aria-current="page"
+            >
+              <i class="fas fa-home mr-2"></i>Dashboard
+            </a>
+            <a
+              href="/ai-chat"
+              class="relative px-4 py-2 rounded-md text-white/80 font-medium transition-all duration-300 hover:text-white hover:bg-white/10"
+            >
+              <i class="fas fa-robot mr-2"></i>AI Chat
+            </a>
+            <button
+              onclick="logout()"
+              class="relative px-4 py-2 rounded-md text-white/80 font-medium transition-all duration-300 hover:text-white hover:bg-red-500/20 border border-transparent hover:border-red-400/30"
+            >
+              <i class="fas fa-sign-out-alt mr-2"></i>Logout
+            </button>
           </div>
         </div>
-
-        <!-- User Info & Logout -->
-        <div class="user-info">
-          <div class="user-welcome text-light">
-            <i class="fa fa-user-circle me-1"></i>
-            Selamat datang, <span id="user-name">Loading...</span>
-          </div>
-          <button onclick="logout()" class="btn btn-outline-light btn-sm logout-btn">
-            <i class="fa fa-sign-out-alt me-1"></i>Logout
-          </button>
-        </div>
-      </div>
-      <div class="text-center mt-3">
-        <small class="opacity-75">Demo MVP untuk Hackathon BI 2025</small>
-      </div>
+      </nav>
     </header>
 
     <!-- MAIN CONTENT -->
-    <main class="container mb-5">
-      <div class="row gy-4">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Stats Overview -->
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+        <div
+          class="bg-white rounded-xl p-6 shadow-md border border-gray-100 relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+        >
+          <div
+            class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-600"
+          ></div>
+          <div class="text-3xl font-bold text-blue-800 mb-2" id="totalBatches">0</div>
+          <div class="text-gray-600">Total Batches</div>
+        </div>
+        <div
+          class="bg-white rounded-xl p-6 shadow-md border border-gray-100 relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+        >
+          <div
+            class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-500 to-green-600"
+          ></div>
+          <div class="text-3xl font-bold text-teal-700 mb-2" id="totalTransactions">0</div>
+          <div class="text-gray-600">Total Transactions</div>
+        </div>
+        <div
+          class="bg-white rounded-xl p-6 shadow-md border border-gray-100 relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+        >
+          <div
+            class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-500 to-orange-600"
+          ></div>
+          <div class="text-3xl font-bold text-yellow-700 mb-2" id="anomaliesFound">0</div>
+          <div class="text-gray-600">Anomalies Found</div>
+        </div>
+        <div
+          class="bg-white rounded-xl p-6 shadow-md border border-gray-100 relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+        >
+          <div
+            class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-pink-600"
+          ></div>
+          <div class="text-3xl font-bold text-red-700 mb-2" id="riskScore">0%</div>
+          <div class="text-gray-600">Risk Score</div>
+        </div>
+      </div>
+
+      <div class="space-y-8">
         <!-- SECTION 1: Upload File -->
-        <section class="col-12">
-          <div class="card shadow-sm border-0">
-            <div class="card-body">
-              <h2 class="h5 mb-3 text-fd-primary">
-                <i class="fa-solid fa-upload me-2"></i>1. Unggah File Transaksi Baru
+        <section class="animate-fade-in">
+          <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+            <div class="p-6 relative">
+              <h2
+                class="text-2xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent flex items-center"
+              >
+                <i class="fas fa-cloud-upload-alt mr-3 text-blue-600"></i>
+                Upload Transaction Data
               </h2>
-              <div class="mb-3 d-flex flex-column flex-sm-row gap-3 align-items-stretch">
+              <div
+                class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 hover:bg-blue-50/50 transition-all duration-300 cursor-pointer"
+                id="uploadZone"
+              >
+                <i class="fas fa-cloud-upload-alt text-4xl text-blue-600 mb-4"></i>
+                <h5 class="text-lg font-medium mb-2">Drag & Drop CSV File Here</h5>
+                <p class="text-gray-500 mb-4">or</p>
                 <input
                   type="file"
                   id="csvFile"
                   accept=".csv"
-                  class="form-control"
-                  style="max-width: 320px"
+                  class="hidden"
+                  aria-label="Select CSV file for upload"
                 />
-                <button id="uploadBtn" class="btn btn-fd-primary flex-fill">
-                  <i class="fa-solid fa-cloud-arrow-up"></i> Unggah File
+                <button
+                  type="button"
+                  class="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                  id="chooseFileBtn"
+                  aria-describedby="file-help"
+                >
+                  <i class="fas fa-folder-open mr-2"></i>
+                  Choose File
                 </button>
+                <div class="text-gray-500 text-sm mt-3" id="file-help">
+                  <i class="fas fa-info-circle mr-1"></i>
+                  Supports CSV files up to 10MB
+                </div>
+                <div id="fileInfo" class="hidden mt-4">
+                  <div
+                    class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 inline-flex items-center"
+                  >
+                    <i class="fas fa-file-csv mr-2 text-blue-600"></i>
+                    <span id="fileName" class="text-blue-800"></span>
+                  </div>
+                </div>
               </div>
+              <button
+                id="uploadBtn"
+                class="absolute bottom-6 right-6 bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled
+                aria-label="Upload and process CSV file"
+              >
+                <i class="fas fa-upload mr-2"></i>
+                Upload & Process
+              </button>
+              <!-- Enhanced Upload Progress -->
               <div
-                id="loadingUpload"
-                class="spinner-border text-fd-primary d-none"
-                role="status"
-                style="width: 2rem; height: 2rem"
-              ></div>
-              <p id="uploadStatus" class="mt-2 min-vh-1"></p>
+                id="uploadProgress"
+                class="hidden mt-6 bg-white rounded-lg border border-gray-200 p-4"
+              >
+                <div class="flex items-center justify-between mb-2">
+                  <span id="progressText" class="text-sm font-medium text-gray-700"
+                    >Preparing upload...</span
+                  >
+                  <span id="progressPercent" class="text-sm text-gray-500">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    id="progressBar"
+                    class="bg-gradient-to-r from-blue-500 to-green-500 h-2 rounded-full transition-all duration-300"
+                    style="width: 0%"
+                  ></div>
+                </div>
+                <div class="mt-2 text-xs text-gray-500">
+                  <i class="fas fa-info-circle mr-1"></i>
+                  Processing may take several minutes for large files
+                </div>
+              </div>
+
+              <!-- Legacy Loading (kept for compatibility) -->
+              <div class="mt-6">
+                <div id="loadingUpload" class="hidden">
+                  <div
+                    class="flex items-center justify-center p-4 bg-blue-50 rounded-lg border border-blue-200"
+                  >
+                    <div
+                      class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"
+                    ></div>
+                    <div>
+                      <div class="font-semibold text-blue-800">Processing your file...</div>
+                      <div class="text-blue-600 text-sm">This may take a few moments</div>
+                    </div>
+                  </div>
+                </div>
+                <div id="uploadStatus" class="mt-2"></div>
+              </div>
             </div>
           </div>
         </section>
 
-        <!-- SECTION 2: Dashboard Batch Upload -->
-        <section class="col-12">
-          <div class="card shadow-sm border-0">
-            <div class="card-body">
-              <h2 class="h5 mb-3 text-fd-primary">
-                <i class="fa-solid fa-database me-2"></i>
-                2. Dashboard Batch Upload
+        <!-- SECTION 2: Batch Management -->
+        <section>
+          <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+            <div
+              class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 flex items-center justify-between"
+            >
+              <h2 class="text-xl font-bold flex items-center">
+                <i class="fas fa-database mr-3"></i>
+                Batch Management
               </h2>
-              <div class="table-responsive">
-                <table id="batchTable" class="table align-middle table-hover mb-0">
-                  <thead class="table-fd-primary">
+              <button
+                class="border-2 border-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-white hover:text-blue-600 transition-all duration-300 backdrop-blur-sm"
+                onclick="location.reload()"
+                title="Refresh Batch List"
+              >
+                <i class="fas fa-sync-alt mr-2"></i>
+                Refresh
+              </button>
+            </div>
+            <div class="p-6">
+              <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                  <thead class="bg-gray-50">
                     <tr>
-                      <th>ID Batch</th>
-                      <th>Nama File</th>
-                      <th>Waktu Upload</th>
-                      <th>Aksi</th>
+                      <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        <i class="fas fa-hashtag mr-2 text-blue-500"></i>Batch ID
+                      </th>
+                      <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        <i class="fas fa-file-csv mr-2 text-green-500"></i>File Name
+                      </th>
+                      <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        <i class="fas fa-clock mr-2 text-yellow-500"></i>Upload Time
+                      </th>
+                      <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        <i class="fas fa-database mr-2 text-purple-500"></i>Transactions
+                      </th>
+                      <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        <i class="fas fa-chart-line mr-2 text-indigo-500"></i>Status
+                      </th>
+                      <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        <i class="fas fa-cogs mr-2 text-gray-500"></i>Actions
+                      </th>
                     </tr>
                   </thead>
-                  <tbody id="batchBody"></tbody>
+                  <tbody id="batchBody" class="bg-white divide-y divide-gray-200">
+                    <tr id="batchSkeleton">
+                      <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                        <div class="flex flex-col items-center">
+                          <i class="fas fa-inbox text-6xl mb-4 text-gray-300"></i>
+                          <h4 class="text-lg font-medium text-gray-600 mb-2">
+                            No batches uploaded yet
+                          </h4>
+                          <p class="text-gray-400">Upload your first CSV file to get started</p>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
                 </table>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- SECTION 3: Hasil Deteksi Anomali -->
-        <section class="col-12">
-          <div class="card shadow-sm border-0">
-            <div class="card-body">
-              <h2 class="h5 mb-3 text-fd-primary">
-                <i class="fa-solid fa-magnifying-glass-chart me-2"></i>
-                3. Hasil Deteksi Anomali
-              </h2>
-              <div id="anomalySummary"></div>
+        <!-- SECTION 3: Anomaly Detection Results -->
+        <section>
+          <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="p-6">
+              <div
+                class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4"
+              >
+                <h2 class="text-xl font-bold text-blue-800 flex items-center">
+                  <i class="fas fa-search mr-3 text-yellow-600"></i>
+                  Anomaly Detection Results
+                </h2>
+                <div class="flex flex-wrap gap-3">
+                  <select
+                    class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    id="resultsFilter"
+                    aria-label="Filter anomaly results"
+                  >
+                    <option value="all">All Results</option>
+                    <option value="high">High Risk</option>
+                    <option value="medium">Medium Risk</option>
+                    <option value="low">Low Risk</option>
+                  </select>
+                  <button
+                    class="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                    id="exportBtn"
+                  >
+                    <i class="fas fa-download mr-2"></i>
+                    Export
+                  </button>
+                </div>
+              </div>
 
-              <p id="resultStatus" class="text-secondary">
-                Pilih "Lihat Hasil" dari batch di atas.
-              </p>
-              <!-- Tampilkan hasil deteksi anomali di sini -->
-              <div class="table-responsive">
-                <table id="resultsTable" class="table table-striped align-middle">
-                  <thead class="table-fd-warning">
+              <!-- Summary Cards -->
+              <div id="anomalySummary" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div class="flex items-center">
+                    <i class="fas fa-chart-pie text-2xl text-blue-600 mr-3"></i>
+                    <div>
+                      <div class="text-2xl font-bold text-blue-800" id="summaryTotal">0</div>
+                      <div class="text-sm text-blue-600">Total Transactions</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle text-2xl text-yellow-600 mr-3"></i>
+                    <div>
+                      <div class="text-2xl font-bold text-yellow-800" id="summaryAnomalies">0</div>
+                      <div class="text-sm text-yellow-600">Anomalies Detected</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <div class="flex items-center">
+                    <i class="fas fa-shield-alt text-2xl text-red-600 mr-3"></i>
+                    <div>
+                      <div class="text-2xl font-bold text-red-800" id="summaryRisk">0%</div>
+                      <div class="text-sm text-red-600">Risk Percentage</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Advanced Search and Filters -->
+              <div id="searchFilterContainer" class="hidden mb-6 space-y-4">
+                <!-- Search Bar -->
+                <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                  <div class="flex-1 relative">
+                    <div
+                      class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+                    >
+                      <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                    <input
+                      type="text"
+                      id="searchInput"
+                      placeholder="Search transactions..."
+                      class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      aria-label="Search transactions"
+                    />
+                  </div>
+                  <button
+                    id="clearFiltersBtn"
+                    class="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                    title="Clear all filters"
+                  >
+                    <i class="fas fa-times-circle mr-1"></i>
+                    Clear
+                  </button>
+                </div>
+
+                <!-- Filter Row -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <!-- Risk Level Filter -->
+                  <div>
+                    <label for="riskFilter" class="block text-sm font-medium text-gray-700 mb-1">
+                      Risk Level
+                    </label>
+                    <select
+                      id="riskFilter"
+                      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="all">All Levels</option>
+                      <option value="high">High Risk (>70%)</option>
+                      <option value="medium">Medium Risk (50-70%)</option>
+                      <option value="low">Low Risk (<50%)</option>
+                    </select>
+                  </div>
+
+                  <!-- Amount Range Filter -->
+                  <div>
+                    <label for="amountFilter" class="block text-sm font-medium text-gray-700 mb-1">
+                      Amount Range
+                    </label>
+                    <select
+                      id="amountFilter"
+                      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="all">All Amounts</option>
+                      <option value="small">$0 - $1,000</option>
+                      <option value="medium">$1,000 - $10,000</option>
+                      <option value="large">$10,000+</option>
+                    </select>
+                  </div>
+
+                  <!-- Date From Filter -->
+                  <div>
+                    <label for="dateFrom" class="block text-sm font-medium text-gray-700 mb-1">
+                      Date From
+                    </label>
+                    <input
+                      type="date"
+                      id="dateFrom"
+                      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <!-- Date To Filter -->
+                  <div>
+                    <label for="dateTo" class="block text-sm font-medium text-gray-700 mb-1">
+                      Date To
+                    </label>
+                    <input
+                      type="date"
+                      id="dateTo"
+                      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+
+                <!-- Filter Status Indicator -->
+                <div class="flex items-center justify-between">
+                  <div
+                    id="resultsInfo"
+                    class="hidden text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-full"
+                  >
+                    <!-- Search results info will appear here -->
+                  </div>
+                  <div
+                    id="filterIndicator"
+                    class="hidden text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full"
+                  >
+                    <!-- Active filters indicator will appear here -->
+                  </div>
+                </div>
+              </div>
+
+              <div id="resultStatus" class="text-center text-gray-500 py-12">
+                <i class="fas fa-chart-line text-6xl mb-4 opacity-50"></i>
+                <h5 class="text-xl font-medium mb-2">No Data Selected</h5>
+                <p class="text-gray-400">
+                  Please select a batch from the table above to view anomaly detection results.
+                </p>
+              </div>
+
+              <!-- Results Table -->
+              <div class="hidden overflow-x-auto" id="resultsTableContainer">
+                <table class="min-w-full divide-y divide-gray-200" id="resultsTable">
+                  <thead class="bg-gray-50">
                     <tr>
-                      <th data-sort="waktu" class="sortable">
-                        Waktu <span class="sort-icon"></span>
+                      <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors select-none"
+                        data-sort="timestamp"
+                        onclick="dashboard.sortResults('timestamp')"
+                      >
+                        <div class="flex items-center justify-between">
+                          <span class="flex items-center">
+                            <i class="fas fa-clock mr-2 text-blue-500"></i>
+                            Timestamp
+                          </span>
+                          <i class="fas fa-sort ml-2 text-gray-400"></i>
+                        </div>
                       </th>
-                      <th data-sort="nominal" class="sortable">
-                        Nominal <span class="sort-icon"></span>
+                      <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors select-none"
+                        data-sort="amount"
+                        onclick="dashboard.sortResults('amount')"
+                      >
+                        <div class="flex items-center justify-between">
+                          <span class="flex items-center">
+                            <i class="fas fa-dollar-sign mr-2 text-green-500"></i>
+                            Amount
+                          </span>
+                          <i class="fas fa-sort ml-2 text-gray-400"></i>
+                        </div>
                       </th>
-                      <th data-sort="merchant" class="sortable">
-                        Merchant <span class="sort-icon"></span>
+                      <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors select-none"
+                        data-sort="merchant"
+                        onclick="dashboard.sortResults('merchant')"
+                      >
+                        <div class="flex items-center justify-between">
+                          <span class="flex items-center">
+                            <i class="fas fa-store mr-2 text-purple-500"></i>
+                            Merchant
+                          </span>
+                          <i class="fas fa-sort ml-2 text-gray-400"></i>
+                        </div>
                       </th>
-                      <th data-sort="lokasi" class="sortable">
-                        Lokasi <span class="sort-icon"></span>
+                      <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors select-none"
+                        data-sort="location"
+                        onclick="dashboard.sortResults('location')"
+                      >
+                        <div class="flex items-center justify-between">
+                          <span class="flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2 text-yellow-500"></i>
+                            Location
+                          </span>
+                          <i class="fas fa-sort ml-2 text-gray-400"></i>
+                        </div>
                       </th>
-                      <th data-sort="skor" class="sortable">
-                        Skor Anomali <span class="sort-icon"></span>
+                      <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors select-none"
+                        data-sort="anomalyScore"
+                        onclick="dashboard.sortResults('anomalyScore')"
+                      >
+                        <div class="flex items-center justify-between">
+                          <span class="flex items-center">
+                            <i class="fas fa-exclamation-circle mr-2 text-red-500"></i>
+                            Risk Score
+                          </span>
+                          <i class="fas fa-sort ml-2 text-gray-400"></i>
+                        </div>
                       </th>
                     </tr>
                   </thead>
-                  <tbody id="resultsBody"></tbody>
+                  <tbody id="resultsBody" class="bg-white divide-y divide-gray-200">
+                    <!-- Dynamic content will be inserted here -->
+                  </tbody>
                 </table>
               </div>
             </div>
@@ -158,15 +542,38 @@
     </main>
 
     <!-- FOOTER -->
-    <footer class="text-center py-3 bg-white shadow-sm">
-      <p class="mb-0 text-fd-primary">
-        &copy; 2025 Tim Fraud Detection
-        <span class="badge bg-fd-primary">Hackathon BI 2025</span>
-      </p>
+    <footer class="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-800 text-white py-8 mt-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="bg-white bg-opacity-10 rounded-lg p-6 backdrop-blur-sm">
+          <div class="flex flex-col md:flex-row items-center justify-between">
+            <div class="text-center md:text-left mb-4 md:mb-0">
+              <h6 class="text-lg font-semibold text-white mb-1">Fraud Detection System</h6>
+              <small class="text-gray-200">Powered by Advanced AI & Machine Learning</small>
+            </div>
+            <div>
+              <span class="bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fas fa-trophy mr-2"></i>
+                Hackathon BI 2025
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
     </footer>
 
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2">
+      <!-- Toasts will be dynamically inserted here -->
+    </div>
+
     <!-- JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/dashApp.js"></script>
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+
+    <!-- Global Scripts -->
+    <script src="../js/config.js"></script>
+    <script src="../js/main.js"></script>
+    <!-- Dashboard Specific Scripts -->
+    <script src="../js/index.js"></script>
   </body>
 </html>

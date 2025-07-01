@@ -3,23 +3,116 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login</title>
-    <link rel="stylesheet" href="../css/style.css" />
+    <title>Login - Fraud Detection System</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Custom Tailwind Configuration -->
+    <script src="../js/tailwind-config.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/main.css" />
   </head>
 
-  <body>
-    <div class="container">
-      <form id="login-form">
-        <h2>Login</h2>
-        <input type="email" id="login-email" placeholder="Email" required />
-        <input type="password" id="login-password" placeholder="Password" required />
-        <button type="submit">Login</button>
-        <p id="login-message" class="message"></p>
-        <p>Don't have an account? <a href="/register">Register</a></p>
-        <a href="/auth/google" class="google-btn">Login dengan Google</a>
-      </form>
+  <body class="bg-fraud-light font-inter min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md fraud-fade-in">
+      <div class="fraud-card overflow-hidden">
+        <div
+          class="bg-gradient-to-r from-fraud-primary to-fraud-secondary text-white p-8 text-center"
+        >
+          <i class="fas fa-shield-alt text-4xl mb-4"></i>
+          <h1 class="text-2xl font-bold mb-2">Welcome Back</h1>
+          <p class="text-blue-100">Sign in to your fraud detection dashboard</p>
+        </div>
+
+        <div class="p-8">
+          <form id="login-form" class="space-y-6" novalidate>
+            <div>
+              <label for="login-email" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-envelope mr-2 text-fraud-primary"></i>Email Address
+              </label>
+              <input
+                type="email"
+                class="fraud-input"
+                id="login-email"
+                required
+                autocomplete="username"
+                placeholder="Enter your email"
+              />
+              <div class="text-red-500 text-sm mt-1 hidden" id="email-error">
+                Please provide a valid email address.
+              </div>
+            </div>
+
+            <div>
+              <label for="login-password" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-lock mr-2 text-fraud-primary"></i>Password
+              </label>
+              <input
+                type="password"
+                class="fraud-input"
+                id="login-password"
+                required
+                autocomplete="current-password"
+                placeholder="Enter your password"
+              />
+              <div class="text-red-500 text-sm mt-1 hidden" id="password-error">
+                Password is required.
+              </div>
+            </div>
+
+            <button type="submit" class="fraud-btn fraud-btn-primary w-full">
+              <i class="fas fa-sign-in-alt"></i>
+              Sign In
+            </button>
+
+            <div class="text-center">
+              <span class="text-gray-500">or</span>
+            </div>
+
+            <button
+              type="button"
+              class="fraud-btn fraud-btn-secondary w-full"
+              onclick="handleGoogleLogin()"
+            >
+              <i class="fab fa-google"></i>
+              Continue with Google
+            </button>
+          </form>
+        </div>
+
+        <div class="bg-gray-50 px-8 py-6 text-center border-t">
+          <p class="text-gray-600">
+            Don't have an account?
+            <a href="/register" class="text-fraud-primary hover:text-fraud-secondary font-medium"
+              >Create one here</a
+            >
+          </p>
+        </div>
+      </div>
     </div>
-    <!-- Include the JavaScript file -->
-    <script src="../js/authApp.js" defer></script>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2">
+      <!-- Toasts will be dynamically inserted here -->
+    </div>
+
+    <!-- JavaScript -->
+    <script src="../js/config.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/auth.js"></script>
   </body>
 </html>

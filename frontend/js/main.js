@@ -1,16 +1,23 @@
-/**
- * MAIN.JS - Global JavaScript Functions
- * Fungsi-fungsi yang digunakan di semua halaman
- */
+// =============================
+// MAIN.JS - Global JavaScript Functions
+// Fungsi-fungsi utilitas global untuk semua halaman
+// =============================
 
 // Global Variables
+// =============================
+// AppUtils: Kumpulan utilitas global
+// =============================
 window.AppUtils = {
+  // =============================
+  // Ambil base URL API dari config
+  // =============================
   get API_BASE_URL() {
-    // Use dynamic config if available, fallback to localhost for development
     return window.AppConfig ? window.AppConfig.getApiUrl() : 'http://localhost:3001';
   },
 
-  // Authentication utilities
+  // =============================
+  // Utilitas autentikasi
+  // =============================
   getAuthToken() {
     return localStorage.getItem('token');
   },
@@ -26,7 +33,9 @@ window.AppUtils = {
     });
   },
 
-  // Toast notification system
+  // =============================
+  // Sistem notifikasi toast
+  // =============================
   showToast(type, message) {
     const container = document.getElementById('toast-container');
     if (!container) return;
@@ -77,7 +86,9 @@ window.AppUtils = {
     }, delay);
   },
 
-  // Utility for animated counters
+  // =============================
+  // Animasi angka berjalan (counter)
+  // =============================
   animateValue(element, start, end, duration) {
     const startTimestamp = performance.now();
 
@@ -96,7 +107,9 @@ window.AppUtils = {
     requestAnimationFrame(step);
   },
 
-  // Debounce utility for performance optimization
+  // =============================
+  // Debounce: optimasi event handler
+  // =============================
   debounce(func, wait, immediate = false) {
     let timeout;
     return function executedFunction(...args) {
@@ -111,7 +124,9 @@ window.AppUtils = {
     };
   },
 
-  // Throttle utility for scroll/resize events
+  // =============================
+  // Throttle: optimasi event scroll/resize
+  // =============================
   throttle(func, limit) {
     let inThrottle;
     return function () {
@@ -125,7 +140,9 @@ window.AppUtils = {
     };
   },
 
-  // Performance monitoring
+  // =============================
+  // Monitoring performa (timing)
+  // =============================
   performanceMonitor: {
     marks: new Map(),
 
@@ -144,7 +161,9 @@ window.AppUtils = {
     },
   },
 
-  // Enhanced loading states
+  // =============================
+  // Loading state pada tombol
+  // =============================
   setLoadingState(element, isLoading, loadingText = 'Loading...') {
     if (!element) return;
 
@@ -163,7 +182,9 @@ window.AppUtils = {
     }
   },
 
-  // Generic API call helper
+  // =============================
+  // Helper pemanggilan API (fetch)
+  // =============================
   async apiCall(endpoint, options = {}) {
     try {
       this.performanceMonitor.start(`API-${endpoint}`);
@@ -228,7 +249,9 @@ window.AppUtils = {
     }
   },
 
-  // Enhanced error handling
+  // =============================
+  // Handler error API
+  // =============================
   handleApiError(error, context = '') {
     console.error(`API Error ${context}:`, error);
 
@@ -256,7 +279,9 @@ window.AppUtils = {
     this.showToast('error', 'An unexpected error occurred. Please try again.');
   },
 
-  // Form validation helpers
+  // =============================
+  // Helper validasi form
+  // =============================
   validateEmail(email) {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
@@ -267,7 +292,9 @@ window.AppUtils = {
     return password && password.length >= 6;
   },
 
-  // File validation
+  // =============================
+  // Validasi file upload
+  // =============================
   validateFileType(file, allowedTypes = ['.csv']) {
     const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
     return allowedTypes.includes(fileExtension);
@@ -278,7 +305,9 @@ window.AppUtils = {
     return file.size <= maxSizeBytes;
   },
 
-  // Format utilities
+  // =============================
+  // Helper format tampilan angka, file, tanggal
+  // =============================
   formatFileSize(bytes) {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -308,7 +337,9 @@ window.AppUtils = {
     }).format(new Date(dateString));
   },
 
-  // Theme utilities (for future use)
+  // =============================
+  // Helper tema (future use)
+  // =============================
   getPreferredColorScheme() {
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       return 'dark';
@@ -316,7 +347,9 @@ window.AppUtils = {
     return 'light';
   },
 
-  // Device detection
+  // =============================
+  // Deteksi device
+  // =============================
   isMobile() {
     return window.innerWidth <= 768;
   },
@@ -329,7 +362,9 @@ window.AppUtils = {
     return window.innerWidth > 1024;
   },
 
-  // Progressive loading with skeleton screens
+  // =============================
+  // Skeleton loader (progressive loading)
+  // =============================
   createSkeletonLoader(container, type = 'table') {
     if (!container) return;
 
@@ -383,7 +418,9 @@ window.AppUtils = {
     container.innerHTML = skeletons[type] || skeletons.table;
   },
 
-  // Enhanced batch operations with progress tracking
+  // =============================
+  // Batch processor (proses data bertahap)
+  // =============================
   batchProcessor: {
     async process(items, processor, onProgress, batchSize = 10) {
       const results = [];
@@ -405,7 +442,9 @@ window.AppUtils = {
     },
   },
 
-  // Enhanced file operations
+  // =============================
+  // Helper download file
+  // =============================
   downloadFile(data, filename, type = 'application/json') {
     try {
       let content;
@@ -438,6 +477,9 @@ window.AppUtils = {
     }
   },
 
+  // =============================
+  // Helper upload file (FileReader)
+  // =============================
   uploadFile(input, callback) {
     const file = input.files[0];
     if (!file) return;
@@ -450,11 +492,16 @@ window.AppUtils = {
     reader.readAsText(file);
   },
 
-  // Initialize global features
+  // =============================
+  // Inisialisasi fitur global
+  // =============================
   init() {
     this.setupGlobalEventListeners();
   },
 
+  // =============================
+  // Setup event listener global (esc, loading, dsb)
+  // =============================
   setupGlobalEventListeners() {
     // Global escape key handler
     document.addEventListener('keydown', e => {
@@ -489,11 +536,15 @@ window.AppUtils = {
   },
 };
 
-// Initialize when DOM is ready
+// =============================
+// Inisialisasi AppUtils saat DOM siap
+// =============================
 document.addEventListener('DOMContentLoaded', () => {
   window.AppUtils.init();
 });
 
-// Export for global access (backward compatibility)
+// =============================
+// Ekspor global (kompatibilitas lama)
+// =============================
 window.logout = window.AppUtils.logout.bind(window.AppUtils);
 window.showToast = window.AppUtils.showToast.bind(window.AppUtils);

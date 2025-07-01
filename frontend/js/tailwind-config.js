@@ -1,7 +1,7 @@
-/**
- * TAILWIND-CONFIG.JS - Shared Tailwind CSS Configuration
- * Centralized Tailwind configuration to avoid duplication
- */
+// =============================
+// TAILWIND-CONFIG.JS - Shared Tailwind CSS Configuration
+// Konfigurasi Tailwind terpusat agar tidak duplikat
+// =============================
 
 window.TailwindConfig = {
   theme: {
@@ -24,7 +24,9 @@ window.TailwindConfig = {
   },
 };
 
-// Apply configuration to Tailwind if available
+// =============================
+// Terapkan konfigurasi ke Tailwind jika tersedia
+// =============================
 if (typeof tailwind !== 'undefined') {
   tailwind.config = window.TailwindConfig;
 }

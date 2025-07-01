@@ -3,15 +3,23 @@
  * Consolidated functionality for AI Chat page
  */
 
+// =============================
+// AIChatManager: Main Chat Page Controller
+// =============================
 class AIChatManager {
   constructor() {
+    // Current selected batch ID
     this.currentBatchId = null;
+    // Chat history array
     this.chatHistory = [];
+    // API base URL from global AppUtils
     this.API_BASE_URL = window.AppUtils.API_BASE_URL;
 
+    // Initialize all features
     this.init();
   }
 
+  // Initialize all main features and event listeners
   init() {
     this.checkAuthentication();
     this.setupEventListeners();
@@ -23,9 +31,9 @@ class AIChatManager {
     this.setupLoadingStates();
   }
 
-  /**
-   * Check if user is authenticated
-   */
+  // =============================
+  // Authentication Check
+  // =============================
   checkAuthentication() {
     if (!window.AppUtils.isAuthenticated()) {
       window.location.href = '/login';
@@ -33,32 +41,35 @@ class AIChatManager {
     }
   }
 
+  // =============================
+  // Setup All DOM Event Listeners
+  // =============================
   setupEventListeners() {
-    // Event listener untuk form chat
+    // Chat form submit
     const chatForm = document.getElementById('chatForm');
     if (chatForm) {
       chatForm.addEventListener('submit', e => this.handleChatSubmit(e));
     }
 
-    // Event listener untuk batch selector
+    // Batch selector change
     const batchSelector = document.getElementById('batchSelector');
     if (batchSelector) {
       batchSelector.addEventListener('change', e => this.handleBatchChange(e));
     }
 
-    // Event listener untuk deep analysis button
+    // Deep analysis button
     const deepAnalysisBtn = document.getElementById('deepAnalysisBtn');
     if (deepAnalysisBtn) {
       deepAnalysisBtn.addEventListener('click', () => this.performDeepAnalysis());
     }
 
-    // Event listener untuk clear chat
+    // Clear chat button
     const clearChatBtn = document.getElementById('clearChatBtn');
     if (clearChatBtn) {
       clearChatBtn.addEventListener('click', () => this.clearChat());
     }
 
-    // Event listener untuk logout button
+    // Logout button
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
       logoutBtn.addEventListener('click', () => {
@@ -69,9 +80,9 @@ class AIChatManager {
     }
   }
 
-  /**
-   * Load batch selector options
-   */
+  // =============================
+  // Load Batch Selector Options from API
+  // =============================
   async loadBatchSelector() {
     try {
       const response = await window.AppUtils.apiCall('/api/transactions/batches');
@@ -105,9 +116,9 @@ class AIChatManager {
     }
   }
 
-  /**
-   * Handle batch selection change
-   */
+  // =============================
+  // Handle Batch Selection Change
+  // =============================
   async handleBatchChange(e) {
     const batchId = e.target.value;
     this.currentBatchId = batchId;
@@ -121,9 +132,9 @@ class AIChatManager {
     }
   }
 
-  /**
-   * Show batch information
-   */
+  // =============================
+  // Show Selected Batch Information in Chat
+  // =============================
   async showBatchInfo(batchId) {
     try {
       const batchSelector = document.getElementById('batchSelector');
@@ -149,9 +160,9 @@ class AIChatManager {
     }
   }
 
-  /**
-   * Handle chat form submission
-   */
+  // =============================
+  // Handle Chat Form Submission
+  // =============================
   async handleChatSubmit(e) {
     e.preventDefault();
 
@@ -211,9 +222,9 @@ class AIChatManager {
     }
   }
 
-  /**
-   * Add message to chat interface
-   */
+  // =============================
+  // Add Message to Chat Interface
+  // =============================
   addMessageToChat(sender, message) {
     const chatContainer = document.getElementById('chatContainer');
     if (!chatContainer) return;
@@ -252,7 +263,7 @@ class AIChatManager {
 
     chatContainer.appendChild(messageDiv);
 
-    // Add to chat history
+    // Add to chat history (skip system messages)
     if (sender !== 'system') {
       this.chatHistory.push({ sender, message, timestamp });
     }
@@ -261,11 +272,10 @@ class AIChatManager {
     this.scrollToBottom();
   }
 
-  /**
-   * Format message content
-   */
+  // =============================
+  // Format Message Content (Markdown-like to HTML)
+  // =============================
   formatMessage(message) {
-    // Convert markdown-like formatting to HTML
     return message
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
@@ -273,9 +283,9 @@ class AIChatManager {
       .replace(/\n/g, '<br>');
   }
 
-  /**
-   * Show typing indicator
-   */
+  // =============================
+  // Show Typing Indicator in Chat
+  // =============================
   showTypingIndicator() {
     const chatContainer = document.getElementById('chatContainer');
     if (!chatContainer) return;
@@ -307,9 +317,9 @@ class AIChatManager {
     this.scrollToBottom();
   }
 
-  /**
-   * Hide typing indicator
-   */
+  // =============================
+  // Hide Typing Indicator
+  // =============================
   hideTypingIndicator() {
     const typingIndicator = document.getElementById('typing-indicator');
     if (typingIndicator) {
@@ -317,9 +327,9 @@ class AIChatManager {
     }
   }
 
-  /**
-   * Scroll chat to bottom
-   */
+  // =============================
+  // Scroll Chat to Bottom
+  // =============================
   scrollToBottom() {
     const chatContainer = document.getElementById('chatContainer');
     if (chatContainer) {
@@ -327,9 +337,9 @@ class AIChatManager {
     }
   }
 
-  /**
-   * Clear chat messages
-   */
+  // =============================
+  // Clear All Chat Messages
+  // =============================
   clearChat() {
     const chatContainer = document.getElementById('chatContainer');
     if (chatContainer) {
@@ -341,9 +351,9 @@ class AIChatManager {
     window.AppUtils.showToast('info', 'Chat history cleared');
   }
 
-  /**
-   * Enable chat interface
-   */
+  // =============================
+  // Enable Chat Input & Buttons
+  // =============================
   enableChatInterface() {
     const chatInput = document.getElementById('chatInput');
     const chatSubmit = document.getElementById('chatSubmit');
@@ -358,9 +368,9 @@ class AIChatManager {
     if (deepAnalysisBtn) deepAnalysisBtn.disabled = false;
   }
 
-  /**
-   * Disable chat interface
-   */
+  // =============================
+  // Disable Chat Input & Buttons
+  // =============================
   disableChatInterface() {
     const chatInput = document.getElementById('chatInput');
     const chatSubmit = document.getElementById('chatSubmit');
@@ -374,9 +384,9 @@ class AIChatManager {
     if (deepAnalysisBtn) deepAnalysisBtn.disabled = true;
   }
 
-  /**
-   * Perform deep analysis
-   */
+  // =============================
+  // Perform Deep Analysis (AI)
+  // =============================
   async performDeepAnalysis() {
     if (!this.currentBatchId) {
       window.AppUtils.showToast('warning', 'Pilih batch data terlebih dahulu');
@@ -390,7 +400,7 @@ class AIChatManager {
         deepAnalysisBtn.innerHTML =
           '<span class="inline-block w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2"></span>Menganalisis...';
       }
-      // PROMPT BARU: lebih profesional dan spesifik
+      // Prompt for deep analysis
       this.addMessageToChat(
         'user',
         'Sebagai AI Risk Analyst, mohon lakukan analisis risiko mendalam pada batch data ini. Identifikasi pola fraud, transaksi mencurigakan, dan berikan rekomendasi mitigasi risiko.'
@@ -457,9 +467,9 @@ class AIChatManager {
     }
   }
 
-  /**
-   * Setup quick buttons
-   */
+  // =============================
+  // Setup Quick Question Buttons
+  // =============================
   setupQuickButtons() {
     const quickButtons = document.querySelectorAll('.quick-btn');
     quickButtons.forEach(btn => {
@@ -486,9 +496,9 @@ class AIChatManager {
     });
   }
 
-  /**
-   * Setup form enhancements
-   */
+  // =============================
+  // Setup Form Enhancements (Enter to Send)
+  // =============================
   setupFormEnhancements() {
     const chatInput = document.getElementById('chatInput');
 
@@ -506,9 +516,9 @@ class AIChatManager {
     }
   }
 
-  /**
-   * Setup scroll animations
-   */
+  // =============================
+  // Setup Scroll Animations (for future use)
+  // =============================
   setupScrollAnimations() {
     const chatContainer = document.getElementById('chatContainer');
 
@@ -524,9 +534,9 @@ class AIChatManager {
     }
   }
 
-  /**
-   * Setup keyboard shortcuts
-   */
+  // =============================
+  // Setup Keyboard Shortcuts (Ctrl+K, Ctrl+L)
+  // =============================
   setupKeyboardShortcuts() {
     document.addEventListener('keydown', e => {
       // Ctrl/Cmd + K to focus on message input
@@ -546,9 +556,9 @@ class AIChatManager {
     });
   }
 
-  /**
-   * Setup loading states
-   */
+  // =============================
+  // Setup Loading State for Buttons
+  // =============================
   setupLoadingStates() {
     // Add loading state to buttons when clicked
     const buttons = document.querySelectorAll('button[type="submit"], .btn-primary');
@@ -562,9 +572,10 @@ class AIChatManager {
       });
     });
   }
-  /**
-   * Run batch analysis using AI model
-   */
+
+  // =============================
+  // Run Batch Analysis using AI Model
+  // =============================
   async runBatchAnalysis() {
     if (!this.currentBatchId) {
       window.AppUtils.showToast('warning', 'Tidak ada batch yang dipilih');
@@ -610,7 +621,9 @@ class AIChatManager {
   }
 }
 
-// Initialize when DOM is ready
+// =============================
+// Initialize Chat Manager on DOM Ready
+// =============================
 document.addEventListener('DOMContentLoaded', () => {
   window.chatManager = new AIChatManager();
 });

@@ -1,10 +1,12 @@
-/**
- * CONFIG.JS - Environment Configuration
- * Manages API URLs and other environment-specific settings
- */
+// =============================
+// CONFIG.JS - Environment Configuration
+// Mengelola URL API & setting environment
+// =============================
 
 window.AppConfig = {
-  // Determine environment based on hostname
+  // =============================
+  // Deteksi environment dari hostname
+  // =============================
   getEnvironment() {
     const hostname = window.location.hostname;
     const port = window.location.port;
@@ -18,7 +20,9 @@ window.AppConfig = {
     }
   },
 
-  // Environment-specific configurations
+  // =============================
+  // Konfigurasi per environment
+  // =============================
   environments: {
     development: {
       API_BASE_URL: 'http://localhost:3001',
@@ -37,23 +41,31 @@ window.AppConfig = {
     },
   },
 
-  // Get current configuration
+  // =============================
+  // Ambil konfigurasi environment aktif
+  // =============================
   get() {
     const env = this.getEnvironment();
     return this.environments[env];
   },
 
-  // Get API base URL for current environment
+  // =============================
+  // Ambil base URL API
+  // =============================
   getApiUrl() {
     return this.get().API_BASE_URL;
   },
 
-  // Check if debug mode is enabled
+  // =============================
+  // Cek mode debug
+  // =============================
   isDebugMode() {
     return this.get().DEBUG;
   },
 
-  // Get request timeout
+  // =============================
+  // Ambil timeout request
+  // =============================
   getTimeout() {
     return this.get().TIMEOUT;
   },

@@ -1,12 +1,15 @@
-/**
- * AUTH.JS - Authentication Handling
- * Menangani autentikasi login, register, dan logout
- */
+// =============================
+// AUTH.JS - Authentication Handling
+// Menangani autentikasi login, register, dan logout
+// =============================
 
+// =============================
+// Main Entry: Init Auth Page Based on URL
+// =============================
 document.addEventListener('DOMContentLoaded', () => {
   const currentPage = window.location.pathname;
 
-  // Initialize authentication based on current page
+  // Inisialisasi halaman autentikasi sesuai URL
   if (currentPage.includes('login.html') || currentPage.includes('login')) {
     initLoginPage();
   } else if (currentPage.includes('register.html') || currentPage.includes('register')) {
@@ -16,9 +19,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-/**
- * Initialize Login Page
- */
+// =============================
+// Inisialisasi Halaman Login
+// =============================
 function initLoginPage() {
   const loginForm = document.getElementById('login-form');
   const emailInput = document.getElementById('login-email');
@@ -27,14 +30,14 @@ function initLoginPage() {
 
   if (!loginForm) return;
 
-  // Store original button text
+  // Simpan teks asli tombol submit
   if (submitBtn) {
     submitBtn.setAttribute('data-original-text', submitBtn.innerHTML);
   }
 
-  // Add real-time form validation
+  // Validasi real-time form login
   if (emailInput && passwordInput) {
-    // Email validation on blur
+    // Validasi email saat blur
     emailInput.addEventListener('blur', () => {
       if (emailInput.value && !window.AppUtils.validateEmail(emailInput.value)) {
         emailInput.classList.add('is-invalid');
@@ -45,7 +48,7 @@ function initLoginPage() {
       }
     });
 
-    // Password validation on input
+    // Validasi password saat input
     passwordInput.addEventListener('input', () => {
       if (passwordInput.value.length > 0) {
         if (passwordInput.value.length < 6) {
@@ -58,7 +61,7 @@ function initLoginPage() {
       }
     });
 
-    // Clear validation on focus
+    // Reset validasi saat focus
     [emailInput, passwordInput].forEach(input => {
       input.addEventListener('focus', () => {
         input.classList.remove('is-invalid', 'is-valid');
@@ -66,26 +69,27 @@ function initLoginPage() {
     });
   }
 
+  // Submit login
   loginForm.addEventListener('submit', async e => {
     e.preventDefault();
 
     const email = emailInput.value.trim();
     const password = passwordInput.value.trim();
 
-    // Basic validation
+    // Validasi dasar
     if (!email || !password) {
       window.AppUtils.showToast('error', 'Email dan password harus diisi');
       return;
     }
 
-    // Email validation
+    // Validasi email
     if (!window.AppUtils.validateEmail(email)) {
       window.AppUtils.showToast('error', 'Format email tidak valid');
       return;
     }
 
     try {
-      // Disable submit button and show loading
+      // Disable tombol dan tampilkan loading
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.innerHTML =
@@ -103,11 +107,11 @@ function initLoginPage() {
       const data = await response.json();
 
       if (response.ok) {
-        // Store token
+        // Simpan token
         localStorage.setItem('token', data.token);
         window.AppUtils.showToast('success', 'Login berhasil! Mengalihkan...');
 
-        // Redirect to dashboard after short delay
+        // Redirect ke dashboard
         setTimeout(() => {
           window.location.href = '/dashboard';
         }, 1500);
@@ -119,11 +123,9 @@ function initLoginPage() {
       }
     } catch (error) {
       console.error('Login error:', error);
-
-      // Enhanced error handling with better user messages
       window.AppUtils.handleApiError(error, 'during login');
     } finally {
-      // Re-enable submit button
+      // Enable tombol kembali
       if (submitBtn) {
         submitBtn.disabled = false;
         submitBtn.innerHTML = submitBtn.getAttribute('data-original-text') || 'Sign In';
@@ -132,9 +134,9 @@ function initLoginPage() {
   });
 }
 
-/**
- * Initialize Register Page
- */
+// =============================
+// Inisialisasi Halaman Register
+// =============================
 function initRegisterPage() {
   const registerForm = document.getElementById('register-form');
   const nameInput = document.getElementById('register-name');
@@ -145,14 +147,14 @@ function initRegisterPage() {
 
   if (!registerForm) return;
 
-  // Store original button text
+  // Simpan teks asli tombol submit
   if (submitBtn) {
     submitBtn.setAttribute('data-original-text', submitBtn.innerHTML);
   }
 
-  // Add real-time form validation
+  // Validasi real-time form register
   if (nameInput && emailInput && passwordInput) {
-    // Name validation on blur
+    // Validasi nama saat blur
     nameInput.addEventListener('blur', () => {
       if (nameInput.value && nameInput.value.length < 2) {
         nameInput.classList.add('is-invalid');
@@ -163,7 +165,7 @@ function initRegisterPage() {
       }
     });
 
-    // Email validation on blur
+    // Validasi email saat blur
     emailInput.addEventListener('blur', () => {
       if (emailInput.value && !window.AppUtils.validateEmail(emailInput.value)) {
         emailInput.classList.add('is-invalid');
@@ -174,7 +176,7 @@ function initRegisterPage() {
       }
     });
 
-    // Password validation on input
+    // Validasi password saat input
     passwordInput.addEventListener('input', () => {
       if (passwordInput.value.length > 0) {
         if (passwordInput.value.length < 6) {
@@ -187,7 +189,7 @@ function initRegisterPage() {
       }
     });
 
-    // Clear validation on focus
+    // Reset validasi saat focus
     [nameInput, emailInput, passwordInput].forEach(input => {
       input.addEventListener('focus', () => {
         input.classList.remove('is-invalid', 'is-valid');
@@ -195,28 +197,29 @@ function initRegisterPage() {
     });
   }
 
+  // Submit register
   registerForm.addEventListener('submit', async e => {
     e.preventDefault();
 
     const name = nameInput.value.trim();
     const email = emailInput.value.trim();
     const password = passwordInput.value.trim();
-    // No confirm password field in the form
+    // Tidak ada field confirm password di form
     const confirmPassword = password;
 
-    // Basic validation
+    // Validasi dasar
     if (!name || !email || !password) {
       window.AppUtils.showToast('error', 'Semua field harus diisi');
       return;
     }
 
-    // Name validation
+    // Validasi nama
     if (name.length < 2) {
       window.AppUtils.showToast('error', 'Nama minimal 2 karakter');
       return;
     }
 
-    // Email validation
+    // Validasi email
     if (!window.AppUtils.validateEmail(email)) {
       window.AppUtils.showToast('error', 'Format email tidak valid');
       return;
@@ -228,7 +231,7 @@ function initRegisterPage() {
     }
 
     try {
-      // Disable submit button and show loading
+      // Disable tombol dan tampilkan loading
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.innerHTML =
@@ -248,7 +251,7 @@ function initRegisterPage() {
       if (response.ok) {
         window.AppUtils.showToast('success', 'Akun berhasil dibuat! Silakan login.');
 
-        // Redirect to login after short delay
+        // Redirect ke login
         setTimeout(() => {
           window.location.href = '/login';
         }, 2000);
@@ -260,11 +263,9 @@ function initRegisterPage() {
       }
     } catch (error) {
       console.error('Register error:', error);
-
-      // Enhanced error handling with better user messages
       window.AppUtils.handleApiError(error, 'during registration');
     } finally {
-      // Re-enable submit button
+      // Enable tombol kembali
       if (submitBtn) {
         submitBtn.disabled = false;
         submitBtn.innerHTML = submitBtn.getAttribute('data-original-text') || 'Create Account';
@@ -273,20 +274,20 @@ function initRegisterPage() {
   });
 }
 
-/**
- * Initialize Auth Success Page (Google OAuth callback)
- */
+// =============================
+// Inisialisasi Halaman Auth Success (Google OAuth Callback)
+// =============================
 function initAuthSuccessPage() {
-  // Get token from URL parameters
+  // Ambil token dari URL
   const urlParams = new URLSearchParams(window.location.search);
   const token = urlParams.get('token');
 
   if (token) {
-    // Store token
+    // Simpan token
     localStorage.setItem('token', token);
     window.AppUtils.showToast('success', 'Login berhasil! Mengalihkan ke dashboard...');
 
-    // Redirect to dashboard
+    // Redirect ke dashboard
     setTimeout(() => {
       window.location.href = '/dashboard';
     }, 2000);
@@ -298,16 +299,16 @@ function initAuthSuccessPage() {
   }
 }
 
-/**
- * Google OAuth Login Handler
- */
+// =============================
+// Google OAuth Login Handler
+// =============================
 function handleGoogleLogin() {
   window.location.href = `${window.AppUtils.API_BASE_URL}/auth/google`;
 }
 
-/**
- * Logout Handler
- */
+// =============================
+// Logout Handler
+// =============================
 function handleLogout() {
   localStorage.removeItem('token');
   window.AppUtils.showToast('success', 'Logout berhasil');
@@ -316,6 +317,6 @@ function handleLogout() {
   }, 1000);
 }
 
-// Export functions for global access
+// Ekspor fungsi ke global agar bisa dipakai di HTML
 window.handleGoogleLogin = handleGoogleLogin;
 window.handleLogout = handleLogout;

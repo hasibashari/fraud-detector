@@ -20,3 +20,11 @@ Thumbs.db
 # lainnya
 /backend/uploads
 /.vscode
+
+node_modules
+# Keep environment variables out of version control
+backend/.env
+/backend/generated/prisma
+# Prisma generated files
+/backend/prisma/
+/frontend/legacy-backup

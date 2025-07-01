@@ -118,9 +118,10 @@
                 <i class="fas fa-cloud-upload-alt mr-3 text-blue-600"></i>
                 Upload Transaction Data
               </h2>
-              <div
+              <section
                 class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 hover:bg-blue-50/50 transition-all duration-300 cursor-pointer"
                 id="uploadZone"
+                aria-label="Upload CSV File Section"
               >
                 <i class="fas fa-cloud-upload-alt text-4xl text-blue-600 mb-4"></i>
                 <h5 class="text-lg font-medium mb-2">Drag & Drop CSV File Here</h5>
@@ -153,7 +154,7 @@
                     <span id="fileName" class="text-blue-800"></span>
                   </div>
                 </div>
-              </div>
+              </section>
               <button
                 id="uploadBtn"
                 class="absolute bottom-6 right-6 bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -181,6 +182,7 @@
                     style="width: 0%"
                   ></div>
                 </div>
+                <!-- Section: Upload Progress Info -->
                 <div class="mt-2 text-xs text-gray-500">
                   <i class="fas fa-info-circle mr-1"></i>
                   Processing may take several minutes for large files

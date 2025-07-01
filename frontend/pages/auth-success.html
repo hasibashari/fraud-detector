@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Authenticating - Fraud Detection System</title>
-    
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Font Awesome -->
     <link
       rel="stylesheet"
@@ -21,22 +21,27 @@
 
     <!-- Custom Tailwind Configuration -->
     <script src="../js/tailwind-config.js"></script>
-    
+
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/main.css" />
   </head>
 
   <body class="bg-fraud-light font-inter min-h-screen">
+    <!-- SECTION: Header Auth Success -->
     <header class="bg-white shadow-sm py-6 text-center">
       <div class="max-w-4xl mx-auto px-4">
-        <a href="/" class="inline-flex items-center space-x-3 mb-2 hover:opacity-80 transition-opacity">
+        <a
+          href="/"
+          class="inline-flex items-center space-x-3 mb-2 hover:opacity-80 transition-opacity"
+        >
           <i class="fas fa-shield-alt text-2xl text-fraud-primary"></i>
           <span class="text-xl font-bold text-fraud-primary">Fraud Detection System</span>
         </a>
         <p class="text-fraud-gray">Advanced AI-Powered Transaction Monitoring</p>
       </div>
     </header>
-    
+
+    <!-- SECTION: Card Proses Autentikasi Sukses -->
     <main class="flex flex-col items-center justify-center flex-1 px-4 py-12">
       <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-md text-center">
         <div class="mb-6">
@@ -44,9 +49,10 @@
             <i class="fas fa-check text-2xl"></i>
           </div>
         </div>
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-fraud-primary mx-auto mb-4"></div>
+        <div
+          class="animate-spin rounded-full h-8 w-8 border-b-2 border-fraud-primary mx-auto mb-4"
+        ></div>
         <h4 class="text-fraud-success text-xl font-semibold mb-2">Authentication Successful!</h4>
-        </p>
         <div class="w-full bg-gray-200 rounded-full h-2">
           <div
             class="bg-fraud-primary h-2 rounded-full transition-all duration-300 progress-bar"
@@ -55,7 +61,8 @@
         </div>
       </div>
     </main>
-    
+
+    <!-- SECTION: Footer Copyright -->
     <footer class="bg-fraud-primary text-white py-6 text-center">
       <div class="max-w-4xl mx-auto px-4">
         <small>&copy; 2025 Fraud Detection System. All rights reserved.</small>

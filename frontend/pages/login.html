@@ -30,14 +30,17 @@
   <body class="bg-fraud-light font-inter min-h-screen flex items-center justify-center p-4">
     <div class="w-full max-w-md fraud-fade-in">
       <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="bg-fraud-primary text-white p-8 text-center">
+        <!-- SECTION: Header Login -->
+        <section class="bg-fraud-primary text-white p-8 text-center">
           <i class="fas fa-shield-alt text-4xl mb-4"></i>
           <h1 class="text-2xl font-bold mb-2">Welcome Back</h1>
           <p class="text-blue-100">Sign in to your fraud detection dashboard</p>
-        </div>
+        </section>
 
-        <div class="p-8">
+        <!-- SECTION: Form Login User -->
+        <section class="p-8">
           <form id="login-form" class="space-y-6" novalidate>
+            <!-- Input Email -->
             <div>
               <label for="login-email" class="block text-sm font-medium text-gray-700 mb-2">
                 <i class="fas fa-envelope mr-2 text-fraud-primary"></i>Email Address
@@ -55,6 +58,7 @@
               </div>
             </div>
 
+            <!-- Input Password -->
             <div>
               <label for="login-password" class="block text-sm font-medium text-gray-700 mb-2">
                 <i class="fas fa-lock mr-2 text-fraud-primary"></i>Password
@@ -72,6 +76,7 @@
               </div>
             </div>
 
+            <!-- SECTION: Tombol Submit Login User -->
             <button
               type="submit"
               class="w-full bg-fraud-primary text-white py-3 rounded-lg font-medium hover:bg-fraud-secondary transition-colors"
@@ -80,10 +85,12 @@
               Sign In
             </button>
 
+            <!-- SECTION: Divider Opsi Login Alternatif -->
             <div class="text-center">
               <span class="text-gray-500">or</span>
             </div>
 
+            <!-- SECTION: Tombol Login dengan Google OAuth -->
             <button
               type="button"
               class="w-full border border-red-300 text-red-600 py-3 rounded-lg font-medium hover:bg-red-50 transition-colors"
@@ -93,16 +100,17 @@
               Continue with Google
             </button>
           </form>
-        </div>
+        </section>
 
-        <div class="bg-gray-50 px-8 py-6 text-center border-t">
+        <!-- SECTION: Link ke Register Jika Belum Punya Akun -->
+        <section class="bg-gray-50 px-8 py-6 text-center border-t">
           <p class="text-gray-600">
             Don't have an account?
             <a href="/register" class="text-fraud-primary hover:text-fraud-secondary font-medium"
               >Create one here</a
             >
           </p>
-        </div>
+        </section>
       </div>
     </div>
 

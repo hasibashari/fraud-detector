@@ -1,5 +1,37 @@
 // =====================================================
-// SECTION: Import Library & Module Dependencies
+// TRANSACTION ROUTES - Fraud Detection System
+//
+// This module handles all transaction-related operations including:
+//
+// 📁 FILE OPERATIONS:
+// - CSV file upload and processing with field mapping
+// - File validation and error handling
+//
+// 🤖 AI ANALYSIS:
+// - Trigger ML model analysis via Flask API
+// - Generate AI explanations using Google Gemini
+// - Interactive AI chat about fraud patterns
+// - Deep analysis reports with recommendations
+//
+// 📊 DATA MANAGEMENT:
+// - Batch creation and management
+// - Anomaly detection results retrieval
+// - Transaction data querying with security controls
+//
+// 📤 EXPORT FEATURES:
+// - CSV download of analysis results
+// - Filtered data export capabilities
+//
+// 🔐 SECURITY:
+// - User authentication required for all operations
+// - Batch ownership verification
+// - Input validation and sanitization
+//
+// Dependencies: Prisma ORM, Multer, CSV-Parser, Axios, Google Gemini AI
+// =====================================================
+
+// =====================================================
+// SECTION: Import Dependencies
 // =====================================================
 const express = require('express');
 const multer = require('multer');
@@ -13,33 +45,60 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const router = express.Router();
 
 // =====================================================
-// SECTION: CSV Upload Configuration & Field Mapping
+// SECTION: AI Configuration (Global Gemini Setup)
 // =====================================================
-// Konfigurasi Multer untuk menyimpan file di folder 'uploads/'
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+/**
+ * Get Gemini model instance - centralized for consistency
+ * @returns {Object} Gemini model instance
+ */
+const getGeminiModel = () => {
+  return genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+};
+
+// =====================================================
+// SECTION: CSV Processing Configuration
+// =====================================================
+
+/**
+ * Multer configuration for file uploads
+ * Files are temporarily stored in 'uploads/' directory
+ */
 const upload = multer({ dest: 'uploads/' });
 
-// Mapping kolom CSV ke kolom database
+/**
+ * CSV column mapping configuration
+ * Maps various CSV column names to standardized database fields
+ * Supports multiple naming conventions for flexibility
+ */
 const MAPPER_CONFIG = {
   amount: ['transactionamount', 'amount', 'jumlah', 'nilai', 'TransactionAmount'],
   timestamp: ['transactiondate', 'timestamp', 'waktu', 'TransactionDate'],
   merchant: ['merchantid', 'merchant', 'MerchantID'],
   location: ['location', 'Location'],
   user_id: ['accountid', 'user_id', 'userid', 'AccountID'],
-  // tambahkan mapping lain jika perlu
 };
 
-// -----------------------------------------------------
-// FUNCTION: mapAndCleanRow
-// Description: Maps and cleans a single CSV row to DB fields
-// -----------------------------------------------------
+// =====================================================
+// SECTION: Utility Functions
+// =====================================================
+
+/**
+ * Maps and cleans a single CSV row to database fields
+ * @param {Object} rawRow - Raw CSV row data
+ * @returns {Object} Cleaned and mapped row data
+ */
 function mapAndCleanRow(rawRow) {
   const cleanRow = {};
-  // Normalisasi key agar lowercase dan tanpa spasi
+
+  // Normalize keys to lowercase without spaces
   const rawKeys = Object.keys(rawRow).reduce((acc, key) => {
     acc[key.toLowerCase().replace(/\s/g, '')] = rawRow[key];
     return acc;
   }, {});
-  // Mapping field dari CSV ke field database
+
+  // Map CSV fields to database fields using configuration
   for (const targetField in MAPPER_CONFIG) {
     for (const sourceField of MAPPER_CONFIG[targetField]) {
       if (rawKeys[sourceField]) {
@@ -48,48 +107,49 @@ function mapAndCleanRow(rawRow) {
       }
     }
   }
-  // Bersihkan amount (hilangkan Rp, spasi, titik, ganti koma jadi titik)
+
+  // Clean amount field (remove currency symbols, spaces, dots; replace comma with dot)
   if (cleanRow.amount) {
     let amountStr = String(cleanRow.amount)
       .replace(/Rp|\s|\./g, '')
       .replace(',', '.');
     cleanRow.amount = parseFloat(amountStr);
   }
-  // Bersihkan timestamp (ubah ke Date)
+
+  // Clean timestamp field (convert to Date object)
   if (cleanRow.timestamp) {
     cleanRow.timestamp = new Date(cleanRow.timestamp);
   }
-  // merchant dan location biarkan string
+
   return cleanRow;
 }
 
-// -----------------------------------------------------
-// FUNCTION: getGeminiExplanation
-// Description: Calls Gemini AI to generate a one-sentence explanation for an anomaly
-// -----------------------------------------------------
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
+/**
+ * Generates AI explanation for anomalous transactions using Gemini
+ * @param {Object} transaction - Transaction data with anomaly information
+ * @returns {Promise<string>} AI-generated explanation in Indonesian
+ */
 async function getGeminiExplanation(transaction) {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' }); // Menggunakan model flash yang cepat
+    const model = getGeminiModel();
 
     const prompt = `
-            Peran: Anda adalah analis risiko keuangan senior di sebuah bank di Indonesia.
-            Tugas: Analis junior saya (sebuah model machine learning) telah menandai sebuah transaksi sebagai anomali. Lihat data mentahnya dan tulis ringkasan analisis dalam SATU KALIMAT singkat dan jelas dalam Bahasa Indonesia untuk menjelaskan mengapa transaksi ini patut dicurigai.
-            Batasan: Hanya berikan satu kalimat penjelasan tersebut. Jangan ada kalimat pembuka atau penutup.
-            
-            Data Transaksi yang Mencurigakan:
-            - Jumlah Transaksi: Rp ${new Intl.NumberFormat('id-ID').format(transaction.amount)}
-            - Waktu Transaksi: ${new Date(transaction.timestamp).toLocaleString('id-ID')}
-            - Merchant: ${transaction.merchant}
-            - Lokasi: ${transaction.location}
-            - Skor Anomali: ${transaction.anomalyScore?.toFixed(3) || 'N/A'}
-            
-            Analisis berdasarkan pattern umum fraud detection:
-            - Nilai transaksi yang tidak biasa
-            - Waktu transaksi yang mencurigakan
-            - Merchant atau lokasi yang berisiko
-            - Kombinasi faktor-faktor di atas
+Peran: Anda adalah analis risiko keuangan senior di sebuah bank di Indonesia.
+Tugas: Analis junior saya (sebuah model machine learning) telah menandai sebuah transaksi sebagai anomali. Lihat data mentahnya dan tulis ringkasan analisis dalam SATU KALIMAT singkat dan jelas dalam Bahasa Indonesia untuk menjelaskan mengapa transaksi ini patut dicurigai.
+Batasan: Hanya berikan satu kalimat penjelasan tersebut. Jangan ada kalimat pembuka atau penutup.
+
+Data Transaksi yang Mencurigakan:
+- Jumlah Transaksi: Rp ${new Intl.NumberFormat('id-ID').format(transaction.amount)}
+- Waktu Transaksi: ${new Date(transaction.timestamp).toLocaleString('id-ID')}
+- Merchant: ${transaction.merchant}
+- Lokasi: ${transaction.location}
+- Skor Anomali: ${transaction.anomalyScore?.toFixed(3) || 'N/A'}
+
+Analisis berdasarkan pattern umum fraud detection:
+- Nilai transaksi yang tidak biasa
+- Waktu transaksi yang mencurigakan
+- Merchant atau lokasi yang berisiko
+- Kombinasi faktor-faktor di atas
         `;
 
     const result = await model.generateContent(prompt);
@@ -97,21 +157,21 @@ async function getGeminiExplanation(transaction) {
     const text = response.text();
     return text.trim();
   } catch (error) {
-    console.error('Error saat memanggil API Gemini:', error);
-    return 'Gagal mendapatkan analisis dari AI.'; // Fallback message
+    console.error('Error calling Gemini API:', error);
+    return 'Gagal mendapatkan analisis dari AI.';
   }
 }
 
 // =====================================================
-// ROUTE: Upload Transaksi CSV
-// @route   POST /transactions/upload
-// @desc    Upload file CSV transaksi
-// @access  Private (butuh token)
+// SECTION: File Upload & Processing Routes
 // =====================================================
+
 /**
- * @route   POST /transactions/upload
- * @desc    Upload file CSV transaksi
- * @access  Private (butuh token)
+ * @route   POST /api/transactions/upload
+ * @desc    Upload and process CSV transaction file
+ * @access  Private (requires authentication)
+ * @param   {file} file - CSV file containing transaction data
+ * @returns {Object} Upload batch information
  */
 router.post('/upload', protect, upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'File tidak diunggah.' });
@@ -231,15 +291,15 @@ router.post('/upload', protect, upload.single('file'), async (req, res) => {
 });
 
 // =====================================================
-// ROUTE: Analisis AI Batch Transaksi
-// @route   POST /api/transactions/analyze/:batchId
-// @desc    Memicu analisis AI untuk satu batch milik user yang login
-// @access  Private
+// SECTION: AI Analysis Routes
 // =====================================================
+
 /**
  * @route   POST /api/transactions/analyze/:batchId
- * @desc    Memicu analisis AI untuk satu batch milik user yang login
- * @access  Private
+ * @desc    Trigger AI analysis for a specific batch
+ * @access  Private (requires authentication)
+ * @param   {string} batchId - ID of the batch to analyze
+ * @returns {Object} Analysis results with anomaly scores
  */
 router.post('/analyze/:batchId', protect, async (req, res) => {
   const { batchId } = req.params;
@@ -287,21 +347,21 @@ router.post('/analyze/:batchId', protect, async (req, res) => {
       results: analysisResults,
     });
   } catch (error) {
-    console.error('Error saat analisis:', error.message);
+    console.error('Error during analysis:', error.message);
     res.status(500).json({ message: 'Terjadi kesalahan pada server.', error: error.message });
   }
 });
 
 // =====================================================
-// ROUTE: Ambil Anomali Batch
-// @route   GET /api/transactions/anomalies/:batchId
-// @desc    Ambil semua transaksi anomali untuk satu batch milik user yang login
-// @access  Private
+// SECTION: Data Retrieval Routes
 // =====================================================
+
 /**
  * @route   GET /api/transactions/anomalies/:batchId
- * @desc    Ambil semua transaksi anomali untuk satu batch milik user yang login
- * @access  Private
+ * @desc    Get all anomalous transactions for a specific batch
+ * @access  Private (requires authentication)
+ * @param   {string} batchId - ID of the batch
+ * @returns {Object} List of anomalies with statistics
  */
 router.get('/anomalies/:batchId', protect, async (req, res) => {
   const { batchId } = req.params;
@@ -332,21 +392,16 @@ router.get('/anomalies/:batchId', protect, async (req, res) => {
       jumlahAnomali: anomalies.length,
     });
   } catch (error) {
-    console.error('Error saat mengambil anomali:', error.message);
+    console.error('Error retrieving anomalies:', error.message);
     res.status(500).json({ message: 'Terjadi kesalahan pada server.', error: error.message });
   }
 });
 
-// =====================================================
-// ROUTE: Ambil Semua Batch User
-// @route   GET /api/transactions/batches
-// @desc    Ambil semua batch upload yang pernah ada untuk user yang login
-// @access  Private
-// =====================================================
 /**
  * @route   GET /api/transactions/batches
- * @desc    Ambil semua batch upload yang pernah ada untuk user yang login
- * @access  Private
+ * @desc    Get all upload batches for the authenticated user
+ * @access  Private (requires authentication)
+ * @returns {Array} List of batches with transaction counts and anomaly statistics
  */
 router.get('/batches', protect, async (req, res) => {
   try {
@@ -386,15 +441,15 @@ router.get('/batches', protect, async (req, res) => {
 });
 
 // =====================================================
-// ROUTE: Hapus Batch & Transaksi
-// @route   DELETE /api/transactions/batch/:batchId
-// @desc    Menghapus satu batch beserta semua transaksinya (hanya milik user yang login)
-// @access  Private
+// SECTION: Batch Management Routes
 // =====================================================
+
 /**
  * @route   DELETE /api/transactions/batch/:batchId
- * @desc    Menghapus satu batch beserta semua transaksinya (hanya milik user yang login)
- * @access  Private
+ * @desc    Delete a batch and all its transactions
+ * @access  Private (requires authentication)
+ * @param   {string} batchId - ID of the batch to delete
+ * @returns {Object} Deletion confirmation with statistics
  */
 router.delete('/batch/:batchId', protect, async (req, res) => {
   const { batchId } = req.params;
@@ -424,49 +479,55 @@ router.delete('/batch/:batchId', protect, async (req, res) => {
       // Kode error Prisma untuk 'Record to delete does not exist.'
       return res.status(404).json({ message: 'Batch tidak ditemukan.' });
     }
-    console.error('Error saat menghapus batch:', error.message);
+    console.error('Error deleting batch:', error.message);
     res.status(500).json({ message: 'Terjadi kesalahan pada server.' });
   }
 });
 
-// =====================================================
-// ROUTE: Ambil Semua Transaksi Batch
-// @route   GET /api/transactions/batch/:batchId
-// @desc    Ambil SEMUA transaksi (anomali dan normal) untuk satu batch
-// @access  Public
-// =====================================================
 /**
  * @route   GET /api/transactions/batch/:batchId
- * @desc    Ambil SEMUA transaksi (anomali dan normal) untuk satu batch
- * @access  Public
+ * @desc    Get all transactions (both normal and anomalous) for a batch
+ * @access  Private (requires authentication)
+ * @param   {string} batchId - ID of the batch
+ * @returns {Array} List of all transactions in the batch
  */
-router.get('/batch/:batchId', async (req, res) => {
+router.get('/batch/:batchId', protect, async (req, res) => {
   const { batchId } = req.params;
   try {
+    // Verify batch ownership before returning transactions
+    const batch = await prisma.uploadBatch.findFirst({
+      where: { id: batchId, userId: req.user.id },
+    });
+
+    if (!batch) {
+      return res.status(404).json({ message: 'Batch tidak ditemukan atau tidak memiliki akses.' });
+    }
+
     const transactions = await prisma.transaction.findMany({
       where: { uploadBatchId: batchId },
-      orderBy: { timestamp: 'asc' }, // atau 'desc' sesuai kebutuhan
+      orderBy: { timestamp: 'asc' },
     });
+
     if (transactions.length === 0) {
       return res.status(404).json({ message: 'Tidak ada transaksi ditemukan untuk batch ini.' });
     }
+
     res.status(200).json(transactions);
   } catch (error) {
-    console.error('Error saat mengambil transaksi batch:', error.message);
+    console.error('Error retrieving batch transactions:', error.message);
     res.status(500).json({ message: 'Terjadi kesalahan pada server.', error: error.message });
   }
 });
 
 // =====================================================
-// ROUTE: Info User Login
-// @route   GET /api/transactions/me
-// @desc    Mendapatkan informasi user yang sedang login
-// @access  Private
+// SECTION: User Information Routes
 // =====================================================
+
 /**
  * @route   GET /api/transactions/me
- * @desc    Mendapatkan informasi user yang sedang login
- * @access  Private
+ * @desc    Get current authenticated user information
+ * @access  Private (requires authentication)
+ * @returns {Object} Current user data
  */
 router.get('/me', protect, async (req, res) => {
   try {
@@ -481,15 +542,16 @@ router.get('/me', protect, async (req, res) => {
 });
 
 // =====================================================
-// ROUTE: Chat dengan AI Analyst
-// @route   POST /api/transactions/chat/:batchId
-// @desc    Chat dengan AI analyst tentang data batch yang sudah dianalisis
-// @access  Private
+// SECTION: AI-Powered Interactive Features
 // =====================================================
+
 /**
  * @route   POST /api/transactions/chat/:batchId
- * @desc    Chat dengan AI analyst tentang data batch yang sudah dianalisis
- * @access  Private
+ * @desc    Interactive AI chat about analyzed batch data
+ * @access  Private (requires authentication)
+ * @param   {string} batchId - ID of the batch to discuss
+ * @param   {string} question - User's question about the data
+ * @returns {Object} AI response with context and insights
  */
 router.post('/chat/:batchId', protect, async (req, res) => {
   const { batchId } = req.params;
@@ -567,7 +629,7 @@ LOKASI YANG SERING MUNCUL DALAM ANOMALI:
 ${[...new Set(anomalies.map(t => t.location))].slice(0, 5).join(', ')}
     `;
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const model = getGeminiModel();
 
     const prompt = `
 Peran: Anda adalah AI Risk Analyst senior di bank yang ahli dalam fraud detection dan analisis data keuangan.
@@ -602,7 +664,7 @@ JAWABAN (maksimal 500 kata):`;
       },
     });
   } catch (error) {
-    console.error('Error saat chat dengan AI:', error.message);
+    console.error('Error in AI chat:', error.message);
     res.status(500).json({
       message: 'Gagal berkomunikasi dengan AI analyst.',
       error: error.message,
@@ -610,16 +672,12 @@ JAWABAN (maksimal 500 kata):`;
   }
 });
 
-// =====================================================
-// ROUTE: Analisis Mendalam dengan AI
-// @route   POST /api/transactions/deep-analysis/:batchId
-// @desc    Mendapatkan analisis mendalam otomatis dari AI tentang pattern fraud dalam batch
-// @access  Private
-// =====================================================
 /**
  * @route   POST /api/transactions/deep-analysis/:batchId
- * @desc    Mendapatkan analisis mendalam otomatis dari AI tentang pattern fraud dalam batch
- * @access  Private
+ * @desc    Generate comprehensive automated analysis of fraud patterns
+ * @access  Private (requires authentication)
+ * @param   {string} batchId - ID of the batch to analyze deeply
+ * @returns {Object} Detailed analysis report with patterns and recommendations
  */
 router.post('/deep-analysis/:batchId', protect, async (req, res) => {
   const { batchId } = req.params;
@@ -789,7 +847,7 @@ ${anomalies
   .join('\n')}
     `;
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const model = getGeminiModel();
 
     const prompt = `
 Peran: Anda adalah Senior Risk Analyst yang mengkhususkan diri dalam fraud detection dan financial crime investigation.
@@ -846,7 +904,7 @@ Gunakan bahasa Indonesia profesional dan berikan insight yang actionable untuk r
       analysis: deepAnalysis,
     });
   } catch (error) {
-    console.error('Error saat deep analysis:', error.message);
+    console.error('Error in deep analysis:', error.message);
     res.status(500).json({
       message: 'Gagal melakukan analisis mendalam.',
       error: error.message,
@@ -854,16 +912,12 @@ Gunakan bahasa Indonesia profesional dan berikan insight yang actionable untuk r
   }
 });
 
-// =====================================================
-// ROUTE: Dapatkan Penjelasan AI untuk Anomali Spesifik
-// @route   POST /api/transactions/explain/:transactionId
-// @desc    Mendapatkan penjelasan AI untuk satu transaksi anomali spesifik
-// @access  Private
-// =====================================================
 /**
  * @route   POST /api/transactions/explain/:transactionId
- * @desc    Mendapatkan penjelasan AI untuk satu transaksi anomali spesifik
- * @access  Private
+ * @desc    Get AI explanation for a specific anomalous transaction
+ * @access  Private (requires authentication)
+ * @param   {string} transactionId - ID of the transaction to explain
+ * @returns {Object} Transaction details with AI-generated explanation
  */
 router.post('/explain/:transactionId', protect, async (req, res) => {
   const { transactionId } = req.params;
@@ -923,7 +977,7 @@ router.post('/explain/:transactionId', protect, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Error saat mendapatkan penjelasan:', error.message);
+    console.error('Error getting explanation:', error.message);
     res.status(500).json({
       message: 'Gagal mendapatkan penjelasan AI.',
       error: error.message,
@@ -932,15 +986,15 @@ router.post('/explain/:transactionId', protect, async (req, res) => {
 });
 
 // =====================================================
-// ROUTE: Download Hasil Batch (CSV)
-// @route   GET /api/transactions/download/:batchId
-// @desc    Download hasil batch dalam format CSV
-// @access  Private
+// SECTION: Export & Download Routes
 // =====================================================
+
 /**
  * @route   GET /api/transactions/download/:batchId
- * @desc    Download hasil batch dalam format CSV
- * @access  Private
+ * @desc    Download batch results in CSV format
+ * @access  Private (requires authentication)
+ * @param   {string} batchId - ID of the batch to download
+ * @returns {file} CSV file with transaction data and analysis results
  */
 router.get('/download/:batchId', protect, async (req, res) => {
   const { batchId } = req.params;
@@ -979,12 +1033,12 @@ router.get('/download/:batchId', protect, async (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename=fraud_results_${batchId}.csv`);
     res.status(200).send(csv);
   } catch (error) {
-    console.error('Error saat download batch:', error.message);
+    console.error('Error downloading batch:', error.message);
     res.status(500).json({ message: 'Gagal mengunduh hasil batch.', error: error.message });
   }
 });
 
 // =====================================================
-// SECTION: Export Router
+// SECTION: Module Export
 // =====================================================
 module.exports = router;

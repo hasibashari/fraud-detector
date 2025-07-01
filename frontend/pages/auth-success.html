@@ -3,25 +3,103 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Authenticating...</title>
+    <title>Authenticating - Fraud Detection System</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Custom Tailwind Configuration -->
+    <script src="../js/tailwind-config.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/main.css">
   </head>
 
-  <body>
-    <p>Login berhasil! Mengalihkan Anda ke dashboard...</p>
+  <body class="bg-fraud-light font-inter min-h-screen">
+    <header class="bg-white shadow-sm py-6 text-center">
+      <div class="max-w-4xl mx-auto px-4">
+        <a href="/" class="inline-flex items-center space-x-3 mb-2 hover:opacity-80 transition-opacity">
+          <i class="fas fa-shield-alt text-2xl text-fraud-primary"></i>
+          <span class="text-xl font-bold text-fraud-primary">Fraud Detection System</span>
+        </a>
+        <p class="text-fraud-gray">Advanced AI-Powered Transaction Monitoring</p>
+      </div>
+    </header>
+    
+    <main class="flex flex-col items-center justify-center flex-1 px-4 py-12">
+      <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-md text-center">
+        <div class="mb-6">
+          <div class="bg-fraud-success text-white rounded-full p-4 inline-flex mb-4">
+            <i class="fas fa-check text-2xl"></i>
+          </div>
+        </div>
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-fraud-primary mx-auto mb-4"></div>
+        <h4 class="text-fraud-success text-xl font-semibold mb-2">Authentication Successful!</h4>
+        </p>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div
+            class="bg-fraud-primary h-2 rounded-full transition-all duration-300 progress-bar"
+            style="width: 0%"
+          ></div>
+        </div>
+      </div>
+    </main>
+    
+    <footer class="bg-fraud-primary text-white py-6 text-center">
+      <div class="max-w-4xl mx-auto px-4">
+        <small>&copy; 2025 Fraud Detection System. All rights reserved.</small>
+      </div>
+    </footer>
 
+    <!-- JavaScript -->
+    <script src="../js/main.js"></script>
     <script>
-      // Ambil token dari URL
-      const token = new URLSearchParams(window.location.search).get('token');
+      // Handle OAuth success redirect
+      document.addEventListener('DOMContentLoaded', () => {
+        // Get token from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        const progressBar = document.querySelector('.progress-bar');
 
-      if (token) {
-        // Simpan token ke localStorage
-        localStorage.setItem('token', token);
-        // Alihkan ke halaman dashboard
-        window.location.href = '/dashboard';
-      } else {
-        // Jika token tidak ada, alihkan ke halaman login
-        window.location.href = '/login';
-      }
+        // Animate progress bar
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += 2;
+          progressBar.style.width = progress + '%';
+          if (progress >= 100) {
+            clearInterval(interval);
+          }
+        }, 30);
+
+        if (token) {
+          // Save token to localStorage
+          localStorage.setItem('token', token);
+
+          // Redirect to dashboard after a short delay
+          setTimeout(() => {
+            window.location.href = '/dashboard';
+          }, 1500);
+        } else {
+          // If no token, redirect to login
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 1500);
+        }
+      });
     </script>
+
+    <!-- JavaScript -->
+    <script src="../js/config.js"></script>
   </body>
 </html>

@@ -419,9 +419,9 @@ class AIChatManager {
             'assistant',
             `
             <div class="rounded-lg bg-yellow-50 border border-yellow-300 p-4">
-              <h6 class="flex items-center font-semibold text-yellow-800 mb-2"><i class="fas fa-exclamation-triangle mr-2"></i>Batch Belum Dianalisis</h6>
-              <div>${response.analysis.replace(/\n/g, '<br>')}</div>
-              <hr class="my-2">
+              <h6 class="flex items-center font-semibold text-yellow-800 mb-3"><i class="fas fa-exclamation-triangle mr-2"></i>Batch Belum Dianalisis</h6>
+              <div>${response.analysis}</div>
+              <hr class="my-3">
               <button class="bg-blue-600 text-white rounded-md px-3 py-1 text-sm font-medium hover:bg-blue-700 transition mt-2" onclick="chatManager.runBatchAnalysis()">
                 <i class="fas fa-brain mr-1"></i>Jalankan Analisis AI Sekarang
               </button>
@@ -433,8 +433,8 @@ class AIChatManager {
             'assistant',
             `
             <div class="analysis-result">
-              <h6 class="flex items-center font-semibold text-blue-800 mb-2"><i class="fas fa-chart-line mr-2"></i>Hasil Analisis Mendalam</h6>
-              <div class="analysis-content">${response.analysis.replace(/\n/g, '<br>')}</div>
+              <h6 class="flex items-center font-semibold text-blue-800 mb-3"><i class="fas fa-chart-line mr-2"></i>Hasil Analisis Mendalam</h6>
+              <div class="analysis-content">${response.analysis}</div>
             </div>
           `
           );

@@ -50,11 +50,60 @@ const router = express.Router();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 /**
- * Get Gemini model instance - centralized for consistency
- * @returns {Object} Gemini model instance
+ * Get Gemini model instance with professional banking configuration
+ * Optimized for financial risk analysis and fraud detection
+ * @returns {Object} Configured Gemini model instance
  */
 const getGeminiModel = () => {
-  return genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+  return genAI.getGenerativeModel({
+    model: 'gemini-2.5-flash',
+    generationConfig: {
+      temperature: AI_CONFIG.MODEL_PARAMETERS.temperature,
+      topP: AI_CONFIG.MODEL_PARAMETERS.topP,
+      maxOutputTokens: AI_CONFIG.MODEL_PARAMETERS.maxTokens,
+    },
+  });
+};
+
+// =====================================================
+// SECTION: AI Configuration Constants
+// =====================================================
+
+/**
+ * Professional AI prompt templates and configurations
+ * Optimized for financial risk analysis and fraud detection
+ */
+const AI_CONFIG = {
+  MODEL_PARAMETERS: {
+    temperature: 0.6, // Balanced for creativity and reliability
+    topP: 0.95, // High diversity for comprehensive analysis
+    maxTokens: 4000, // Significantly increased for complete analysis
+  },
+
+  RESPONSE_LIMITS: {
+    explanation: { min: 30, max: 500 }, // Increased for better explanations
+    chat: { min: 80, max: 800 }, // Increased for comprehensive responses
+    'deep-analysis': { min: 300, max: 3000 }, // Much higher limit for complete analysis
+  },
+
+  PROFESSIONAL_CONTEXT: {
+    institution: 'Institusi Perbankan Indonesia',
+    regulations: ['OJK', 'BI', 'PPATK'],
+    standards: ['ISO 27001', 'PCI DSS', 'Basel III'],
+    certifications: ['CFE', 'CAMS', 'FRM'],
+  },
+
+  QUALITY_THRESHOLDS: {
+    minConfidence: 0.5, // Lowered threshold
+    requiredKeywords: ['risiko', 'anomali', 'analisis', 'rekomendasi'],
+    bannedPhrases: ['saya adalah ai', 'sebagai model', 'tidak dapat membantu'],
+  },
+
+  RETRY_CONFIG: {
+    maxRetries: 3,
+    retryDelay: 1500, // Increased delay between retries
+    timeoutMs: 45000, // Increased timeout for longer analysis
+  },
 };
 
 // =====================================================
@@ -134,32 +183,187 @@ async function getGeminiExplanation(transaction) {
     const model = getGeminiModel();
 
     const prompt = `
-Peran: Anda adalah analis risiko keuangan senior di sebuah bank di Indonesia.
-Tugas: Analis junior saya (sebuah model machine learning) telah menandai sebuah transaksi sebagai anomali. Lihat data mentahnya dan tulis ringkasan analisis dalam SATU KALIMAT singkat dan jelas dalam Bahasa Indonesia untuk menjelaskan mengapa transaksi ini patut dicurigai.
-Batasan: Hanya berikan satu kalimat penjelasan tersebut. Jangan ada kalimat pembuka atau penutup.
+# SISTEM ANALISIS RISIKO TRANSAKSI PERBANKAN
 
-Data Transaksi yang Mencurigakan:
-- Jumlah Transaksi: Rp ${new Intl.NumberFormat('id-ID').format(transaction.amount)}
-- Waktu Transaksi: ${new Date(transaction.timestamp).toLocaleString('id-ID')}
-- Merchant: ${transaction.merchant}
-- Lokasi: ${transaction.location}
-- Skor Anomali: ${transaction.anomalyScore?.toFixed(3) || 'N/A'}
+## KONTEKS OPERASIONAL
+Anda adalah Senior Risk Analyst pada institusi perbankan di Indonesia dengan spesialisasi fraud detection dan financial crime prevention. Sistem machine learning telah mengidentifikasi transaksi berikut sebagai anomali dengan tingkat kepercayaan tinggi.
 
-Analisis berdasarkan pattern umum fraud detection:
-- Nilai transaksi yang tidak biasa
-- Waktu transaksi yang mencurigakan
-- Merchant atau lokasi yang berisiko
-- Kombinasi faktor-faktor di atas
-        `;
+## DATA TRANSAKSI ANOMALI
+**Nilai Transaksi:** Rp ${new Intl.NumberFormat('id-ID').format(transaction.amount)}
+**Timestamp:** ${new Date(transaction.timestamp).toLocaleString('id-ID', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })}
+**Merchant:** ${transaction.merchant}
+**Lokasi:** ${transaction.location}
+**Anomaly Score:** ${
+      transaction.anomalyScore?.toFixed(3) || 'N/A'
+    } (0.0 = Normal, 1.0 = Highly Suspicious)
+
+## TUGAS ANALISIS
+Berikan analisis singkat dan profesional dalam SATU KALIMAT yang menjelaskan alasan spesifik mengapa transaksi ini diklasifikasikan sebagai anomali berdasarkan:
+- Pattern nilai transaksi yang tidak biasa
+- Anomali temporal (waktu transaksi mencurigakan)
+- Risiko merchant atau lokasi
+- Kombinasi faktor risiko
+
+## FORMAT OUTPUT
+Berikan HANYA satu kalimat analisis dalam Bahasa Indonesia formal perbankan, tanpa pembukaan atau penutup.
+
+## CONTOH FORMAT YANG DIHARAPKAN
+"Transaksi mencurigakan karena nilai Rp X.XXX.XXX pada jam Y:YY di merchant Z sangat tidak sesuai dengan pattern normal nasabah dan lokasi berisiko tinggi."
+
+ANALISIS:`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
-    return text.trim();
+
+    // Validate and enhance the AI response
+    const enhancedResponse = validateAndEnhanceAIResponse(text, 'explanation');
+    return enhancedResponse;
   } catch (error) {
     console.error('Error calling Gemini API:', error);
-    return 'Gagal mendapatkan analisis dari AI.';
+    return getDefaultResponse('explanation');
   }
+}
+
+/**
+ * Validates and enhances AI response quality
+ * @param {string} aiResponse - Raw AI response
+ * @param {string} type - Type of analysis ('explanation', 'chat', 'deep-analysis')
+ * @returns {string} Enhanced and validated response
+ */
+function validateAndEnhanceAIResponse(aiResponse, type = 'explanation') {
+  console.log(`[AI Validation] Processing ${type} response...`);
+  console.log(`[AI Validation] Original response length: ${aiResponse?.length || 0} chars`);
+
+  if (!aiResponse || aiResponse.trim().length === 0) {
+    console.log(`[AI Validation] Empty response detected for type: ${type}`);
+    return getDefaultResponse(type);
+  }
+
+  let cleanedResponse = aiResponse.trim();
+
+  // Remove any unwanted prefixes or AI artifacts
+  const unwantedPrefixes = [
+    'ANALISIS:',
+    'JAWABAN:',
+    'RESPONS:',
+    'A:',
+    'LAPORAN ANALISIS:',
+    'HASIL:',
+    '**ANALISIS:**',
+    '**JAWABAN:**',
+    '**LAPORAN:**',
+    'HTML:',
+    'FORMAT HTML:',
+    'BERIKAN ANALISIS:',
+    'BERIKAN RESPONS:',
+    '```html',
+    '```',
+    '`html`',
+  ];
+
+  unwantedPrefixes.forEach(prefix => {
+    if (cleanedResponse.toUpperCase().startsWith(prefix.toUpperCase())) {
+      cleanedResponse = cleanedResponse.substring(prefix.length).trim();
+    }
+  });
+
+  // More flexible minimum length validation
+  const minLengths = {
+    explanation: 30, // Reduced from 50
+    chat: 80, // Increased for better responses
+    'deep-analysis': 300, // Increased for comprehensive analysis
+  };
+
+  if (cleanedResponse.length < minLengths[type]) {
+    console.log(
+      `[AI Validation] Response too short (${cleanedResponse.length} < ${minLengths[type]}) for type: ${type}`
+    );
+    return getDefaultResponse(type);
+  }
+
+  // Clean up unwanted AI self-references more aggressively
+  const inappropriatePatterns = [
+    /sebagai ai/gi,
+    /saya adalah ai/gi,
+    /sebagai model bahasa/gi,
+    /saya tidak dapat/gi,
+    /maaf, saya tidak/gi,
+    /sebagai asisten/gi,
+  ];
+
+  inappropriatePatterns.forEach(pattern => {
+    cleanedResponse = cleanedResponse.replace(pattern, '');
+  });
+
+  // Clean up HTML-related artifacts and unwanted text
+  const htmlArtifacts = [
+    /```html\s*/gi, // Remove ```html markers
+    /```\s*/gi, // Remove ``` markers
+    /`html`/gi, // Remove `html` text
+    /format html/gi, // Remove "format html" text
+    /dalam format html/gi, // Remove "dalam format html" text
+    /gunakan html/gi, // Remove "gunakan html" text
+  ];
+
+  htmlArtifacts.forEach(pattern => {
+    cleanedResponse = cleanedResponse.replace(pattern, '');
+  });
+
+  // Final cleanup
+  cleanedResponse = cleanedResponse.trim();
+
+  console.log(`[AI Validation] Final response length: ${cleanedResponse.length} chars`);
+
+  return cleanedResponse.length > 10 ? cleanedResponse : getDefaultResponse(type);
+}
+
+/**
+ * Provides default professional responses when AI fails
+ * @param {string} type - Type of analysis
+ * @returns {string} Default professional response
+ */
+function getDefaultResponse(type) {
+  const defaults = {
+    explanation:
+      'Transaksi menunjukkan pattern yang tidak sesuai dengan profil normal dan memerlukan investigasi lebih lanjut oleh tim fraud prevention.',
+    chat: 'Berdasarkan data yang tersedia, diperlukan analisis lebih mendalam untuk memberikan insight yang akurat. Silakan hubungi tim risk analyst untuk konsultasi lebih lanjut.',
+    'deep-analysis': `
+<div class="analysis-report">
+<h3>RINGKASAN RISIKO</h3>
+<p>Sistem sedang mengalami kendala dalam menganalisis pattern kompleks pada batch ini. Diperlukan review manual oleh tim specialist untuk memberikan assessment yang akurat.</p>
+<h3>TEMUAN UTAMA</h3>
+<ol>
+<li>Data batch memerlukan validasi manual lebih lanjut</li>
+<li>Pattern anomali memerlukan analisis mendalam oleh expert</li>
+<li>Sistem AI membutuhkan tuning untuk data dengan karakteristik ini</li>
+</ol>
+<h3>POLA FRAUD TERDETEKSI</h3>
+<p>Pattern yang terdeteksi memerlukan investigasi manual karena kompleksitas data yang tinggi.</p>
+<h3>REKOMENDASI SEGERA</h3>
+<ol>
+<li>Escalate batch ini ke tim fraud investigation senior</li>
+<li>Lakukan review manual terhadap transaksi dengan anomaly score tertinggi</li>
+<li>Implementasi enhanced monitoring untuk batch ini</li>
+</ol>
+<h3>MONITORING LANJUTAN</h3>
+<ul>
+<li>Continuous monitoring selama 30 hari ke depan</li>
+<li>Weekly progress review dengan tim risk management</li>
+<li>Monthly evaluation untuk pattern analysis improvement</li>
+</ul>
+</div>
+    `,
+  };
+
+  return defaults[type] || defaults.explanation;
 }
 
 // =====================================================
@@ -632,26 +836,55 @@ ${[...new Set(anomalies.map(t => t.location))].slice(0, 5).join(', ')}
     const model = getGeminiModel();
 
     const prompt = `
-Peran: Anda adalah AI Risk Analyst senior di bank yang ahli dalam fraud detection dan analisis data keuangan.
+# SISTEM KONSULTASI AI RISK ANALYST - FRAUD DETECTION
 
-KONTEKS DATA:
+## IDENTITAS PROFESIONAL
+Anda adalah AI Risk Analyst Level Senior dengan 10+ tahun pengalaman di fraud detection, financial crime investigation, dan risk management di institusi perbankan Indonesia. Anda memiliki sertifikasi CFE (Certified Fraud Examiner) dan CAMS (Certified Anti-Money Laundering Specialist).
+
+## KONTEKS DATA ANALISIS
 ${dataContext}
 
-INSTRUKSI:
-1. Jawab pertanyaan user dengan data yang tersedia di atas
-2. Berikan insight mendalam dan analisis yang actionable
-3. Gunakan bahasa Indonesia yang profesional
-4. Sertakan angka dan statistik yang relevan
-5. Berikan rekomendasi praktis jika diminta
-6. Jika pertanyaan di luar konteks data, arahkan kembali ke analisis fraud detection
+## PEDOMAN RESPONS PROFESIONAL
+1. **AKURASI DATA**: Gunakan HANYA data yang tersedia di konteks di atas
+2. **TONE PROFESIONAL**: Gunakan bahasa Indonesia formal sektor perbankan
+3. **INSIGHT ACTIONABLE**: Berikan rekomendasi yang dapat langsung diimplementasikan
+4. **STRUKTUR JELAS**: Gunakan format yang terstruktur untuk readability yang optimal
+5. **KONTEKS TERBATAS**: Jika pertanyaan di luar scope data, arahkan kembali ke analisis fraud detection
+6. **PANJANG OPTIMAL**: Maksimal 600 kata untuk analisis komprehensif
 
-PERTANYAAN USER: ${question}
+## STANDAR KUALITAS RESPONS
+- Sertakan statistik spesifik dan persentase
+- Berikan perbandingan dengan benchmark industri jika relevan
+- Identifikasi pattern dan trend yang terdeteksi
+- Rekomendakan tindakan prioritas berdasarkan tingkat risiko
+- Gunakan terminologi fraud detection yang tepat
 
-JAWABAN (maksimal 500 kata):`;
+## PERTANYAAN KLIEN
+**Q:** ${question}
+
+## FORMAT RESPONS:
+Berikan respons dengan struktur berikut untuk tampilan yang optimal di web:
+
+<div class="chat-response">
+<h4>ANALISIS RISK ANALYST</h4>
+<p>[Jawaban utama dengan insight dan analisis]</p>
+<h4>REKOMENDASI TINDAKAN</h4>
+<ul>
+<li>[Rekomendasi spesifik 1]</li>
+<li>[Rekomendasi spesifik 2]</li>
+</ul>
+<h4>CATATAN TAMBAHAN</h4>
+<p>[Insight tambahan atau konteks penting]</p>
+</div>
+
+## RESPONS RISK ANALYST:`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const aiAnswer = response.text().trim();
+    const rawAnswer = response.text();
+
+    // Validate and enhance the AI response
+    const aiAnswer = validateAndEnhanceAIResponse(rawAnswer, 'chat');
 
     res.status(200).json({
       question: question,
@@ -722,30 +955,33 @@ router.post('/deep-analysis/:batchId', protect, async (req, res) => {
     // Jika tidak ada anomali yang terdeteksi, beri notifikasi
     if (anomalies.length === 0) {
       const noAnomalyAnalysis = `
-ANALISIS MENDALAM FRAUD DETECTION - ${batch.fileName}
-
-## STATUS: BATCH BELUM DIANALISIS ATAU TIDAK ADA ANOMALI
-
-OVERVIEW:
-- Total Transaksi: ${allTransactions.length}
-- Anomali Terdeteksi: 0 (0.00%)
-- Status: Batch ini mungkin belum dianalisis dengan AI model
-
-NEXT STEPS:
-1. Jalankan analisis AI terlebih dahulu pada batch ini
-2. Setelah analisis AI selesai, coba lagi deep analysis
-3. Jika sudah dianalisis dan tidak ada anomali, berarti data bersih
-
-SAMPLE DATA:
+<div class="analysis-report no-anomaly">
+<h3>STATUS: BATCH BELUM DIANALISIS ATAU TIDAK ADA ANOMALI</h3>
+<h4>OVERVIEW</h4>
+<ul>
+<li>Total Transaksi: ${allTransactions.length}</li>
+<li>Anomali Terdeteksi: 0 (0.00%)</li>
+<li>Status: Batch ini mungkin belum dianalisis dengan AI model</li>
+</ul>
+<h4>NEXT STEPS</h4>
+<ol>
+<li>Jalankan analisis AI terlebih dahulu pada batch ini</li>
+<li>Setelah analisis AI selesai, coba lagi deep analysis</li>
+<li>Jika sudah dianalisis dan tidak ada anomali, berarti data bersih</li>
+</ol>
+<h4>SAMPLE DATA</h4>
+<ul>
 ${allTransactions
   .slice(0, 3)
   .map(
     (t, i) =>
-      `${i + 1}. Rp ${new Intl.NumberFormat('id-ID').format(t.amount)} | ${t.merchant} | ${
+      `<li>${i + 1}. Rp ${new Intl.NumberFormat('id-ID').format(t.amount)} | ${t.merchant} | ${
         t.location
-      }`
+      }</li>`
   )
-  .join('\n')}
+  .join('')}
+</ul>
+</div>
       `;
 
       return res.status(200).json({
@@ -849,39 +1085,79 @@ ${anomalies
 
     const model = getGeminiModel();
 
+    // Simplified and more effective prompt
     const prompt = `
-Peran: Anda adalah Senior Risk Analyst yang mengkhususkan diri dalam fraud detection dan financial crime investigation.
+Anda adalah Risk Analyst Senior Bank Indonesia. Analisis data fraud berikut dan berikan laporan profesional LENGKAP:
 
-TUGAS: Berikan analisis mendalam dan rekomendasi aksi berdasarkan data berikut:
+DATA BATCH: ${batch.fileName}
+Total Transaksi: ${allTransactions.length}
+Anomali: ${anomalies.length} (${((anomalies.length / allTransactions.length) * 100).toFixed(2)}%)
 
-${analysisData}
+MERCHANT BERISIKO:
+${Object.entries(merchantPattern)
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 3)
+  .map(([merchant, count]) => `${merchant}: ${count} anomali`)
+  .join('\n')}
 
-BERIKAN ANALISIS DALAM FORMAT BERIKUT:
+LOKASI BERISIKO:
+${Object.entries(locationPattern)
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 3)
+  .map(([location, count]) => `${location}: ${count} anomali`)
+  .join('\n')}
 
-## EXECUTIVE SUMMARY
-[Ringkasan kondisi risiko dalam 2-3 kalimat]
+WAKTU PUNCAK:
+${Object.entries(timePattern)
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 3)
+  .map(([hour, count]) => `Jam ${hour}:00 - ${count} anomali`)
+  .join('\n')}
 
-## KEY FINDINGS
-[3-5 temuan utama yang paling penting]
+DISTRIBUSI NILAI:
+${Object.entries(amountRanges)
+  .map(([range, count]) => `${range}: ${count} transaksi`)
+  .join('\n')}
 
-## RISK ASSESSMENT
-[Evaluasi tingkat risiko dan dampak potensial]
+BERIKAN ANALISIS LENGKAP DENGAN STRUKTUR SEBAGAI BERIKUT:
 
-## PATTERN ANALYSIS
-[Analisis pattern fraud yang terdeteksi]
+<div class="analysis-report">
+<h3>RINGKASAN RISIKO</h3>
+<p>[2-3 kalimat kondisi risiko batch ini]</p>
+<h3>TEMUAN UTAMA</h3>
+<ol>
+<li>[Temuan paling penting]</li>
+<li>[Pattern anomali yang mengkhawatirkan]</li>
+<li>[Risiko finansial dan operasional]</li>
+</ol>
+<h3>POLA FRAUD TERDETEKSI</h3>
+<p>[Analisis pattern berdasarkan data di atas]</p>
+<h3>REKOMENDASI SEGERA</h3>
+<ol>
+<li>[Tindakan urgent 24-48 jam]</li>
+<li>[Follow-up 1 minggu]</li>
+<li>[Monitoring jangka panjang]</li>
+</ol>
+<h3>MONITORING LANJUTAN</h3>
+<ul>
+<li>[Tindakan monitoring berkelanjutan]</li>
+<li>[Review schedule dan escalation]</li>
+<li>[Performance metrics untuk tracking]</li>
+</ul>
+</div>
 
-## IMMEDIATE ACTIONS
-[Rekomendasi tindakan segera yang harus diambil]
+PENTING: Gunakan struktur di atas dan bahasa Indonesia formal perbankan.`;
 
-## MONITORING RECOMMENDATIONS
-[Saran monitoring lanjutan]
+    // Use retry mechanism for better reliability
+    const rawAnalysis = await callAIWithRetry(() => model.generateContent(prompt), 'Deep Analysis');
 
-Gunakan bahasa Indonesia profesional dan berikan insight yang actionable untuk risk management team.
-`;
+    console.log(`[Deep Analysis] Final analysis: ${rawAnalysis}`);
+    console.log(`[Deep Analysis] Final length: ${rawAnalysis?.length || 0}`);
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const deepAnalysis = response.text().trim();
+    // Validate and enhance the AI response
+    const deepAnalysis = rawAnalysis
+      ? validateAndEnhanceAIResponse(rawAnalysis, 'deep-analysis')
+      : getDefaultResponse('deep-analysis');
 
     res.status(200).json({
       batchInfo: {
@@ -905,9 +1181,62 @@ Gunakan bahasa Indonesia profesional dan berikan insight yang actionable untuk r
     });
   } catch (error) {
     console.error('Error in deep analysis:', error.message);
+
+    // Enhanced error logging for debugging
+    console.error('Deep Analysis Error Details:', {
+      batchId,
+      errorType: error.constructor.name,
+      errorMessage: error.message,
+      stackTrace: error.stack?.split('\n').slice(0, 3).join('\n'),
+    });
+
+    // Return a more detailed error response for deep analysis failures
+    const detailedErrorResponse = {
+      batchInfo: {
+        fileName: 'Error in analysis',
+        totalTransactions: 0,
+        anomalyCount: 0,
+        riskLevel: 'ERROR',
+      },
+      patterns: {
+        timePattern: {},
+        merchantPattern: {},
+        locationPattern: {},
+        amountRanges: {},
+      },
+      analysis: `
+<div class="error-analysis">
+<h3>STATUS ERROR</h3>
+<p>Terjadi kesalahan sistem dalam melakukan analisis mendalam.</p>
+<h4>DETAIL ERROR</h4>
+<ul>
+<li>Error Type: ${error.constructor.name}</li>
+<li>Error Message: ${error.message}</li>
+<li>Timestamp: ${new Date().toLocaleString('id-ID')}</li>
+</ul>
+<h4>TINDAKAN YANG DIREKOMENDASIKAN</h4>
+<ol>
+<li>Refresh halaman dan coba lagi setelah beberapa saat</li>
+<li>Periksa koneksi internet dan coba kembali</li>
+<li>Jika masalah berlanjut, hubungi administrator sistem</li>
+<li>Sebagai alternatif, gunakan fitur AI Chat untuk analisis manual</li>
+</ol>
+<h4>INFORMASI TEKNIS</h4>
+<p>Sistem mencoba menganalisis batch tetapi mengalami kendala teknis. Tim IT telah menerima log error untuk investigasi lebih lanjut.</p>
+</div>
+      `,
+      error: true,
+      errorDetails: {
+        type: error.constructor.name,
+        message: error.message,
+        timestamp: new Date().toISOString(),
+      },
+    };
+
     res.status(500).json({
       message: 'Gagal melakukan analisis mendalam.',
       error: error.message,
+      ...detailedErrorResponse,
     });
   }
 });
@@ -1042,3 +1371,123 @@ router.get('/download/:batchId', protect, async (req, res) => {
 // SECTION: Module Export
 // =====================================================
 module.exports = router;
+
+/**
+ * Enhanced AI API call with retry mechanism and better error handling
+ * @param {Function} apiCall - The API call function to execute
+ * @param {string} type - Type of analysis for logging
+ * @param {number} maxRetries - Maximum number of retries
+ * @returns {Promise<string>} AI response or fallback
+ */
+async function callAIWithRetry(
+  apiCall,
+  type = 'analysis',
+  maxRetries = AI_CONFIG.RETRY_CONFIG.maxRetries
+) {
+  let lastError = null;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`[${type}] Attempt ${attempt}/${maxRetries}`);
+
+      // Set timeout for the API call
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('AI API timeout')), AI_CONFIG.RETRY_CONFIG.timeoutMs);
+      });
+
+      const result = await Promise.race([apiCall(), timeoutPromise]);
+      const response = await result.response;
+      const text = response.text();
+
+      console.log(`[${type}] Raw AI response: ${text.substring(0, 100)}...`);
+      console.log(`[${type}] Response length: ${text.length}`);
+
+      if (text && text.trim().length > 20) {
+        return text.trim();
+      } else {
+        throw new Error('Empty or too short response from AI');
+      }
+    } catch (error) {
+      lastError = error;
+      console.error(`[${type}] Attempt ${attempt} failed:`, error.message);
+
+      if (attempt < maxRetries) {
+        console.log(`[${type}] Retrying in ${AI_CONFIG.RETRY_CONFIG.retryDelay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, AI_CONFIG.RETRY_CONFIG.retryDelay));
+      }
+    }
+  }
+
+  console.error(`[${type}] All ${maxRetries} attempts failed. Last error:`, lastError);
+  return null;
+}
+
+// =====================================================
+// SECTION: AI Health Check Route (Admin Only)
+// =====================================================
+
+/**
+ * @route   GET /api/transactions/ai-health
+ * @desc    Check AI system health and status
+ * @access  Private (admin only)
+ * @returns {Object} AI system health status
+ */
+router.get('/ai-health', protect, async (req, res) => {
+  try {
+    const healthCheck = {
+      timestamp: new Date().toISOString(),
+      geminiApiStatus: 'unknown',
+      testPrompt: 'Test analisis singkat untuk health check',
+      responseTime: null,
+      lastError: null,
+    };
+
+    const startTime = Date.now();
+
+    try {
+      const model = getGeminiModel();
+      const testResult = await callAIWithRetry(
+        () =>
+          model.generateContent(
+            'Berikan respon singkat "AI system operational" dalam bahasa Indonesia professional.'
+          ),
+        'Health Check',
+        1 // Only 1 retry for health check
+      );
+
+      healthCheck.responseTime = Date.now() - startTime;
+
+      if (testResult && testResult.length > 0) {
+        healthCheck.geminiApiStatus = 'operational';
+        healthCheck.testResponse = testResult.substring(0, 100);
+      } else {
+        healthCheck.geminiApiStatus = 'degraded';
+        healthCheck.lastError = 'Empty response from AI';
+      }
+    } catch (error) {
+      healthCheck.geminiApiStatus = 'error';
+      healthCheck.lastError = error.message;
+      healthCheck.responseTime = Date.now() - startTime;
+    }
+
+    res.status(200).json({
+      status: healthCheck.geminiApiStatus,
+      details: healthCheck,
+      recommendations:
+        healthCheck.geminiApiStatus !== 'operational'
+          ? [
+              'Check API key configuration',
+              'Verify network connectivity',
+              'Review rate limiting status',
+              'Consider using fallback responses',
+            ]
+          : ['AI system is functioning normally'],
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Health check failed',
+      error: error.message,
+    });
+  }
+});

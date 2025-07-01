@@ -30,6 +30,70 @@
    ESSENTIAL CUSTOM STYLES (Hanya yang tidak bisa dengan Tailwind)
    ============================= */
 
+/* Analysis Report Styling */
+.analysis-result .analysis-content h3 {
+    font-weight: bold;
+    font-size: 1.125rem;
+    color: #1e3a8a;
+    margin: 1rem 0 0.5rem 0;
+    padding: 0.5rem 0;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.analysis-result .analysis-content h4 {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #1d4ed8;
+    margin: 0.75rem 0 0.25rem 0;
+}
+
+.analysis-result .analysis-content p {
+    margin: 0.5rem 0;
+    line-height: 1.6;
+}
+
+.analysis-result .analysis-content ol,
+.analysis-result .analysis-content ul {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+}
+
+.analysis-result .analysis-content li {
+    margin: 0.25rem 0;
+    line-height: 1.5;
+}
+
+.analysis-result .analysis-content .analysis-report {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+/* Chat Response Styling */
+.chat-response h4 {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #1d4ed8;
+    margin: 0.75rem 0 0.5rem 0;
+}
+
+.chat-response p {
+    margin: 0.5rem 0;
+    line-height: 1.6;
+}
+
+.chat-response ul,
+.chat-response ol {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+}
+
+.chat-response li {
+    margin: 0.25rem 0;
+    line-height: 1.5;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
     width: 8px;

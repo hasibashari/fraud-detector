@@ -1,6 +1,6 @@
-// =========================
+// =============================
 // Import Library & Modul
-// =========================
+// =============================
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
@@ -8,9 +8,9 @@ const { protect } = require('../middleware/authMiddleware');
 const passport = require('passport'); // Untuk Google OAuth
 const jwt = require('jsonwebtoken'); // Untuk membuat JWT
 
-// =========================
+// =============================
 // Route Autentikasi Manual (Register & Login)
-// =========================
+// =============================
 // Register user baru
 router.post('/register', authController.register);
 // Login user
@@ -18,9 +18,9 @@ router.post('/login', authController.login);
 // Mendapatkan data user yang sedang login (dilindungi token)
 router.get('/me', protect, authController.getMe);
 
-// =========================
+// =============================
 // Route Autentikasi Google OAuth
-// =========================
+// =============================
 // Memulai proses login dengan Google
 router.get(
   '/google',
@@ -50,7 +50,7 @@ router.get(
   }
 );
 
-// =========================
+// =============================
 // Export Router
-// =========================
+// =============================
 module.exports = router;

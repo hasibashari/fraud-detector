@@ -1,6 +1,6 @@
-// =========================
-// Import Library & Modul
-// =========================
+// =====================================================
+// SECTION: Import Library & Module Dependencies
+// =====================================================
 const express = require('express');
 const multer = require('multer');
 const csv = require('csv-parser');
@@ -12,9 +12,9 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const router = express.Router();
 
-// =========================
-// Konfigurasi Upload & Mapping CSV
-// =========================
+// =====================================================
+// SECTION: CSV Upload Configuration & Field Mapping
+// =====================================================
 // Konfigurasi Multer untuk menyimpan file di folder 'uploads/'
 const upload = multer({ dest: 'uploads/' });
 
@@ -28,7 +28,10 @@ const MAPPER_CONFIG = {
   // tambahkan mapping lain jika perlu
 };
 
-// Fungsi untuk mapping dan membersihkan data per baris CSV
+// -----------------------------------------------------
+// FUNCTION: mapAndCleanRow
+// Description: Maps and cleans a single CSV row to DB fields
+// -----------------------------------------------------
 function mapAndCleanRow(rawRow) {
   const cleanRow = {};
   // Normalisasi key agar lowercase dan tanpa spasi
@@ -60,8 +63,10 @@ function mapAndCleanRow(rawRow) {
   return cleanRow;
 }
 
-// --- FUNGSI BARU UNTUK BERBICARA DENGAN GEMINI ---
-// Inisialisasi Gemini dengan kunci API dari .env
+// -----------------------------------------------------
+// FUNCTION: getGeminiExplanation
+// Description: Calls Gemini AI to generate a one-sentence explanation for an anomaly
+// -----------------------------------------------------
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 async function getGeminiExplanation(transaction) {
@@ -97,9 +102,12 @@ async function getGeminiExplanation(transaction) {
   }
 }
 
-// =========================
+// =====================================================
 // ROUTE: Upload Transaksi CSV
-// =========================
+// @route   POST /transactions/upload
+// @desc    Upload file CSV transaksi
+// @access  Private (butuh token)
+// =====================================================
 /**
  * @route   POST /transactions/upload
  * @desc    Upload file CSV transaksi
@@ -222,9 +230,12 @@ router.post('/upload', protect, upload.single('file'), async (req, res) => {
   }
 });
 
-// =========================
+// =====================================================
 // ROUTE: Analisis AI Batch Transaksi
-// =========================
+// @route   POST /api/transactions/analyze/:batchId
+// @desc    Memicu analisis AI untuk satu batch milik user yang login
+// @access  Private
+// =====================================================
 /**
  * @route   POST /api/transactions/analyze/:batchId
  * @desc    Memicu analisis AI untuk satu batch milik user yang login
@@ -281,9 +292,12 @@ router.post('/analyze/:batchId', protect, async (req, res) => {
   }
 });
 
-// =========================
+// =====================================================
 // ROUTE: Ambil Anomali Batch
-// =========================
+// @route   GET /api/transactions/anomalies/:batchId
+// @desc    Ambil semua transaksi anomali untuk satu batch milik user yang login
+// @access  Private
+// =====================================================
 /**
  * @route   GET /api/transactions/anomalies/:batchId
  * @desc    Ambil semua transaksi anomali untuk satu batch milik user yang login
@@ -323,9 +337,12 @@ router.get('/anomalies/:batchId', protect, async (req, res) => {
   }
 });
 
-// =========================
+// =====================================================
 // ROUTE: Ambil Semua Batch User
-// =========================
+// @route   GET /api/transactions/batches
+// @desc    Ambil semua batch upload yang pernah ada untuk user yang login
+// @access  Private
+// =====================================================
 /**
  * @route   GET /api/transactions/batches
  * @desc    Ambil semua batch upload yang pernah ada untuk user yang login
@@ -368,9 +385,12 @@ router.get('/batches', protect, async (req, res) => {
   }
 });
 
-// =========================
+// =====================================================
 // ROUTE: Hapus Batch & Transaksi
-// =========================
+// @route   DELETE /api/transactions/batch/:batchId
+// @desc    Menghapus satu batch beserta semua transaksinya (hanya milik user yang login)
+// @access  Private
+// =====================================================
 /**
  * @route   DELETE /api/transactions/batch/:batchId
  * @desc    Menghapus satu batch beserta semua transaksinya (hanya milik user yang login)
@@ -409,9 +429,12 @@ router.delete('/batch/:batchId', protect, async (req, res) => {
   }
 });
 
-// =========================
+// =====================================================
 // ROUTE: Ambil Semua Transaksi Batch
-// =========================
+// @route   GET /api/transactions/batch/:batchId
+// @desc    Ambil SEMUA transaksi (anomali dan normal) untuk satu batch
+// @access  Public
+// =====================================================
 /**
  * @route   GET /api/transactions/batch/:batchId
  * @desc    Ambil SEMUA transaksi (anomali dan normal) untuk satu batch
@@ -434,9 +457,12 @@ router.get('/batch/:batchId', async (req, res) => {
   }
 });
 
-// =========================
+// =====================================================
 // ROUTE: Info User Login
-// =========================
+// @route   GET /api/transactions/me
+// @desc    Mendapatkan informasi user yang sedang login
+// @access  Private
+// =====================================================
 /**
  * @route   GET /api/transactions/me
  * @desc    Mendapatkan informasi user yang sedang login
@@ -454,9 +480,12 @@ router.get('/me', protect, async (req, res) => {
   }
 });
 
-// =========================
+// =====================================================
 // ROUTE: Chat dengan AI Analyst
-// =========================
+// @route   POST /api/transactions/chat/:batchId
+// @desc    Chat dengan AI analyst tentang data batch yang sudah dianalisis
+// @access  Private
+// =====================================================
 /**
  * @route   POST /api/transactions/chat/:batchId
  * @desc    Chat dengan AI analyst tentang data batch yang sudah dianalisis
@@ -581,9 +610,12 @@ JAWABAN (maksimal 500 kata):`;
   }
 });
 
-// =========================
+// =====================================================
 // ROUTE: Analisis Mendalam dengan AI
-// =========================
+// @route   POST /api/transactions/deep-analysis/:batchId
+// @desc    Mendapatkan analisis mendalam otomatis dari AI tentang pattern fraud dalam batch
+// @access  Private
+// =====================================================
 /**
  * @route   POST /api/transactions/deep-analysis/:batchId
  * @desc    Mendapatkan analisis mendalam otomatis dari AI tentang pattern fraud dalam batch
@@ -822,9 +854,12 @@ Gunakan bahasa Indonesia profesional dan berikan insight yang actionable untuk r
   }
 });
 
-// =========================
+// =====================================================
 // ROUTE: Dapatkan Penjelasan AI untuk Anomali Spesifik
-// =========================
+// @route   POST /api/transactions/explain/:transactionId
+// @desc    Mendapatkan penjelasan AI untuk satu transaksi anomali spesifik
+// @access  Private
+// =====================================================
 /**
  * @route   POST /api/transactions/explain/:transactionId
  * @desc    Mendapatkan penjelasan AI untuk satu transaksi anomali spesifik
@@ -896,9 +931,12 @@ router.post('/explain/:transactionId', protect, async (req, res) => {
   }
 });
 
-// =========================
+// =====================================================
 // ROUTE: Download Hasil Batch (CSV)
-// =========================
+// @route   GET /api/transactions/download/:batchId
+// @desc    Download hasil batch dalam format CSV
+// @access  Private
+// =====================================================
 /**
  * @route   GET /api/transactions/download/:batchId
  * @desc    Download hasil batch dalam format CSV
@@ -946,7 +984,7 @@ router.get('/download/:batchId', protect, async (req, res) => {
   }
 });
 
-// =========================
-// Export Router
-// =========================
+// =====================================================
+// SECTION: Export Router
+// =====================================================
 module.exports = router;

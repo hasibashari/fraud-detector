@@ -14,7 +14,7 @@
 
 > **⚡ Quick Start**: Clone repo → Setup .env (include GEMINI_API_KEY) → `./start-dev.sh` → Open http://localhost:3001
 
-> **� FINAL RELEASE v2.1**: Complete enterprise-grade fraud detection system with advanced AI capabilities, comprehensive testing, and production-ready architecture
+> **🚀 FINAL RELEASE v2.1**: Complete enterprise-grade fraud detection system with advanced AI capabilities, comprehensive testing, and production-ready architecture
 
 > **✨ Highlights**: Hybrid AI approach (Custom ML + Google Gemini), Interactive AI Chat, Real-time analysis, Enterprise security, Modern responsive design
 
@@ -62,7 +62,7 @@
 - **🌐 Seamless OAuth**: Google integration dengan scope management dan security best practices
 - **📱 Cross-Platform**: Optimized untuk desktop, tablet, dan mobile devices
 - **🛡️ Enterprise Security**: Multi-layer security dengan input validation, CORS, dan data encryption
-- **� Results Management**: Table display dengan filtering, sorting, dan export capabilities
+- **📋 Results Management**: Table display dengan filtering, sorting, dan export capabilities
 - **⚡ High Performance**: Optimized queries, caching, dan efficient data processing
 - **🧪 Quality Assurance**: Comprehensive testing suite dengan 5 testing scripts
 - **🚀 Production Ready**: Environment validation, graceful shutdown, dan deployment optimization
@@ -73,8 +73,8 @@
 - **👤 User Management**: Manajemen pengguna dengan hashing password (bcrypt)
 - **🤖 AI-Powered Detection**: Menggunakan autoencoder neural network untuk deteksi anomali
 - **🧠 Google Gemini AI Integration**: Penjelasan anomali berbasis AI dengan Google Gemini 2.5 Flash
-- **� AI Chat Interface**: Chat langsung dengan AI analyst untuk konsultasi fraud detection
-- **�📊 Batch Processing**: Upload dan analisis file CSV dalam batch per user
+- **💬 AI Chat Interface**: Chat langsung dengan AI analyst untuk konsultasi fraud detection
+- **📊 Batch Processing**: Upload dan analisis file CSV dalam batch per user
 - **📈 Real-time Analysis**: Analisis transaksi secara real-time dengan komunikasi Flask API
 - **🎯 Dynamic Threshold**: Threshold deteksi yang adaptif berdasarkan distribusi data (95th percentile)
 - **💾 Database Integration**: Penyimpanan data relasional menggunakan PostgreSQL dengan Prisma ORM
@@ -99,7 +99,7 @@ graph TB
         AUTH[🔐 Authentication Pages]
         UPLOAD[📤 File Upload Interface]
         CHAT[💬 AI Chat Interface]
-        RESULTS[� Results & Export]
+        RESULTS[📋 Results & Export]
     end
 
     subgraph "Backend Services"
@@ -128,7 +128,8 @@ graph TB
 
     WEB --> UI
     MOB --> UI
-    UI --> AUTH    UI --> UPLOAD
+    UI --> AUTH
+    UI --> UPLOAD
     UI --> CHAT
     UI --> RESULTS
 
@@ -254,7 +255,7 @@ graph TB
 │                                                           │                     │
 │  4. RESULTS               5. AI EXPLANATION      ◄────────┘                     │
 │  ┌─────────────┐         ┌─────────────┐                                        │
-│  │ � Results   │◄────────│ 💬 Gemini  │                                        │
+│  │ 📋 Results  │◄────────│ 💬 Gemini  │                                        │
 │  │ • Tables    │         │ • Explain   │                                        │
 │  │ • Filter    │         │ • Context   │                                        │
 │  │ • Export    │         │ • Insights  │                                        │

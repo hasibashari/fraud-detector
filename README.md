@@ -1,22 +1,20 @@
 # Fraud Detection System
 
-**🎯 Production-Ready AI-based Anomaly Detection System for Financial Fraud Prevention**
+**🎯 AI-based Anomaly Detection System for Financial Fraud Prevention**
 
 ![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)
-![Status](https://img.shields.io/badge/status-Production%20Ready-brightgreen.svg)
+![Status](https://img.shields.io/badge/status-Development-yellow.svg)
 ![Node.js](https://img.shields.io/badge/node-%3E%3D%2016.0.0-brightgreen.svg)
 ![Python](https://img.shields.io/badge/python-%3E%3D%203.8-brightgreen.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
-![TensorFlow](https://img.shields.io/badge/tensorflow-%3E%3D%202.15.0-orange.svg)
+![TensorFlow](https://img.shields.io/badge/tensorflow-2.19.0-orange.svg)
 ![Google AI](https://img.shields.io/badge/Google%20Gemini-AI%20Powered-green.svg)
-![Security](https://img.shields.io/badge/security-Enterprise%20Level-red.svg)
-![Testing](https://img.shields.io/badge/testing-Comprehensive-green.svg)
 
 > **⚡ Quick Start**: Clone repo → Setup .env (include GEMINI_API_KEY) → `./start-dev.sh` → Open http://localhost:3001
 
-> **🚀 FINAL RELEASE v2.1**: Complete enterprise-grade fraud detection system with advanced AI capabilities, comprehensive testing, and production-ready architecture
+> **🚀 Learning Project**: Sistem deteksi fraud dengan AI untuk pembelajaran dan eksplorasi teknologi
 
-> **✨ Highlights**: Hybrid AI approach (Custom ML + Google Gemini), Interactive AI Chat, Real-time analysis, Enterprise security, Modern responsive design
+> **✨ Features**: Custom ML model + Google Gemini AI, Batch processing, User authentication, Modern web interface
 
 ## 📚 Table of Contents
 
@@ -32,11 +30,11 @@
 - [💡 Cara Penggunaan](#-cara-penggunaan)
 - [⚙️ Konfigurasi](#️-konfigurasi)
 - [🧪 Testing](#-testing)
-- [🛡️ Security](#️-security-considerations)
+- [🛡️ Security Features](#️-security-features)
 - [🔧 Troubleshooting](#-troubleshooting)
-- [📈 Performance](#-performance--scalability)
+- [📈 Performance](#-performance)
 - [🤝 Contributing](#-contributing)
-- [🚀 Deployment](#-deployment-guide)
+- [🚀 Deployment Guide](#-deployment-guide)
 - [📧 Contact & Support](#-contact--support)
 - [🔄 Version History & Development Roadmap](#-version-history--development-roadmap)
 
@@ -44,41 +42,22 @@
 
 ## 📋 Deskripsi
 
-**Fraud Detection System** adalah aplikasi web full-stack berbasis AI yang dirancang secara enterprise-grade untuk mendeteksi transaksi keuangan yang mencurigakan menggunakan teknik machine learning dan AI terdepan. Sistem ini mengintegrasikan custom autoencoder neural network dengan Google Gemini AI untuk memberikan analisis fraud yang komprehensif dan actionable insights.
+**Fraud Detection System** adalah aplikasi web full-stack berbasis AI yang dirancang untuk mendeteksi transaksi keuangan yang mencurigakan menggunakan teknik machine learning dan AI. Sistem ini mengintegrasikan custom autoencoder neural network dengan Google Gemini AI untuk memberikan analisis fraud dan penjelasan anomali.
 
-### ✨ Fitur Utama - Enterprise Grade
-
-- **🔐 Enterprise Authentication**: Sistem login/register dengan JWT dan Google OAuth 2.0 + enterprise security
-- **👤 Advanced User Management**: Manajemen pengguna dengan bcrypt hashing dan role-based access
-- **🤖 Hybrid AI Detection**: Custom autoencoder + Google Gemini 2.5 Flash untuk deteksi dan analisis
-- **🧠 Interactive AI Analyst**: Chat real-time dengan AI fraud analyst untuk konsultasi mendalam
-- **💼 Professional AI Chat**: Dedicated AI interface dengan context-aware responses
-- **📊 Intelligent Batch Processing**: Upload dan analisis CSV dengan advanced field mapping
-- **📈 Real-time Analysis**: Analisis transaksi instant dengan komunikasi Flask API
-- **🎯 Dynamic Risk Scoring**: Threshold adaptif dengan 95th percentile + custom risk metrics
-- **💾 Enterprise Database**: PostgreSQL dengan Prisma ORM untuk data integrity dan performance
-- **🖥️ Modern Responsive UI**: Tailwind CSS dengan modular architecture dan mobile optimization
-- **🔄 Production APIs**: 12+ RESTful endpoints dengan comprehensive middleware protection
-- **🌐 Seamless OAuth**: Google integration dengan scope management dan security best practices
-- **📱 Cross-Platform**: Optimized untuk desktop, tablet, dan mobile devices
-- **🛡️ Enterprise Security**: Multi-layer security dengan input validation, CORS, dan data encryption
-- **📋 Results Management**: Table display dengan filtering, sorting, dan export capabilities
-- **⚡ High Performance**: Optimized queries, caching, dan efficient data processing
-- **🧪 Quality Assurance**: Comprehensive testing suite dengan 5 testing scripts
-- **🚀 Production Ready**: Environment validation, graceful shutdown, dan deployment optimization
+**🎓 Learning Project**: Ini adalah proyek pembelajaran yang dikembangkan dengan bantuan AI coding partners untuk mengeksplorasi teknologi AI, machine learning, dan pengembangan web modern.
 
 ### ✨ Fitur Utama
 
 - **🔐 User Authentication**: Sistem login/register dengan JWT dan Google OAuth 2.0
 - **👤 User Management**: Manajemen pengguna dengan hashing password (bcrypt)
 - **🤖 AI-Powered Detection**: Menggunakan autoencoder neural network untuk deteksi anomali
-- **🧠 Google Gemini AI Integration**: Penjelasan anomali berbasis AI dengan Google Gemini 2.5 Flash
-- **💬 AI Chat Interface**: Chat langsung dengan AI analyst untuk konsultasi fraud detection
+- **🧠 Google Gemini AI Integration**: Penjelasan anomali berbasis AI dengan Google Gemini
+- **💬 AI Chat Interface**: Chat dengan AI untuk konsultasi fraud detection
 - **📊 Batch Processing**: Upload dan analisis file CSV dalam batch per user
-- **📈 Real-time Analysis**: Analisis transaksi secara real-time dengan komunikasi Flask API
-- **🎯 Dynamic Threshold**: Threshold deteksi yang adaptif berdasarkan distribusi data (95th percentile)
-- **💾 Database Integration**: Penyimpanan data relasional menggunakan PostgreSQL dengan Prisma ORM
-- **🖥️ Modern Web Interface**: Interface web responsive dengan Tailwind CSS + modular architecture
+- **📈 Real-time Analysis**: Analisis transaksi secara real-time melalui Flask API
+- **🎯 Dynamic Threshold**: Threshold deteksi adaptif berdasarkan distribusi data
+- **💾 Database Integration**: PostgreSQL dengan Prisma ORM
+- **🖥️ Modern Web Interface**: Interface web responsive dengan Tailwind CSS
 - **🔄 RESTful API**: API yang komprehensif dengan middleware proteksi
 - **🌐 OAuth Integration**: Login dengan Google untuk kemudahan akses
 - **📱 Responsive Design**: Optimized untuk desktop dan mobile devices
@@ -279,13 +258,11 @@ graph TB
 - **Axios**: HTTP client untuk komunikasi dengan AI model
 - **CORS**: Cross-origin resource sharing
 - **Google Generative AI**: Integration dengan Google Gemini API
-- **Body-Parser**: Enhanced request parsing
-- **Dotenv**: Environment variables management
 
 ### AI Model (Python)
 
 - **TensorFlow/Keras**: Neural network framework untuk autoencoder
-- **Flask**: Lightweight web API framework
+- **Flask**: Web API framework
 - **Flask-CORS**: CORS support untuk Flask
 - **Pandas**: Data manipulation dan analysis
 - **NumPy**: Numerical computing
@@ -297,17 +274,15 @@ graph TB
 - **HTML5/CSS3**: Modern markup dan styling
 - **JavaScript (Vanilla)**: Client-side logic dan DOM manipulation
 - **Tailwind CSS**: Utility-first CSS framework untuk responsive design
-- **Font Awesome**: Comprehensive icon library
-- **Google Fonts (Inter)**: Modern typography
-- **Fetch API**: Modern HTTP client untuk browser
-- **Modular Architecture**: Component-based frontend organization
+- **Font Awesome**: Icon library
+- **Google Fonts (Inter)**: Typography
+- **Fetch API**: HTTP client untuk browser
 
 ### AI & Intelligence
 
-- **Google Gemini 2.5 Flash**: Advanced AI untuk fraud explanation dan chat
-- **Custom Autoencoder**: Specialized model untuk anomaly detection
-- **Hybrid AI Approach**: Kombinasi ML model + LLM untuk comprehensive analysis
-- **Real-time AI Processing**: Instant fraud analysis dan explanation
+- **Google Gemini**: AI untuk fraud explanation dan chat
+- **Custom Autoencoder**: Model untuk anomaly detection
+- **Hybrid AI Approach**: Kombinasi ML model + LLM
 
 ### Authentication & Security
 
@@ -321,81 +296,80 @@ graph TB
 ```
 fraud-detector/
 ├── backend/                    # Backend Node.js application
-│   ├── index.js               # Main server file dengan auth setup + environment validation
-│   ├── package.json           # Dependencies dengan Google AI + auth packages
+│   ├── index.js               # Main server file
+│   ├── package.json           # Dependencies
 │   ├── lib/
 │   │   └── prisma.js         # Prisma client configuration
 │   ├── controllers/
-│   │   └── authController.js # Authentication logic (register/login)
+│   │   └── authController.js # Authentication logic
 │   ├── middleware/
 │   │   └── authMiddleware.js # JWT protection middleware
 │   ├── config/
 │   │   └── passport-setup.js # Google OAuth configuration
 │   ├── routes/
 │   │   ├── authRoutes.js     # Authentication routes
-│   │   ├── transactionRoutes.js # Protected transaction routes + Gemini integration
+│   │   ├── transactionRoutes.js # Transaction routes + AI integration
 │   │   └── frontendRoutes.js # Frontend page routes
 │   ├── prisma/
-│   │   ├── schema.prisma     # Database schema dengan User model + AI explanation field
-│   │   └── migrations/       # Database migrations (6 total migrations)
+│   │   ├── schema.prisma     # Database schema
+│   │   └── migrations/       # Database migrations
 │   ├── generated/
 │   │   └── prisma/          # Auto-generated Prisma client
-│   └── uploads/              # Temporary file storage (user-specific)
+│   └── uploads/              # Temporary file storage
 │
-├── frontend/                  # Frontend web application (MODULAR TAILWIND ARCHITECTURE)
+├── frontend/                  # Frontend web application
 │   ├── pages/                # HTML pages with Tailwind CSS
 │   │   ├── index.html        # Dashboard page
-│   │   ├── ai-chat.html      # AI Chat interface (NEW - Gemini integration)
+│   │   ├── ai-chat.html      # AI Chat interface
 │   │   ├── login.html        # Login page
 │   │   ├── register.html     # Registration page
 │   │   └── auth-success.html # OAuth success page
-│   ├── css/                  # Modular stylesheets
-│   │   └── main.css          # Global Tailwind customizations + fraud-specific colors
-│   ├── js/                   # Modular JavaScript
+│   ├── css/                  # Stylesheets
+│   │   └── main.css          # Global Tailwind customizations
+│   ├── js/                   # JavaScript modules
 │   │   ├── main.js           # Global utilities and API configuration
-│   │   ├── config.js         # Centralized configuration management
+│   │   ├── config.js         # Configuration management
 │   │   ├── tailwind-config.js # Tailwind CSS configuration
 │   │   ├── index.js          # Dashboard page logic
-│   │   ├── ai-chat.js        # AI Chat page logic (NEW)
+│   │   ├── ai-chat.js        # AI Chat page logic
 │   │   └── auth.js           # Authentication logic
 │
 ├── model/                     # AI/ML Python components
-│   ├── app.py                # Flask API server dengan health check + comprehensive logging
+│   ├── app.py                # Flask API server
 │   ├── train.py              # Model training script
-│   ├── requirements.txt      # Python dependencies (8 packages)
+│   ├── requirements.txt      # Python dependencies
 │   ├── autoencoder_model.keras # Trained model file
 │   ├── preprocessor_pipeline.joblib # Data preprocessor
-│   └── data/                 # Training datasets (3 sample files)
+│   └── data/                 # Training datasets
 │       ├── transactions_realistic_multi_feature.csv
 │       ├── bank_transactions_data_2.csv
 │       └── transactions_large.csv
 │
-├── start-dev.sh              # Development startup script dengan dependency checks
+├── start-dev.sh              # Development startup script
 ├── test-api.sh               # API endpoint testing script
 ├── test-frontend.sh          # Frontend testing script
 ├── test-routes.sh            # Route testing script
 ├── test-system.sh            # System integration testing
-├── LICENSE                   # MIT License (Hasib Ashari)
-├── .gitignore               # Git ignore rules untuk security
-└── README.md                # Comprehensive documentation (this file)
+├── LICENSE                   # MIT License
+├── .gitignore               # Git ignore rules
+└── README.md                # Documentation (this file)
 ```
 
-> **🎯 New Modular Frontend Architecture**: Frontend menggunakan Tailwind CSS dengan arsitektur modular untuk better maintainability dan performance. Setiap halaman memiliki dedicated file dengan global utilities yang ter-centralized.
+> **🎯 Modern Frontend Architecture**: Frontend menggunakan Tailwind CSS dengan arsitektur modular untuk maintainability dan responsive design.
 >
-> **🆕 AI Chat & Google Gemini Integration**
+> **🤖 AI Integration**:
 >
-> - **AI Chat Interface**: Halaman dedicated untuk berinteraksi langsung dengan AI fraud analyst (`ai-chat.html`, `ai-chat.js`)
-> - **Google Gemini 2.5 Flash**: Integrasi penuh dengan Gemini API untuk fraud explanation dan real-time chat
-> - **Smart Fraud Analysis**: Setiap anomali yang terdeteksi otomatis mendapat penjelasan detail dari Gemini AI
-> - **Enhanced User Experience**: Interface modern dengan Tailwind CSS + responsive design
+> - **AI Chat Interface**: Halaman untuk berinteraksi dengan AI fraud analyst (`ai-chat.html`, `ai-chat.js`)
+> - **Google Gemini Integration**: Integrasi dengan Gemini API untuk fraud explanation dan chat
+> - **Fraud Analysis**: Setiap anomali yang terdeteksi bisa mendapat penjelasan dari AI
+> - **Modern Interface**: Interface responsive dengan Tailwind CSS
 >
 > **💡 Development Features:**
 >
-> - **Automated Setup**: Script `start-dev.sh` untuk setup environment otomatis
-> - **Comprehensive Testing**: 5 testing scripts untuk berbagai aspek sistem
-> - **Environment Validation**: Backend memvalidasi semua required environment variables
+> - **Automated Setup**: Script `start-dev.sh` untuk setup environment
+> - **Testing Scripts**: 4 testing scripts untuk berbagai aspek sistem
+> - **Environment Validation**: Backend memvalidasi required environment variables
 > - **Modular Configuration**: Centralized config management di frontend
-> - **Production Ready**: Enhanced error handling + logging system
 
 ## 🚀 Instalasi dan Setup
 
@@ -659,17 +633,6 @@ Body:
   "email": "john@example.com",
   "password": "securepassword"
 }
-
-Response:
-{
-  "message": "User registered successfully",
-  "user": {
-    "id": "user-id",
-    "name": "John Doe",
-    "email": "john@example.com",
-    "createdAt": "2025-06-30T10:00:00Z"
-  }
-}
 ```
 
 #### 2. Login User
@@ -683,12 +646,6 @@ Body:
   "email": "john@example.com",
   "password": "securepassword"
 }
-
-Response:
-{
-  "message": "Login successful",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
 ```
 
 #### 3. Get Current User
@@ -696,14 +653,6 @@ Response:
 ```http
 GET /auth/me
 Authorization: Bearer <token>
-
-Response:
-{
-  "id": "user-id",
-  "name": "John Doe",
-  "email": "john@example.com",
-  "createdAt": "2025-06-30T10:00:00Z"
-}
 ```
 
 #### 4. Google OAuth
@@ -729,17 +678,6 @@ Content-Type: multipart/form-data
 
 Body:
 - file: CSV file
-
-Response:
-{
-  "message": "File berhasil diunggah.",
-  "batch": {
-    "id": "batch-id",
-    "fileName": "transactions.csv",
-    "status": "COMPLETED",
-    "userId": "user-id"
-  }
-}
 ```
 
 #### 2. Analyze Batch
@@ -747,13 +685,6 @@ Response:
 ```http
 POST /api/transactions/analyze/:batchId
 Authorization: Bearer <token>
-
-Response:
-{
-  "message": "Analisis berhasil diselesaikan.",
-  "batchId": "batch-id",
-  "results": [...]
-}
 ```
 
 #### 3. Get User's Batches
@@ -761,17 +692,6 @@ Response:
 ```http
 GET /api/transactions/batches
 Authorization: Bearer <token>
-
-Response:
-[
-  {
-    "id": "batch-id",
-    "fileName": "transactions.csv",
-    "status": "COMPLETED",
-    "createdAt": "2025-06-30T10:00:00Z",
-    "userId": "user-id"
-  }
-]
 ```
 
 #### 4. Get Anomalies from Batch
@@ -779,69 +699,47 @@ Response:
 ```http
 GET /api/transactions/anomalies/:batchId
 Authorization: Bearer <token>
-
-Response:
-[
-  {
-    "id": "transaction-id",
-    "amount": 1500.00,
-    "timestamp": "2025-06-30T10:00:00Z",
-    "merchant": "Unknown Merchant",
-    "location": "Remote",
-    "isAnomaly": true,
-    "anomalyScore": 0.8542
-  }
-]
 ```
 
-#### 6. AI Chat with Gemini
+#### 5. AI Chat with Batch Context
 
 ```http
-POST /api/ai-chat
+POST /api/transactions/chat/:batchId
 Authorization: Bearer <token>
 Content-Type: application/json
 
 Body:
 {
-  "message": "Explain the recent anomalies detected in my account",
-  "context": "fraud_analysis"
-}
-
-Response:
-{
-  "message": "AI analysis of your fraud patterns...",
-  "suggestions": ["Check merchant verification", "Review location patterns"],
-  "timestamp": "2025-07-01T10:00:00Z"
+  "question": "Explain the anomalies in this batch"
 }
 ```
 
-#### 7. Get Fraud Explanation
+#### 6. Deep Analysis
 
 ```http
-GET /api/transactions/explanation/:transactionId
+POST /api/transactions/deep-analysis/:batchId
 Authorization: Bearer <token>
-
-Response:
-{
-  "transactionId": "transaction-id",
-  "explanation": "This transaction is flagged as anomalous because...",
-  "riskFactors": ["unusual_amount", "new_merchant", "odd_timing"],
-  "severity": "high"
-}
 ```
 
-#### 8. Delete Batch
+#### 7. Get Transaction Explanation
+
+```http
+POST /api/transactions/explain/:transactionId
+Authorization: Bearer <token>
+```
+
+#### 8. Download Results (CSV)
+
+```http
+GET /api/transactions/download/:batchId
+Authorization: Bearer <token>
+```
+
+#### 9. Delete Batch
 
 ```http
 DELETE /api/transactions/batch/:batchId
 Authorization: Bearer <token>
-
-Response:
-{
-  "message": "Batch berhasil dihapus.",
-  "deletedTransactionsCount": 150,
-  "deletedBatchInfo": {...}
-}
 ```
 
 ### AI Model Endpoints
@@ -850,13 +748,6 @@ Response:
 
 ```http
 GET http://localhost:5000/health
-
-Response:
-{
-  "status": "healthy",
-  "model_status": "loaded",
-  "message": "Fraud Detection AI Service is running"
-}
 ```
 
 #### Predict Anomalies
@@ -876,41 +767,6 @@ Body:
       "location": "Online"
     }
   ]
-}
-
-Response:
-{
-  "results": [
-    {
-      "id": "1",
-      "is_anomaly": false,
-      "anomaly_score": 0.23,
-      "risk_level": "low"
-    }
-  ],
-  "threshold": 0.85,
-  "model_info": "AutoEncoder v2.0"
-}
-```
-
-#### Test Format
-
-```http
-GET http://localhost:5000/test-format
-
-Response:
-{
-  "sample_format": {
-    "transactions": [
-      {
-        "id": "example",
-        "amount": 150.0,
-        "timestamp": "2025-07-01T12:00:00Z",
-        "merchant": "Store Name",
-        "location": "City"
-      }
-    ]
-  }
 }
 ```
 
@@ -1033,23 +889,21 @@ GET http://localhost:5000/test-format
    - Semua transaksi dalam batch juga akan terhapus
 3. **Filter per User**: Hanya batch milik user yang login yang ditampilkan
 
-### 6. AI Chat Interface (NEW)
+### 6. AI Chat Interface
 
 1. **Akses AI Chat**: Setelah login, klik menu "AI Chat" atau langsung ke `/ai-chat`
-2. **Interactive Consultation**: Chat langsung dengan AI fraud analyst untuk:
+2. **Interactive Consultation**: Chat dengan AI untuk:
    - Konsultasi tentang pola transaksi mencurigakan
    - Penjelasan detail tentang hasil deteksi fraud
-   - Rekomendasi tindakan pencegahan
-   - Analisis trend fraud di akun Anda
-3. **Real-time Responses**: Powered by Google Gemini 2.5 Flash untuk response yang cepat dan accurate
-4. **Context-Aware**: AI memahami context dari data transaksi dan history fraud detection
+   - Analisis batch yang sudah diupload
+3. **Context-Aware**: AI memahami context dari data batch yang dipilih
+4. **Batch Selection**: Pilih batch yang ingin didiskusikan dari dropdown
 
 ### 7. Enhanced Fraud Analysis
 
-1. **Automatic AI Explanation**: Setiap anomali yang terdeteksi otomatis mendapat penjelasan dari Gemini AI
-2. **Smart Risk Assessment**: AI menganalisis berbagai faktor risiko dan memberikan scoring yang comprehensive
-3. **Actionable Insights**: Tidak hanya mendeteksi, tapi juga memberikan saran konkret untuk mitigation
-4. **Results Export**: Download hasil analisis dalam format CSV untuk reporting atau analisis lanjutan
+1. **Automatic AI Explanation**: Setiap anomali yang terdeteksi bisa mendapat penjelasan dari Gemini AI
+2. **Deep Analysis**: Fitur analisis mendalam untuk batch tertentu
+3. **Results Export**: Download hasil analisis dalam format CSV untuk reporting
 
 ## ⚙️ Konfigurasi
 
@@ -1142,12 +996,27 @@ jumlah,waktu,merchant,Location,userid
 
 ## 🧪 Testing
 
-<details>
-<summary><strong>Click to expand testing guide</strong></summary>
+### Automated Testing Scripts
 
-### 1. Authentication Testing
+Proyek ini menyediakan beberapa script testing untuk memverifikasi fungsionalitas:
 
-#### Manual Registration/Login
+```bash
+# Test semua API endpoints
+./test-api.sh
+
+# Test frontend functionality
+./test-frontend.sh
+
+# Test routes accessibility
+./test-routes.sh
+
+# Comprehensive system integration test
+./test-system.sh
+```
+
+### Manual Testing
+
+#### Authentication Testing
 
 ```bash
 # Test Registration
@@ -1159,19 +1028,9 @@ curl -X POST http://localhost:3001/auth/register \
 curl -X POST http://localhost:3001/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"testpass"}'
-
-# Test Protected Route
-curl -X GET http://localhost:3001/auth/me \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
-#### Google OAuth Testing
-
-1. Buka `http://localhost:3001/auth/google` di browser
-2. Login dengan akun Google
-3. Verify redirect ke `auth-success.html` dengan token
-
-### 2. File Upload Testing
+#### File Upload Testing
 
 ```bash
 # Test CSV Upload (dengan token)
@@ -1180,57 +1039,16 @@ curl -X POST http://localhost:3001/api/transactions/upload \
   -F "file=@sample_transactions.csv"
 ```
 
-### 3. API Integration Testing
-
-```bash
-# Test Get User Batches
-curl -X GET http://localhost:3001/api/transactions/batches \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
-
-# Test Analyze Batch
-curl -X POST http://localhost:3001/api/transactions/analyze/BATCH_ID \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
-
-# Test Get Anomalies
-curl -X GET http://localhost:3001/api/transactions/anomalies/BATCH_ID \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
-```
-
-### 5. AI Model Testing (Enhanced)
+#### AI Model Testing
 
 ```bash
 # Test AI Model Health
 curl http://localhost:5000/health
 
-# Test AI Model Format
-curl http://localhost:5000/test-format
-
-# Test AI Prediction dengan sample data
+# Test AI Prediction
 curl -X POST http://localhost:5000/predict \
   -H "Content-Type: application/json" \
   -d '{"transactions":[{"id":"1","amount":1500.00,"merchant":"Unknown","location":"Remote","timestamp":"2025-07-01T10:00:00Z"}]}'
-
-# Test Google Gemini Integration (backend)
-curl -X POST http://localhost:3001/api/ai-chat \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"message":"Explain fraud patterns","context":"fraud_analysis"}'
-```
-
-### 6. Automated Testing Scripts
-
-```bash
-# Test semua API endpoints
-./test-api.sh
-
-# Test frontend functionality dan configuration
-./test-frontend.sh
-
-# Test routes accessibility
-./test-routes.sh
-
-# Comprehensive system integration test
-./test-system.sh
 ```
 
 ### Sample Test Data
@@ -1241,34 +1059,12 @@ File sample tersedia di `model/data/`:
 - `bank_transactions_data_2.csv` - Data transaksi bank
 - `transactions_large.csv` - Dataset besar untuk testing performa
 
-### Test Scenarios
-
-#### Positive Test Cases
-
-1. ✅ User registration dengan data valid
-2. ✅ Login dengan credentials yang benar
-3. ✅ Google OAuth flow lengkap
-4. ✅ Upload CSV dengan format yang benar
-5. ✅ Analisis batch dengan data normal
-6. ✅ Deteksi anomali pada transaksi mencurigakan
-
-#### Negative Test Cases
-
-1. ❌ Registration dengan email yang sudah ada
-2. ❌ Login dengan password salah
-3. ❌ Akses protected route tanpa token
-4. ❌ Upload file non-CSV
-5. ❌ Analisis batch yang tidak ada
-6. ❌ Akses batch milik user lain
-
-</details>
-
-## 🛡️ Security Considerations
+## 🛡️ Security Features
 
 ### Authentication Security
 
 - **JWT Tokens**: Stateless authentication dengan expiration (1 jam)
-- **Password Hashing**: bcrypt dengan salt rounds 10 untuk keamanan password
+- **Password Hashing**: bcrypt dengan salt untuk keamanan password
 - **Google OAuth**: Third-party authentication dengan scope terbatas
 - **Route Protection**: Middleware JWT untuk semua protected endpoints
 - **User Isolation**: Setiap user hanya dapat mengakses data miliknya
@@ -1283,31 +1079,18 @@ File sample tersedia di `model/data/`:
 
 ### API Security
 
-- **Rate Limiting**: Perlu diimplementasi untuk production
-- **HTTPS**: Disarankan untuk production deployment
-- **Input Sanitization**: Data cleaning sebelum database storage
-- **Error Handling**: Comprehensive error handling tanpa data exposure
 - **Authorization**: User-based data access control
+- **Error Handling**: Comprehensive error handling tanpa data exposure
+- **Input Sanitization**: Data cleaning sebelum database storage
 
-### Database Security
+## 📈 Performance
 
-- **Connection Security**: Encrypted database connections
-- **User Separation**: Data isolation per user dengan foreign keys
-- **Cascade Deletion**: Automatic cleanup saat user dihapus
-- **Data Types**: Proper typing untuk semua fields
-- **Indexes**: Performance optimization tanpa security compromise
-
-## 📈 Performance & Scalability
-
-- **Batch Processing**: Mendukung file CSV berukuran besar
-- **Database Indexing**: Index pada kolom yang sering diquery
+- **Database Optimization**: Proper indexing untuk query yang efisien
+- **Batch Processing**: Mendukung file CSV berukuran menengah
 - **Async Processing**: Processing asinkron untuk performa optimal
-- **Memory Management**: Efficient memory usage untuk large datasets
+- **Memory Management**: Efficient memory usage untuk datasets
 
 ## 🔧 Troubleshooting
-
-<details>
-<summary><strong>Click to expand troubleshooting guide</strong></summary>
 
 ### Common Issues
 
@@ -1322,10 +1105,6 @@ Solution: Login ulang untuk mendapat token baru
 Error: "Error 400: redirect_uri_mismatch"
 Solution: Periksa Google Console redirect URI settings
 Pastikan: http://localhost:3001/auth/google/callback
-
-# User already exists
-Error: "User already exists"
-Solution: Gunakan email lain atau login dengan akun existing
 ```
 
 #### 2. Database Connection Errors
@@ -1341,11 +1120,6 @@ sudo systemctl status postgresql
 Error: "password authentication failed"
 Solution: Verify .env DATABASE_URL
 DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
-
-# Missing database
-Error: "database does not exist"
-Solution: Create database manually
-sudo -u postgres createdb fraud_detection
 ```
 
 #### 3. AI Model Issues
@@ -1361,7 +1135,7 @@ ls *.keras *.joblib  # Verify files exist
 # Python dependencies
 Error: "ModuleNotFoundError: No module named 'tensorflow'"
 Solution:
-pip install tensorflow flask flask-cors pandas numpy scikit-learn joblib
+pip install -r requirements.txt
 
 # AI service not running
 Error: "connect ECONNREFUSED 127.0.0.1:5000"
@@ -1382,10 +1156,6 @@ Solution:
 - Check CSV column headers sesuai mapping
 - Pastikan encoding UTF-8
 - Verify data types (amount harus numeric)
-
-# Large file timeout
-Error: Request timeout
-Solution: Increase upload limits atau bagi file menjadi chunks kecil
 ```
 
 #### 5. Port Issues
@@ -1404,72 +1174,7 @@ sudo kill -9 $(sudo lsof -t -i:5000)
 # Or change port in model/app.py
 ```
 
-#### 6. Frontend Issues
-
-```bash
-# CORS error
-Error: "blocked by CORS policy"
-Solution: Verify backend CORS configuration allows frontend origin
-
-# Token not found
-Error: "No token found"
-Solution: Check localStorage atau login ulang
-
-# API endpoint error
-Error: "404 Not Found"
-Solution: Verify API base URL di frontend (http://localhost:3001)
-```
-
-### Performance Issues
-
-#### Slow CSV Processing
-
-- **Cause**: File terlalu besar
-- **Solution**:
-  - Bagi file menjadi chunks < 10MB
-  - Implement streaming processing
-  - Add progress indicators
-
-#### Slow AI Prediction
-
-- **Cause**: Model loading atau data preprocessing
-- **Solution**:
-  - Keep AI service running (don't restart)
-  - Optimize preprocessing pipeline
-  - Consider model quantization
-
-#### Database Query Slow
-
-- **Cause**: Missing indexes atau large datasets
-- **Solution**:
-  - Add database indexes
-  - Implement pagination
-  - Optimize Prisma queries
-
 ### Development Tips
-
-#### Hot Reload Setup
-
-```bash
-# Backend with nodemon
-npm run dev
-
-# AI model with auto-reload
-pip install watchdog
-# Add file watching to app.py
-```
-
-#### Debug Mode
-
-```bash
-# Enable debug logs
-NODE_ENV=development
-DEBUG=true
-
-# Python debug mode
-export FLASK_DEBUG=1
-python app.py
-```
 
 #### Database Reset
 
@@ -1479,7 +1184,16 @@ npx prisma migrate reset
 npx prisma db push
 ```
 
-</details>
+#### Debug Mode
+
+```bash
+# Enable debug logs
+NODE_ENV=development
+
+# Python debug mode
+export FLASK_DEBUG=1
+python app.py
+```
 
 ## 🤝 Contributing
 
@@ -1552,14 +1266,14 @@ Proyek Fraud Detection System ini dikembangkan sebagai **solo development projec
 
 #### 🏆 Achievement Recognition
 
-**Solo Project with Enterprise-Grade Results:**
+**Solo Project dengan AI Partnership:**
 
-- Successfully delivered production-ready fraud detection system
+- Successfully delivered fraud detection system dengan modern tech stack
 - Implemented advanced AI integration dengan cutting-edge technology
-- Created comprehensive testing suite dan deployment automation
-- Developed enterprise-level security dan scalability features
-- Built modern, responsive user interface dengan excellent UX
-- Established robust architecture untuk future scalability
+- Created comprehensive testing suite dan development workflow
+- Developed modern security dan data protection features
+- Built responsive user interface dengan excellent UX
+- Established robust architecture untuk scalability
 
 **AI Partnership Success:**
 
@@ -1567,15 +1281,15 @@ Proyek Fraud Detection System ini dikembangkan sebagai **solo development projec
 - Efficient development workflow dengan AI-human collaboration
 - High-quality code output dengan minimal technical debt
 - Comprehensive documentation dan user guides
-- Production-ready system dengan enterprise-grade features
+- Modern system dengan good architecture features
 
 ## 🚀 Deployment Guide
 
-> **📌 IMPORTANT NOTE**: Section ini adalah **panduan/roadmap untuk future deployment**, bukan bukti bahwa sistem sudah di-deploy ke production.
+> **📌 IMPORTANT NOTE**: Bagian ini adalah **panduan untuk future deployment**, bukan bukti bahwa sistem sudah di-deploy ke production.
 >
-> **Current Status**: Sistem berjalan sempurna di **local development environment** (`localhost:3001`). Production deployment belum dilakukan.
+> **Current Status**: Sistem berjalan di **local development environment** (`localhost:3001`).
 >
-> **Purpose**: Dokumentasi ini menunjukkan bahwa sistem sudah "production-ready" dari segi architecture dan menyediakan langkah-langkah yang diperlukan jika ingin deploy ke production server.
+> **Purpose**: Dokumentasi ini menunjukkan bahwa sistem sudah siap untuk deployment dan menyediakan langkah-langkah yang diperlukan untuk deploy ke production server di masa depan.
 
 ### Production Deployment Checklist
 
@@ -1585,14 +1299,12 @@ Proyek Fraud Detection System ini dikembangkan sebagai **solo development projec
 - [ ] Configure production environment variables
 - [ ] Setup Google OAuth production credentials
 - [ ] Generate secure JWT secrets
-- [ ] Configure HTTPS certificates
 
 #### Backend Deployment
 
 ```bash
 # Production build
 npm install --production
-npm run build  # if build script exists
 
 # Environment variables
 NODE_ENV=production
@@ -1600,6 +1312,7 @@ DATABASE_URL="postgresql://..."
 JWT_SECRET="production-secret-very-long"
 GOOGLE_CLIENT_ID="production-client-id"
 GOOGLE_CLIENT_SECRET="production-secret"
+GEMINI_API_KEY="production-gemini-key"
 ```
 
 #### AI Model Deployment
@@ -1608,13 +1321,6 @@ GOOGLE_CLIENT_SECRET="production-secret"
 # Production Python setup
 pip install gunicorn
 gunicorn -w 4 -b 0.0.0.0:5000 app:app
-
-# Docker deployment (recommended)
-FROM python:3.9-slim
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
 ```
 
 #### Database Migration
@@ -1625,40 +1331,17 @@ npx prisma migrate deploy
 npx prisma generate
 ```
 
-## 📊 System Metrics & Monitoring
-
-### Key Performance Indicators
-
-- **Response Time**: API endpoints < 500ms
-- **Throughput**: Support 100+ concurrent users
-- **Accuracy**: AI model detection rate > 90%
-- **Uptime**: 99.9% availability target
-
-### Monitoring Setup
-
-```bash
-# Add logging middleware
-npm install winston morgan
-
-# Health check endpoints
-GET /health
-GET /api/health
-GET /auth/health
-```
-
 ## 📧 Contact & Support
 
-### Technical Support & Issues
+### Learning Project
 
 Proyek ini dibuat sebagai sarana belajar dan eksplorasi teknologi oleh seorang pelajar dengan bantuan AI coding partners (GitHub Copilot, Gemini, ChatGPT, Claude). Jika ada pertanyaan, saran, atau ingin berdiskusi seputar kode, silakan:
 
 - **GitHub Issues**: [Create New Issue](https://github.com/hasib-ashari/fraud-detector/issues)
-- **Email (for feedback only)**: hasibashari@gmail.com
+- **Email**: hasibashari@gmail.com
 - **LinkedIn**: [Hasib Ashari](https://linkedin.com/in/hasib-ashari)
-- **Portfolio**: [hasibashari.my.id](https://hasibashari.my.id)
 
-> **Catatan:**  
-> Saya masih dalam tahap belajar dan seluruh proyek ini tidak akan bisa selesai tanpa bantuan AI coding partners. Jika Anda ingin menggunakan, memodifikasi, atau belajar dari proyek ini, silakan! Namun, saya belum bisa memberikan dukungan teknis profesional atau konsultasi bisnis.
+> **Catatan:** Saya masih dalam tahap belajar dan proyek ini dikembangkan dengan bantuan AI coding partners. Jika Anda ingin menggunakan, memodifikasi, atau belajar dari proyek ini, silakan! Namun, saya belum bisa memberikan dukungan teknis profesional.
 
 ### Documentation & Resources
 
@@ -1666,22 +1349,6 @@ Proyek ini dibuat sebagai sarana belajar dan eksplorasi teknologi oleh seorang p
 - **API Reference**: Lihat bagian API Documentation di atas
 - **Setup Guides**: Lihat bagian Instalasi dan Setup
 - **Troubleshooting**: Lihat bagian Troubleshooting untuk masalah umum
-
-### Community & Feedback
-
-- **Feedback & Suggestions**: Silakan buat issue di GitHub atau hubungi via email
-- **Feature Requests**: Boleh request fitur baru, tapi saya tidak janji bisa mengimplementasikan
-- **Contributions**: Pull request sangat diterima untuk belajar bersama
-
-### Response Time
-
-- **Technical Issues**: Akan saya balas sebisa mungkin, mohon maklum jika lambat (karena masih pelajar)
-- **Business Inquiries**: Tidak tersedia, proyek ini hanya untuk pembelajaran
-
-### Version Support
-
-- **Current Version (v2.1.0)**: Bebas digunakan, silakan fork/clone untuk belajar
-- **Future Versions**: Roadmap hanya sebagai rencana belajar pribadi
 
 ---
 
@@ -1691,86 +1358,63 @@ Proyek ini dibuat sebagai sarana belajar dan eksplorasi teknologi oleh seorang p
 
 #### v2.1.0 (Current - July 2025)
 
-**🎯 Production-Ready Release - Complete Fraud Detection System**
-
-**✨ Major Features Added:**
-
-- ✅ **AI Chat Integration**: Dedicated AI chat interface dengan Google Gemini 2.5 Flash
-- ✅ **Enhanced UI/UX**: Modern responsive design dengan Tailwind CSS
-- ✅ **Results Management**: Advanced filtering, sorting, dan CSV export
-- ✅ **Security Hardening**: Enterprise-level authentication dan data protection
-- ✅ **Comprehensive Testing**: 5 automated testing scripts untuk quality assurance
-- ✅ **Production Optimization**: Environment validation, error handling, deployment readiness
-
-**🔧 Technical Improvements:**
-
-- Modular frontend architecture untuk better maintainability
-- Comprehensive API documentation dengan 12+ endpoints
-- Database optimization dengan proper indexing
-- Enhanced error handling dan logging system
-- Automated setup scripts untuk development
-
-**📊 System Metrics:**
-
-- **Backend**: 12+ RESTful API endpoints
-- **Frontend**: 5 dedicated pages dengan modular JS architecture
-- **AI Integration**: Custom ML model + Google Gemini AI
-- **Database**: PostgreSQL dengan Prisma ORM, 6 migrations
-- **Testing**: 100% endpoint coverage dengan automated scripts
-
-#### v2.0.0 (June 2025)
-
-**🚀 Major System Architecture Release**
+**🎯 Complete Fraud Detection System**
 
 **✨ Features:**
 
-- ✅ Complete authentication system (JWT + Google OAuth)
-- ✅ AI-powered fraud detection dengan autoencoder model
-- ✅ Batch processing untuk CSV file uploads
-- ✅ Real-time analysis dengan Flask API integration
-- ✅ User management dengan data isolation
-- ✅ Basic responsive UI dengan Tailwind CSS
+- ✅ **AI Chat Integration**: Chat interface dengan Google Gemini untuk fraud analysis
+- ✅ **Enhanced UI/UX**: Modern responsive design dengan Tailwind CSS
+- ✅ **Results Management**: Filtering, sorting, dan CSV export
+- ✅ **Security Implementation**: Authentication dan data protection
+- ✅ **Testing Suite**: 4 automated testing scripts
+- ✅ **Development Tools**: Setup scripts dan development workflow
 
-#### v1.0.0 (May 2025)
+**🔧 Technical Implementation:**
+
+- Backend: API endpoints dengan Express.js
+- Frontend: 5 dedicated pages dengan modular JS architecture
+- AI Integration: Custom ML model + Google Gemini AI
+- Database: PostgreSQL dengan Prisma ORM
+- Authentication: JWT + Google OAuth 2.0
+
+#### v1.0.0 (Late June 2025)
 
 **🌟 Initial Release - MVP**
 
 **✨ Core Features:**
 
-- ✅ Basic fraud detection model
-- ✅ Simple file upload functionality
-- ✅ Basic user authentication
-- ✅ Simple results display
+- ✅ Basic fraud detection model (Autoencoder)
+- ✅ File upload functionality untuk CSV
+- ✅ User authentication system
+- ✅ Basic results display
+- ✅ Database integration
 
 ### Development Roadmap
 
-#### 🎯 **Immediate Priorities (Q3 2025)**
+#### 🎯 **Near Future (Q4 2025)**
 
+- [ ] **Chart Implementation**: Implementasi Chart.js yang sudah di-load
+- [ ] **Advanced Analytics**: Statistical analysis yang lebih mendalam
 - [ ] **Performance Optimization**: Database indexing dan query optimization
-- [ ] **Real Charts Implementation**: Menambahkan Chart.js visualizations yang sudah di-load
-- [ ] **Advanced Analytics**: Statistical analysis dan pattern recognition
-- [ ] **Rate Limiting**: API rate limiting untuk production security
-- [ ] **Monitoring Dashboard**: System health monitoring dan alerting
+- [ ] **Error Handling Enhancement**: Improved error messages dan logging
 
-#### 🚀 **Future Enhancements (Q4 2025)**
+#### 🚀 **Future Enhancements (2026)**
 
+- [ ] **Advanced AI Models**: Model ensemble untuk improved accuracy
+- [ ] **Real-time Notifications**: WebSocket integration untuk alerts
+- [ ] **Mobile Optimization**: Better mobile experience
 - [ ] **Multi-language Support**: Internationalization (i18n)
-- [ ] **Advanced AI Models**: Ensemble models untuk improved accuracy
-- [ ] **Real-time Notifications**: WebSocket integration untuk instant alerts
-- [ ] **Advanced Reporting**: PDF reports generation
-- [ ] **API Versioning**: RESTful API versioning untuk backward compatibility
 
-#### 🌟 **Long-term Vision (2026)**
+#### 🌟 **Long-term Learning Goals**
 
-- [ ] **Machine Learning Pipeline**: Automated model retraining
-- [ ] **Microservices Architecture**: Service decomposition untuk scalability
-- [ ] **Cloud Deployment**: AWS/GCP production deployment
-- [ ] **Mobile App**: React Native mobile application
-- [ ] **Business Intelligence**: Advanced analytics dashboard
+- [ ] **Cloud Deployment**: AWS/GCP deployment experience
+- [ ] **Microservices Architecture**: Service decomposition
+- [ ] **Advanced Security**: Enhanced security practices
+- [ ] **DevOps Pipeline**: CI/CD implementation
 
-### Project Completion Status
+### Project Status
 
-#### ✅ **COMPLETED (Production-Ready)**
+#### ✅ **COMPLETED**
 
 - **Core Functionality**: 100% complete
 - **Authentication System**: 100% complete
@@ -1778,24 +1422,41 @@ Proyek ini dibuat sebagai sarana belajar dan eksplorasi teknologi oleh seorang p
 - **Database Design**: 100% complete
 - **API Development**: 100% complete
 - **Frontend UI**: 100% complete
-- **Testing Suite**: 100% complete
+- **Basic Testing**: 100% complete
 - **Documentation**: 100% complete
-- **Security Implementation**: 100% complete
-- **Deployment Readiness**: 100% complete
 
-#### 🔄 **IN PROGRESS (Future Learning)**
+#### 🔄 **IN PROGRESS (Learning)**
 
 - **Charts/Visualizations**: 0% (Chart.js loaded but not implemented)
 - **Advanced Analytics**: 25% (basic statistics only)
-- **Performance Optimization**: 75% (basic optimization done)
-- **Monitoring**: 50% (health checks only)
+- **Performance Optimization**: 50% (basic optimization done)
 
 #### 📋 **PLANNED (Learning Roadmap)**
 
-- **Advanced AI Features**: ML pipeline automation
-- **Enterprise Features**: Advanced reporting, monitoring
-- **Scalability**: Microservices, cloud deployment
-- **Mobile Support**: React Native app
+- **Advanced Features**: ML pipeline automation
+- **Production Features**: Advanced monitoring, scaling
+- **DevOps**: CI/CD, containerization
+
+### Learning Achievements
+
+**Teknologi yang Dipelajari:**
+
+- ✅ **Full-Stack Development**: Node.js, Express.js, Prisma, PostgreSQL
+- ✅ **AI/ML Integration**: TensorFlow, Google Gemini API, Custom Models
+- ✅ **Modern Frontend**: Tailwind CSS, Vanilla JS, Responsive Design
+- ✅ **Authentication**: JWT, OAuth 2.0, Session Management
+- ✅ **API Development**: RESTful APIs, Middleware, Error Handling
+- ✅ **Database Design**: Relational modeling, Migrations, ORM
+- ✅ **Testing**: Automated testing scripts, API testing
+- ✅ **Development Workflow**: Git, Environment management, Documentation
+
+**Skill Development:**
+
+- 🤖 **AI Integration**: Berhasil mengintegrasikan multiple AI services
+- 🔐 **Security Implementation**: Authentication, authorization, data protection
+- 📊 **Data Processing**: CSV parsing, batch processing, anomaly detection
+- 🎨 **UI/UX Design**: Modern responsive interfaces
+- 📖 **Technical Writing**: Comprehensive documentation
 
 ### Learning Journey & AI Partnership
 
@@ -1803,8 +1464,8 @@ Proyek ini dibuat sebagai sarana belajar dan eksplorasi teknologi oleh seorang p
 
 - ✅ Full-stack development dengan modern tech stack
 - ✅ AI/ML integration dalam web applications
-- ✅ Enterprise-level security implementation
-- ✅ Production-ready deployment practices
+- ✅ Modern security implementation
+- ✅ Development best practices
 - ✅ Comprehensive testing strategies
 - ⏳ Advanced DevOps dan cloud deployment
 - ⏳ Scalable system architecture design
@@ -1816,6 +1477,6 @@ Proyek ini dibuat sebagai sarana belajar dan eksplorasi teknologi oleh seorang p
 - **ChatGPT**: 20% documentation dan debugging support
 - **Claude**: 10% code review dan best practices guidance
 
-> **💡 Honest Assessment**: Proyek ini mencapai status production-ready berkat kombinasi antara dedikasi belajar personal dan bantuan comprehensive dari AI coding partners. Tanpa AI assistance, kompleksitas sistem ini akan sangat sulit dicapai dalam timeframe yang reasonable.
+> **💡 Learning Achievement**: Proyek ini dikembangkan dengan bantuan AI coding partners untuk mengeksplorasi teknologi modern. Sistem berhasil dibangun dengan fitur-fitur yang solid dan bisa berjalan dengan baik di development environment.
 
 ---

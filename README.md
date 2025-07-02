@@ -1568,7 +1568,13 @@ Proyek Fraud Detection System ini dikembangkan sebagai **solo development projec
 - Comprehensive documentation dan user guides
 - Production-ready system dengan enterprise-grade features
 
-## � Deployment Guide
+## 🚀 Deployment Guide
+
+> **📌 IMPORTANT NOTE**: Section ini adalah **panduan/roadmap untuk future deployment**, bukan bukti bahwa sistem sudah di-deploy ke production.
+>
+> **Current Status**: Sistem berjalan sempurna di **local development environment** (`localhost:3001`). Production deployment belum dilakukan.
+>
+> **Purpose**: Dokumentasi ini menunjukkan bahwa sistem sudah "production-ready" dari segi architecture dan menyediakan langkah-langkah yang diperlukan jika ingin deploy ke production server.
 
 ### Production Deployment Checklist
 
@@ -1648,7 +1654,7 @@ Proyek ini dibuat sebagai sarana belajar dan eksplorasi teknologi oleh seorang p
 - **GitHub Issues**: [Create New Issue](https://github.com/hasib-ashari/fraud-detector/issues)
 - **Email (for feedback only)**: hasibashari@gmail.com
 - **LinkedIn**: [Hasib Ashari](https://linkedin.com/in/hasib-ashari)
-- **Portfolio**: [hasib-ashari.dev](https://hasib-ashari.dev)
+- **Portfolio**: [hasibashari.my.id](https://hasibashari.my.id)
 
 > **Catatan:**  
 > Saya masih dalam tahap belajar dan seluruh proyek ini tidak akan bisa selesai tanpa bantuan AI coding partners. Jika Anda ingin menggunakan, memodifikasi, atau belajar dari proyek ini, silakan! Namun, saya belum bisa memberikan dukungan teknis profesional atau konsultasi bisnis.

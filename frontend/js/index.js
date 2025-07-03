@@ -162,7 +162,7 @@ class DashboardManager {
 
     if (this.validateFile(file)) {
       fileName.textContent = `${file.name} (${window.AppUtils.formatFileSize(file.size)})`;
-      fileInfo.classList.remove('d-none');
+      fileInfo.classList.remove('hidden');
       if (uploadBtn) uploadBtn.disabled = false;
 
       window.AppUtils.showToast('info', 'File selected successfully');
@@ -178,10 +178,23 @@ class DashboardManager {
     const csvFile = document.getElementById('csvFile');
     const fileInfo = document.getElementById('fileInfo');
     const uploadBtn = document.getElementById('uploadBtn');
+    const progressContainer = document.getElementById('uploadProgress');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const progressPercent = document.getElementById('progressPercent');
 
     if (csvFile) csvFile.value = '';
-    if (fileInfo) fileInfo.classList.add('d-none');
+    if (fileInfo) fileInfo.classList.add('hidden');
     if (uploadBtn) uploadBtn.disabled = true;
+
+    // Reset progress UI
+    if (progressContainer) {
+      progressContainer.classList.add('hidden');
+      progressContainer.classList.remove('flex');
+    }
+    if (progressBar) progressBar.style.width = '0%';
+    if (progressText) progressText.textContent = 'Preparing upload...';
+    if (progressPercent) progressPercent.textContent = '0%';
   }
 
   // =============================
@@ -215,7 +228,7 @@ class DashboardManager {
       window.AppUtils.setLoadingState(uploadBtn, true, 'Uploading...');
 
       const formData = new FormData();
-      formData.append('csvFile', file);
+      formData.append('file', file);
 
       // Create XMLHttpRequest for progress tracking
       const xhr = new XMLHttpRequest();
@@ -224,6 +237,7 @@ class DashboardManager {
       xhr.upload.addEventListener('progress', e => {
         if (e.lengthComputable) {
           const percentComplete = (e.loaded / e.total) * 100;
+          const progressPercent = document.getElementById('progressPercent');
 
           if (progressBar) {
             progressBar.style.width = `${percentComplete}%`;
@@ -232,31 +246,51 @@ class DashboardManager {
           if (progressText) {
             progressText.textContent = `Uploading: ${Math.round(percentComplete)}%`;
           }
+
+          if (progressPercent) {
+            progressPercent.textContent = `${Math.round(percentComplete)}%`;
+          }
         }
       });
 
       // Handle completion
-      xhr.addEventListener('load', () => {
-        if (xhr.status === 200) {
+      xhr.addEventListener('load', async () => {
+        if (xhr.status === 200 || xhr.status === 201) {
           try {
             const response = JSON.parse(xhr.responseText);
 
             if (progressText) {
               progressText.textContent = 'Processing completed!';
             }
+            if (progressBar) {
+              progressBar.style.width = '100%';
+            }
 
             window.AppUtils.showToast('success', 'File uploaded and processed successfully!');
 
-            // Reload data
-            this.loadBatches();
-            this.loadResults();
-            this.loadStats();
+            // Wait a moment then reload data and reset UI
+            setTimeout(async () => {
+              try {
+                // Reload batch data to show new upload
+                await this.loadBatchData();
 
-            // Reset form
-            this.clearFileSelection();
+                // Reset form and UI after successful data reload
+                this.clearFileSelection();
+
+                ClientLogger.success('Data reloaded and UI reset after upload');
+              } catch (reloadError) {
+                console.error('Error reloading data:', reloadError);
+                window.AppUtils.showToast(
+                  'warning',
+                  'Upload successful but failed to refresh data. Please refresh the page.'
+                );
+                this.clearFileSelection();
+              }
+            }, 2000); // Increased timeout untuk memastikan database sudah update
           } catch (parseError) {
             console.error('Error parsing response:', parseError);
             window.AppUtils.showToast('error', 'Upload completed but response parsing failed');
+            this.clearFileSelection();
           }
         } else {
           let errorMessage = 'Upload failed';
@@ -267,16 +301,18 @@ class DashboardManager {
             // Use default error message
           }
           window.AppUtils.showToast('error', errorMessage);
+          this.clearFileSelection();
         }
       });
 
       // Handle errors
       xhr.addEventListener('error', () => {
         window.AppUtils.showToast('error', 'Network error during upload');
+        this.clearFileSelection();
       });
 
       // Configure and send request
-      xhr.open('POST', `${window.AppUtils.API_BASE_URL}/api/upload`);
+      xhr.open('POST', `${this.API_BASE_URL}/upload`);
 
       const token = window.AppUtils.getAuthToken();
       if (token) {
@@ -288,18 +324,11 @@ class DashboardManager {
       console.error('Upload error:', error);
       const errorMessage = error.message || 'Failed to upload file';
       window.AppUtils.showToast('error', errorMessage);
+      this.clearFileSelection();
     } finally {
-      // Reset UI after a delay
-      setTimeout(() => {
-        window.AppUtils.setLoadingState(uploadBtn, false);
-
-        if (progressContainer) {
-          progressContainer.classList.add('hidden');
-          progressContainer.classList.remove('flex');
-        }
-
-        window.AppUtils.performanceMonitor.end('fileUpload');
-      }, 1000);
+      // Reset loading state immediately, progress will be handled by clearFileSelection
+      window.AppUtils.setLoadingState(uploadBtn, false);
+      window.AppUtils.performanceMonitor.end('fileUpload');
     }
   }
 
@@ -307,13 +336,15 @@ class DashboardManager {
   // Load data batch dari server
   // =============================
   async loadBatchData() {
+    ClientLogger.info('Loading batch data...');
     try {
       const data = await window.AppUtils.apiCall('/api/transactions/batches');
       this.batchData = Array.isArray(data) ? data : data.batches || [];
+      ClientLogger.success(`Batch data loaded: ${this.batchData.length} batches`);
       this.renderBatchTable();
       this.updateStatsDisplay();
     } catch (error) {
-      console.error('Failed to load batch data:', error);
+      ClientLogger.error('Failed to load batch data', error);
     }
   }
 
@@ -1141,19 +1172,36 @@ class DashboardManager {
       return;
     }
 
-    // Create CSV content
-    const headers = ['Timestamp', 'Amount', 'Merchant', 'Location', 'Risk Score'];
+    // Create CSV content dengan informasi waktu yang lengkap
+    const headers = [
+      'Timestamp',
+      'Date',
+      'Day',
+      'Hour',
+      'Amount',
+      'Merchant',
+      'Location',
+      'Risk Score',
+    ];
     const csvContent = [
       headers.join(','),
-      ...dataToExport.map(row =>
-        [
-          `"${new Date(row.timestamp).toLocaleString()}"`,
+      ...dataToExport.map(row => {
+        const date = new Date(row.timestamp);
+        const hour = date.getHours();
+        const dateStr = date.toLocaleDateString('id-ID');
+        const dayName = date.toLocaleDateString('id-ID', { weekday: 'long' });
+
+        return [
+          `"${date.toLocaleString()}"`,
+          `"${dateStr}"`,
+          `"${dayName}"`,
+          hour,
           row.amount,
           `"${row.merchant}"`,
           `"${row.location}"`,
           ((row.anomalyScore || 0) * 100).toFixed(1),
-        ].join(',')
-      ),
+        ].join(',');
+      }),
     ].join('\n');
 
     // Download file
@@ -1281,7 +1329,7 @@ class DashboardManager {
           this.updatePagination(response.total, page, pageSize);
         });
 
-        console.log(`Loaded ${response.results.length} results`);
+        ClientLogger.info(`Loaded ${response.results.length} results`);
       } else {
         this.renderResults([]);
       }

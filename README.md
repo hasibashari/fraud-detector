@@ -65,86 +65,38 @@
 ## 🏗️ System Architecture
 
 
+
 ### High-Level Architecture Overview
 
-> **Note:** Visual diagram below uses high-contrast colors and is optimized for both light and dark mode. Jika diagram tidak tampil di markdown viewer, silakan lihat ringkasan layer di bawahnya.
+> **Penjelasan Arsitektur Sistem:**
+>
+> Fraud Detection System dirancang dengan pendekatan multi-layer yang terstruktur dan mudah dipelajari. Setiap layer memiliki peran spesifik untuk menjaga keamanan, skalabilitas, dan kemudahan pengembangan. Proses dimulai dari client (web/mobile) yang berinteraksi dengan frontend modern berbasis Tailwind CSS dan JavaScript. Frontend mengirim request ke backend API (Express.js & Prisma) yang menangani autentikasi, manajemen data, serta integrasi ke layanan AI/ML. Layanan AI/ML berjalan terpisah menggunakan Python Flask dan TensorFlow, serta terhubung ke Google Gemini untuk penjelasan anomali. Semua data disimpan di PostgreSQL dan file storage, dengan dukungan Google OAuth untuk autentikasi eksternal. Arsitektur ini memudahkan proses belajar, debugging, dan pengembangan fitur baru secara modular.
+
+Diagram berikut menggambarkan alur utama komunikasi antar layer dan layanan eksternal:
 
 ```mermaid
-flowchart TD
-    subgraph CLIENT[Client Layer 🖥️📱]
-        WEB["🌐 Web Browser"]
-        MOB["📱 Mobile Browser"]
-    end
-    subgraph FRONTEND[Frontend 🎨]
-        UI["UI: Tailwind + JS"]
-        AUTH["Login/Register"]
-        UPLOAD["Batch Upload"]
-        CHAT["AI Chat"]
-        RESULTS["Results/Export"]
-    end
-    subgraph BACKEND[Backend 🚀]
-        API["Express.js API"]
-        MIDDLEWARE["Security Middleware"]
-        ROUTES["Route Handlers"]
-        CTRL["Controllers"]
-        FILES["Uploads Folder"]
-    end
-    subgraph AI[AI & ML 🤖]
-        PYAPI["Flask API"]
-        MODEL["Autoencoder Model"]
-        PREPROC["Preprocessor"]
-        GEMINI["Gemini API Integration"]
-    end
-    subgraph DATA[Data Layer 🗄️]
-        DB[("PostgreSQL DB")]
-        STORAGE["File Storage"]
-    end
-    subgraph EXTERNAL[External 🌐]
-        GOOGLE["Google OAuth"]
-        GEMINI_API["Google Gemini API"]
-    end
-    %% Client to Frontend
-    WEB & MOB --> UI
-    UI --> AUTH
-    UI --> UPLOAD
-    UI --> CHAT
-    UI --> RESULTS
-    %% Frontend to Backend
-    AUTH --> API
-    UPLOAD --> API
-    CHAT --> API
-    RESULTS --> API
-    %% Backend internals
-    API --> MIDDLEWARE
-    MIDDLEWARE --> ROUTES
-    ROUTES --> CTRL
-    CTRL --> DB
-    CTRL --> FILES
-    CTRL --> PYAPI
-    CTRL --> GEMINI
-    %% AI Layer
-    PYAPI --> MODEL
-    PYAPI --> PREPROC
-    GEMINI --> GEMINI_API
-    %% Data Layer
-    FILES --> STORAGE
+flowchart TB
+    CLIENT["Client (Web/Mobile)"]
+    FRONTEND["Frontend (Tailwind CSS, JS)"]
+    BACKEND["Backend (Express.js, Prisma)"]
+    AI["AI/ML Service (Flask, TensorFlow, Gemini)"]
+    DB["Database (PostgreSQL)"]
+    STORAGE["File Storage"]
+    OAUTH["Google OAuth"]
+    GEMINI["Google Gemini API"]
+
+    CLIENT -->|HTTP/HTTPS| FRONTEND
+    FRONTEND -->|REST API| BACKEND
+    BACKEND -->|API Call| AI
+    BACKEND -->|DB Query| DB
+    BACKEND -->|File Ops| STORAGE
+    BACKEND -->|OAuth| OAUTH
+    AI -->|AI API| GEMINI
     DB --> STORAGE
-    %% External
-    AUTH --> GOOGLE
-    GEMINI --> GEMINI_API
-    %% Styling for dark/light mode
-    classDef client fill:#0d47a1,color:#fff,stroke:#1976d2,stroke-width:2px;
-    classDef frontend fill:#4a148c,color:#fff,stroke:#7c43bd,stroke-width:2px;
-    classDef backend fill:#e65100,color:#fff,stroke:#ff9800,stroke-width:2px;
-    classDef ai fill:#1b5e20,color:#fff,stroke:#43a047,stroke-width:2px;
-    classDef data fill:#311b92,color:#fff,stroke:#5e35b1,stroke-width:2px;
-    classDef external fill:#fbc02d,color:#222,stroke:#fbc02d,stroke-width:2px;
-    class CLIENT client;
-    class FRONTEND frontend;
-    class BACKEND backend;
-    class AI ai;
-    class DATA data;
-    class EXTERNAL external;
+
+    %% Styling: Black & White only
+    classDef bw fill:#fff,color:#111,stroke:#111,stroke-width:1.5px;
+    class CLIENT,FRONTEND,BACKEND,AI,DB,STORAGE,OAUTH,GEMINI bw;
 ```
 
 **Ringkasan Layer (Textual Summary):**

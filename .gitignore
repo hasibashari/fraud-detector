@@ -12,19 +12,39 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+*.egg-info/
 
 # System files
 .DS_Store
 Thumbs.db
+*.log
 
-# lainnya
+# Project specific
 /backend/uploads
 /.vscode
 
+# Node.js
 node_modules
+
 # Keep environment variables out of version control
 backend/.env
-/backend/generated/prisma
+
 # Prisma generated files
-/backend/prisma/
+/backend/generated/prisma
+
+# Legacy backups
 /frontend/legacy-backup
+
+# IDE files
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+
+# Coverage reports
+coverage/
+.nyc_output/

@@ -592,6 +592,7 @@ model Transaction {
   isAnomaly     Boolean? @default(false) // Status anomali dari AI
   anomalyScore  Float?   // Skor risiko dari model AI (0.0 - 1.0)
   aiExplanation String?  @db.Text // Penjelasan anomali dari Google Gemini AI
+  hour          Int      // Jam transaksi (0-23) untuk analisis pattern
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -610,6 +611,54 @@ enum BatchStatus {
   FAILED    // Error saat processing
 }
 ```
+
+## 🔧 **PERBAIKAN MASALAH ANALISIS WAKTU**
+
+### **Masalah yang Telah Diperbaiki (Juli 2025)**
+
+**Issue:** Informasi waktu (jam) transaksi tidak tersedia dalam analisis anomali, menyebabkan hasil analisis kurang akurat dalam deteksi pola fraud berdasarkan waktu.
+
+**Root Cause:**
+
+- Backend tidak mengekstrak informasi `hour` dari timestamp saat upload CSV
+- Database tidak menyimpan field `hour` secara terpisah
+- Model AI bergantung pada ekstraksi timestamp yang tidak konsisten
+
+**Solusi yang Diimplementasikan:**
+
+1. **Database Schema Update:**
+
+   ```prisma
+   model Transaction {
+     // ...existing fields...
+     hour      Int // Jam transaksi (0-23) untuk analisis pattern
+     // ...
+   }
+   ```
+
+2. **Backend Processing Enhancement:**
+
+   - Ekstraksi otomatis `hour` dari timestamp saat upload CSV
+   - Validasi dan pembersihan data timestamp
+   - Default value hour=12 jika timestamp tidak valid
+
+3. **AI Model Improvement:**
+
+   - Penggunaan informasi hour yang sudah diekstrak dari database
+   - Validasi range hour (0-23)
+   - Fallback mechanism yang lebih robust
+
+4. **Frontend Updates:**
+   - Tampilan informasi hour dalam export CSV
+   - UI yang menunjukkan analisis berdasarkan waktu
+
+**Hasil Perbaikan:**
+✅ Analisis pattern waktu anomali sekarang tersedia dan akurat  
+✅ Deteksi fraud berdasarkan jam transaksi berfungsi optimal  
+✅ Export data mencakup informasi waktu lengkap  
+✅ Konsistensi data antara upload, analisis, dan hasil
+
+---
 
 ## 🔗 API Documentation
 
@@ -1419,51 +1468,6 @@ Proyek ini dibuat sebagai sarana belajar dan eksplorasi teknologi oleh seorang p
 - **Core Functionality**: 100% complete
 - **Authentication System**: 100% complete
 - **AI Integration**: 100% complete
-- **Database Design**: 100% complete
-- **API Development**: 100% complete
-- **Frontend UI**: 100% complete
-- **Basic Testing**: 100% complete
-- **Documentation**: 100% complete
-
-#### 🔄 **IN PROGRESS (Learning)**
-
-- **Charts/Visualizations**: 0% (Chart.js loaded but not implemented)
-- **Advanced Analytics**: 25% (basic statistics only)
-- **Performance Optimization**: 50% (basic optimization done)
-
-#### 📋 **PLANNED (Learning Roadmap)**
-
-- **Advanced Features**: ML pipeline automation
-- **Production Features**: Advanced monitoring, scaling
-- **DevOps**: CI/CD, containerization
-
-### Learning Achievements
-
-**Teknologi yang Dipelajari:**
-
-- ✅ **Full-Stack Development**: Node.js, Express.js, Prisma, PostgreSQL
-- ✅ **AI/ML Integration**: TensorFlow, Google Gemini API, Custom Models
-- ✅ **Modern Frontend**: Tailwind CSS, Vanilla JS, Responsive Design
-- ✅ **Authentication**: JWT, OAuth 2.0, Session Management
-- ✅ **API Development**: RESTful APIs, Middleware, Error Handling
-- ✅ **Database Design**: Relational modeling, Migrations, ORM
-- ✅ **Testing**: Automated testing scripts, API testing
-- ✅ **Development Workflow**: Git, Environment management, Documentation
-
-**Skill Development:**
-
-- 🤖 **AI Integration**: Berhasil mengintegrasikan multiple AI services
-- 🔐 **Security Implementation**: Authentication, authorization, data protection
-- 📊 **Data Processing**: CSV parsing, batch processing, anomaly detection
-- 🎨 **UI/UX Design**: Modern responsive interfaces
-- 📖 **Technical Writing**: Comprehensive documentation
-
-### Learning Journey & AI Partnership
-
-**🎓 Personal Learning Objectives:**
-
-- ✅ Full-stack development dengan modern tech stack
-- ✅ AI/ML integration dalam web applications
 - ✅ Modern security implementation
 - ✅ Development best practices
 - ✅ Comprehensive testing strategies

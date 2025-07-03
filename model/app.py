@@ -106,7 +106,7 @@ def predict():
             logging.info("Added default user_id field (0)")
 
         if 'hour' not in df.columns:
-            # Extract hour from timestamp if available
+            # Extract hour from timestamp (selalu tersedia dari backend)
             if 'timestamp' in df.columns:
                 try:
                     temp_timestamps = pd.to_datetime(
@@ -125,6 +125,14 @@ def predict():
                 df['hour'] = 12  # Default ke jam 12
                 logging.info(
                     "No timestamp field found, added default hour field (12)")
+        else:
+            # Hour sudah dikirim dari backend (hasil ekstraksi timestamp)
+            df['hour'] = pd.to_numeric(
+                df['hour'], errors='coerce').fillna(12).astype(int)
+            # Ensure hour is in valid range (0-23)
+            df['hour'] = df['hour'].clip(0, 23)
+            logging.info(
+                f"Using provided hour values. Sample hours: {df['hour'].head().tolist()}")
 
         # Add default values for merchant and location if missing
         if 'merchant' not in df.columns:

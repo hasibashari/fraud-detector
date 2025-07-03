@@ -654,7 +654,6 @@ model Transaction {
   isAnomaly     Boolean? @default(false) // Status anomali dari AI
   anomalyScore  Float?   // Skor risiko dari model AI (0.0 - 1.0)
   aiExplanation String?  @db.Text // Penjelasan anomali dari Google Gemini AI
-  hour          Int      // Jam transaksi (0-23) untuk analisis pattern
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -680,44 +679,36 @@ enum BatchStatus {
 
 **Issue:** Informasi waktu (jam) transaksi tidak tersedia dalam analisis anomali, menyebabkan hasil analisis kurang akurat dalam deteksi pola fraud berdasarkan waktu.
 
-**Root Cause:**
+**Root Cause (SEBELUM DIPERBAIKI):**
 
-- Backend tidak mengekstrak informasi `hour` dari timestamp saat upload CSV
-- Database tidak menyimpan field `hour` secara terpisah
-- Model AI bergantung pada ekstraksi timestamp yang tidak konsisten
+- Backend sebelumnya tidak mengekstrak informasi waktu transaksi secara detail dari timestamp.
+- Database awal tidak menyimpan field jam (`hour`) secara terpisah.
+- Model AI sempat mengandalkan parsing manual timestamp yang tidak konsisten.
 
 **Solusi yang Diimplementasikan:**
 
 1. **Database Schema Update:**
 
-   ```prisma
-   model Transaction {
-     // ...existing fields...
-     hour      Int // Jam transaksi (0-23) untuk analisis pattern
-     // ...
-   }
-   ```
+   - Field `hour` sudah dihapus dari schema dan migrasi terbaru. Analisis waktu kini hanya berdasarkan field `timestamp`.
 
 2. **Backend Processing Enhancement:**
 
-   - Ekstraksi otomatis `hour` dari timestamp saat upload CSV
-   - Validasi dan pembersihan data timestamp
-   - Default value hour=12 jika timestamp tidak valid
+   - Ekstraksi waktu transaksi kini langsung dari field `timestamp` tanpa field `hour` terpisah.
+   - Validasi dan pembersihan data timestamp tetap dilakukan.
 
 3. **AI Model Improvement:**
 
-   - Penggunaan informasi hour yang sudah diekstrak dari database
-   - Validasi range hour (0-23)
-   - Fallback mechanism yang lebih robust
+   - Model AI kini menggunakan parsing waktu dari field `timestamp` saja.
+   - Validasi range waktu tetap dilakukan pada sisi backend/AI jika diperlukan.
 
 4. **Frontend Updates:**
-   - Tampilan informasi hour dalam export CSV
-   - UI yang menunjukkan analisis berdasarkan waktu
+   - Tampilan waktu transaksi di-export langsung dari field `timestamp`.
+   - UI tetap mendukung analisis waktu berbasis timestamp.
 
 **Hasil Perbaikan:**
-✅ Analisis pattern waktu anomali sekarang tersedia dan akurat  
-✅ Deteksi fraud berdasarkan jam transaksi berfungsi optimal  
-✅ Export data mencakup informasi waktu lengkap  
+✅ Analisis pattern waktu anomali tetap tersedia dan akurat  
+✅ Deteksi fraud berdasarkan waktu transaksi tetap berfungsi optimal  
+✅ Export data mencakup informasi waktu lengkap (timestamp)  
 ✅ Konsistensi data antara upload, analisis, dan hasil
 
 ---
@@ -887,7 +878,7 @@ Body:
 
 - **Type**: Autoencoder Neural Network
 - **Purpose**: Unsupervised anomaly detection
-- **Features**: [amount, user_id, hour, merchant, location]
+- **Features**: [amount, user_id, merchant, location, timestamp]
 - **Preprocessing**: StandardScaler + OneHotEncoder
 - **Threshold**: Dynamic (95th percentile)
 
@@ -1412,159 +1403,6 @@ Project Fraud Detection System ini dikembangkan sebagai **solo development proje
 - High-quality code output dengan minimal technical debt
 - Comprehensive documentation dan user guides
 - Modern system dengan good architecture features
-
-## 🚀 Deployment Guide
-
-> **📌 IMPORTANT NOTE**: Bagian ini adalah **panduan untuk future deployment**, bukan bukti bahwa system sudah di-deploy ke production.
->
-> **Current Status**: System berjalan di **local development environment** (`localhost:3001`).
->
-> **Purpose**: Documentation ini menunjukkan bahwa system sudah siap untuk deployment dan menyediakan langkah-langkah yang diperlukan untuk deploy ke production server di masa depan.
-
-### Production Deployment Checklist
-
-#### Environment Setup
-
-- [ ] Setup production PostgreSQL database
-- [ ] Configure production environment variables
-- [ ] Setup Google OAuth production credentials
-- [ ] Generate secure JWT secrets
-
-#### Backend Deployment
-
-```bash
-# Production build
-npm install --production
-
-# Environment variables
-NODE_ENV=production
-DATABASE_URL="postgresql://..."
-JWT_SECRET="production-secret-very-long"
-GOOGLE_CLIENT_ID="production-client-id"
-GOOGLE_CLIENT_SECRET="production-secret"
-GEMINI_API_KEY="production-gemini-key"
-```
-
-#### AI Model Deployment
-
-```bash
-# Production Python setup
-pip install gunicorn
-gunicorn -w 4 -b 0.0.0.0:5000 app:app
-```
-
-#### Database Migration
-
-```bash
-# Production migration
-npx prisma migrate deploy
-npx prisma generate
-```
-
-## 📧 Contact & Support
-
-### Learning Project
-
-Proyek ini dibuat sebagai sarana belajar dan eksplorasi teknologi oleh seorang pelajar, dengan dukungan AI coding partners seperti GitHub Copilot, Google Gemini, ChatGPT, dan Claude. Selain sebagai bahan pembelajaran, proyek ini juga disiapkan untuk berpartisipasi dalam Hackathon BI‑OJK 2025 (tema: Fraud Detection & Risk Mitigation).
-
-Jika Anda memiliki pertanyaan, saran, atau ingin berdiskusi seputar kode, silakan membuka issue atau menghubungi maintainer di repositori ini.
-
-- **GitHub Issues**: [Create New Issue](https://github.com/hasib-ashari/fraud-detector/issues)
-- **Email**: hasibashari@gmail.com
-- **LinkedIn**: [Hasib Ashari](https://linkedin.com/in/hasib-ashari)
-
-> **Catatan:** Saya masih dalam tahap pembelajaran, dan proyek ini dikembangkan dengan bantuan AI coding partners sebagai bagian dari eksplorasi teknologi AI dan pengembangan web modern.
->
-> Jika Anda ingin menggunakan, memodifikasi, atau belajar dari proyek ini—silakan! Proyek ini bersifat terbuka untuk pembelajaran dan eksperimen. Namun, mohon dipahami bahwa saya belum dapat memberikan dukungan teknis secara profesional.
-
-### Documentation & Resources
-
-- **Technical Documentation**: Tersedia lengkap dalam file README.md ini
-- **API Reference**: Lihat bagian API Documentation di atas
-- **Setup Guides**: Lihat bagian Installation & Setup Guide
-- **Troubleshooting**: Lihat bagian Troubleshooting Guide untuk masalah umum
-
----
-
-## 🔄 Version History & Development Roadmap
-
-### Version History
-
-#### v2.1.0 (Current - July 2025)
-
-**🎯 Complete Fraud Detection System**
-
-**✨ Features:**
-
-- ✅ **AI Chat Integration**: Chat interface dengan Google Gemini untuk fraud analysis
-- ✅ **Enhanced UI/UX**: Modern responsive design dengan Tailwind CSS
-- ✅ **Results Management**: Filtering, sorting, dan CSV export
-- ✅ **Security Implementation**: Authentication dan data protection
-- ✅ **Testing Suite**: 3 basic testing scripts
-- ✅ **Development Tools**: Setup scripts dan development workflow
-
-**🔧 Technical Implementation:**
-
-- Backend: API endpoints dengan Express.js
-- Frontend: 5 dedicated pages dengan modular JS architecture
-- AI Integration: Custom ML model + Google Gemini AI
-- Database: PostgreSQL dengan Prisma ORM
-- Authentication: JWT + Google OAuth 2.0
-
-#### v1.0.0 (Late June 2025)
-
-**🌟 Initial Release - MVP**
-
-**✨ Core Features:**
-
-- ✅ Basic fraud detection model (Autoencoder)
-- ✅ File upload functionality untuk CSV
-- ✅ User authentication system
-- ✅ Basic results display
-- ✅ Database integration
-
-### Development Roadmap
-
-#### 🎯 **Near Future (Q4 2025)**
-
-- [ ] **Chart Implementation**: Implementasi Chart.js yang sudah di-load
-- [ ] **Advanced Analytics**: Statistical analysis yang lebih mendalam
-- [ ] **Performance Optimization**: Database indexing dan query optimization
-- [ ] **Error Handling Enhancement**: Improved error messages dan logging
-
-#### 🚀 **Future Enhancements (2026)**
-
-- [ ] **Advanced AI Models**: Model ensemble untuk improved accuracy
-- [ ] **Real-time Notifications**: WebSocket integration untuk alerts
-- [ ] **Mobile Optimization**: Better mobile experience
-- [ ] **Multi-language Support**: Internationalization (i18n)
-
-#### 🌟 **Long-term Learning Goals**
-
-- [ ] **Cloud Deployment**: AWS/GCP deployment experience
-- [ ] **Microservices Architecture**: Service decomposition
-- [ ] **Advanced Security**: Enhanced security practices
-- [ ] **DevOps Pipeline**: CI/CD implementation
-
-### Project Status
-
-#### ✅ **COMPLETED**
-
-- **Core Functionality**: 100% complete
-- **Authentication System**: 100% complete
-- **AI Integration**: 100% complete
-- ✅ Modern security implementation
-- ✅ Development best practices
-- ✅ Comprehensive testing strategies
-- ⏳ Advanced DevOps dan cloud deployment
-- ⏳ Scalable system architecture design
-
-**🤖 AI Collaboration Success:**
-
-- **GitHub Copilot**: 40% code completion assistance
-- **Google Gemini**: 30% architecture planning dan problem solving
-- **ChatGPT**: 20% documentation dan debugging support
-- **Claude**: 10% code review dan best practices guidance
 
 > **💡 Learning Achievement**: Proyek ini dikembangkan dengan bantuan AI coding partners untuk mengeksplorasi teknologi modern, termasuk AI, machine learning, dan pengembangan web full-stack. Sistem berhasil dibangun dengan fitur-fitur yang solid dan berjalan dengan baik di lingkungan pengembangan (development environment).
 >

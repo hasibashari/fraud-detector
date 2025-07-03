@@ -64,62 +64,56 @@
 
 ## 🏗️ System Architecture
 
+
 ### High-Level Architecture Overview
 
+> **Note:** Visual diagram below uses high-contrast colors and is optimized for both light and dark mode. Jika diagram tidak tampil di markdown viewer, silakan lihat ringkasan layer di bawahnya.
+
 ```mermaid
-%% Improved System Architecture Diagram
 flowchart TD
     subgraph CLIENT[Client Layer 🖥️📱]
-        WEB[🌐 Web Browser]
-        MOB[📱 Mobile Browser]
+        WEB["🌐 Web Browser"]
+        MOB["📱 Mobile Browser"]
     end
-
-    subgraph FRONTEND[Frontend Layer 🎨]
-        UI[UI: Tailwind + JS]
-        AUTH[Login/Register]
-        UPLOAD[Batch Upload]
-        CHAT[AI Chat]
-        RESULTS[Results/Export]
+    subgraph FRONTEND[Frontend 🎨]
+        UI["UI: Tailwind + JS"]
+        AUTH["Login/Register"]
+        UPLOAD["Batch Upload"]
+        CHAT["AI Chat"]
+        RESULTS["Results/Export"]
     end
-
-    subgraph BACKEND[Backend Layer 🚀]
-        API[Express.js API]
-        MIDDLEWARE[Security Middleware]
-        ROUTES[Route Handlers]
-        CTRL[Controllers]
-        FILES[Uploads Folder]
+    subgraph BACKEND[Backend 🚀]
+        API["Express.js API"]
+        MIDDLEWARE["Security Middleware"]
+        ROUTES["Route Handlers"]
+        CTRL["Controllers"]
+        FILES["Uploads Folder"]
     end
-
-    subgraph AI[AI & ML Layer 🤖]
-        PYAPI[Flask API]
-        MODEL[Autoencoder Model]
-        PREPROC[Preprocessor]
-        GEMINI[Gemini API Integration]
+    subgraph AI[AI & ML 🤖]
+        PYAPI["Flask API"]
+        MODEL["Autoencoder Model"]
+        PREPROC["Preprocessor"]
+        GEMINI["Gemini API Integration"]
     end
-
     subgraph DATA[Data Layer 🗄️]
-        DB[(PostgreSQL DB)]
-        STORAGE[File Storage]
+        DB[("PostgreSQL DB")]
+        STORAGE["File Storage"]
     end
-
-    subgraph EXTERNAL[External Services 🌐]
-        GOOGLE[Google OAuth]
-        GEMINI_API[Google Gemini API]
+    subgraph EXTERNAL[External 🌐]
+        GOOGLE["Google OAuth"]
+        GEMINI_API["Google Gemini API"]
     end
-
     %% Client to Frontend
     WEB & MOB --> UI
     UI --> AUTH
     UI --> UPLOAD
     UI --> CHAT
     UI --> RESULTS
-
     %% Frontend to Backend
     AUTH --> API
     UPLOAD --> API
     CHAT --> API
     RESULTS --> API
-
     %% Backend internals
     API --> MIDDLEWARE
     MIDDLEWARE --> ROUTES
@@ -128,28 +122,41 @@ flowchart TD
     CTRL --> FILES
     CTRL --> PYAPI
     CTRL --> GEMINI
-
     %% AI Layer
     PYAPI --> MODEL
     PYAPI --> PREPROC
     GEMINI --> GEMINI_API
-
     %% Data Layer
     FILES --> STORAGE
     DB --> STORAGE
-
     %% External
     AUTH --> GOOGLE
     GEMINI --> GEMINI_API
-
-    %% Styling
-    style CLIENT fill:#e1f5fe,stroke:#2196f3,stroke-width:2px
-    style FRONTEND fill:#f3e5f5,stroke:#8e24aa,stroke-width:2px
-    style BACKEND fill:#fff3e0,stroke:#ff9800,stroke-width:2px
-    style AI fill:#e8f5e9,stroke:#43a047,stroke-width:2px
-    style DATA fill:#ede7f6,stroke:#5e35b1,stroke-width:2px
-    style EXTERNAL fill:#fff8e1,stroke:#fbc02d,stroke-width:2px
+    %% Styling for dark/light mode
+    classDef client fill:#0d47a1,color:#fff,stroke:#1976d2,stroke-width:2px;
+    classDef frontend fill:#4a148c,color:#fff,stroke:#7c43bd,stroke-width:2px;
+    classDef backend fill:#e65100,color:#fff,stroke:#ff9800,stroke-width:2px;
+    classDef ai fill:#1b5e20,color:#fff,stroke:#43a047,stroke-width:2px;
+    classDef data fill:#311b92,color:#fff,stroke:#5e35b1,stroke-width:2px;
+    classDef external fill:#fbc02d,color:#222,stroke:#fbc02d,stroke-width:2px;
+    class CLIENT client;
+    class FRONTEND frontend;
+    class BACKEND backend;
+    class AI ai;
+    class DATA data;
+    class EXTERNAL external;
 ```
+
+**Ringkasan Layer (Textual Summary):**
+
+- **Client Layer:** Web & mobile browser
+- **Frontend Layer:** Tailwind CSS, Vanilla JS, modular UI (auth, upload, chat, results)
+- **Backend Layer:** Express.js API, Prisma ORM, middleware security, file uploads
+- **AI/ML Layer:** Python Flask API, autoencoder model, Google Gemini integration
+- **Data Layer:** PostgreSQL database, file storage
+- **External Services:** Google OAuth, Google Gemini API
+
+> **Lihat diagram komponen dan data flow di bawah untuk detail visual arsitektur.**
 
 ### Detailed Component Architecture
 

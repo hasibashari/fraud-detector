@@ -18,21 +18,21 @@
 
 ## 📚 Table of Contents
 
-- [📋 Deskripsi](#-deskripsi)
-- [✨ Fitur Utama](#-fitur-utama)
-- [🏗️ Arsitektur Sistem](#️-arsitektur-sistem)
-- [🛠️ Teknologi yang Digunakan](#️-teknologi-yang-digunakan)
-- [📁 Struktur Proyek](#-struktur-proyek)
-- [🚀 Instalasi dan Setup](#-instalasi-dan-setup)
+- [📋 Deskripsi Project](#-deskripsi-project)
+- [✨ Fitur Utama & Key Features](#-fitur-utama--key-features)
+- [🏗️ System Architecture](#️-system-architecture)
+- [🛠️ Tech Stack & Tools](#️-tech-stack--tools)
+- [📁 Project Structure](#-project-structure)
+- [🚀 Installation & Setup Guide](#-installation--setup-guide)
 - [📊 Database Schema](#-database-schema)
 - [🔗 API Documentation](#-api-documentation)
 - [🤖 AI Model Details](#-ai-model-details)
-- [💡 Cara Penggunaan](#-cara-penggunaan)
-- [⚙️ Konfigurasi](#️-konfigurasi)
-- [🧪 Testing](#-testing)
+- [💡 Usage Guide (Cara Penggunaan)](#-usage-guide-cara-penggunaan)
+- [⚙️ Configuration Setup](#️-configuration-setup)
+- [🧪 Testing & Validation](#-testing--validation)
 - [🛡️ Security Features](#️-security-features)
-- [🔧 Troubleshooting](#-troubleshooting)
-- [📈 Performance](#-performance)
+- [🔧 Troubleshooting Guide](#-troubleshooting-guide)
+- [📈 Performance & Optimization](#-performance--optimization)
 - [🤝 Contributing](#-contributing)
 - [🚀 Deployment Guide](#-deployment-guide)
 - [📧 Contact & Support](#-contact--support)
@@ -40,103 +40,115 @@
 
 ---
 
-## 📋 Deskripsi
+## 📋 Deskripsi Project
 
-**Fraud Detection System** adalah aplikasi web full-stack berbasis AI yang dirancang untuk mendeteksi transaksi keuangan yang mencurigakan menggunakan teknik machine learning dan AI. Sistem ini mengintegrasikan custom autoencoder neural network dengan Google Gemini AI untuk memberikan analisis fraud dan penjelasan anomali.
+**Fraud Detection System** adalah aplikasi web full-stack berbasis AI yang dirancang untuk mendeteksi transaksi keuangan yang mencurigakan menggunakan teknik machine learning dan AI. System ini mengintegrasikan custom autoencoder neural network dengan Google Gemini AI untuk memberikan fraud analysis dan anomaly explanation.
 
 **🎓 Learning Project**: Ini adalah proyek pembelajaran yang dikembangkan dengan bantuan AI coding partners untuk mengeksplorasi teknologi AI, machine learning, dan pengembangan web modern.
 
-### ✨ Fitur Utama
+### ✨ Fitur Utama & Key Features
 
-- **🔐 User Authentication**: Sistem login/register dengan JWT dan Google OAuth 2.0
-- **👤 User Management**: Manajemen pengguna dengan hashing password (bcrypt)
-- **🤖 AI-Powered Detection**: Menggunakan autoencoder neural network untuk deteksi anomali
+- **🔐 User Authentication**: System login/register dengan JWT dan Google OAuth 2.0
+- **👤 User Management**: Manajemen pengguna dengan password hashing (bcrypt)
+- **🤖 AI-Powered Detection**: Menggunakan autoencoder neural network untuk anomaly detection
 - **🧠 Google Gemini AI Integration**: Penjelasan anomali berbasis AI dengan Google Gemini
 - **💬 AI Chat Interface**: Chat dengan AI untuk konsultasi fraud detection
 - **📊 Batch Processing**: Upload dan analisis file CSV dalam batch per user
 - **📈 Real-time Analysis**: Analisis transaksi secara real-time melalui Flask API
-- **🎯 Dynamic Threshold**: Threshold deteksi adaptif berdasarkan distribusi data
+- **🎯 Dynamic Threshold**: Threshold deteksi adaptif berdasarkan data distribution
 - **💾 Database Integration**: PostgreSQL dengan Prisma ORM
 - **🖥️ Modern Web Interface**: Interface web responsive dengan Tailwind CSS
-- **🔄 RESTful API**: API yang komprehensif dengan middleware proteksi
+- **🔄 RESTful API**: API yang comprehensive dengan middleware protection
 - **🌐 OAuth Integration**: Login dengan Google untuk kemudahan akses
 - **📱 Responsive Design**: Optimized untuk desktop dan mobile devices
 
-## 🏗️ Arsitektur Sistem
+## 🏗️ System Architecture
 
 ### High-Level Architecture Overview
 
 ```mermaid
-graph TB
-    subgraph "Client Layer"
+%% Improved System Architecture Diagram
+flowchart TD
+    subgraph CLIENT[Client Layer 🖥️📱]
         WEB[🌐 Web Browser]
         MOB[📱 Mobile Browser]
     end
 
-    subgraph "Frontend Layer"
-        UI[🎨 Frontend Application]
-        AUTH[🔐 Authentication Pages]
-        UPLOAD[📤 File Upload Interface]
-        CHAT[💬 AI Chat Interface]
-        RESULTS[📋 Results & Export]
+    subgraph FRONTEND[Frontend Layer 🎨]
+        UI[UI: Tailwind + JS]
+        AUTH[Login/Register]
+        UPLOAD[Batch Upload]
+        CHAT[AI Chat]
+        RESULTS[Results/Export]
     end
 
-    subgraph "Backend Services"
-        API[🚀 Express.js API Server]
-        MIDDLEWARE[🛡️ Security Middleware]
-        ROUTES[🛤️ Route Handlers]
-        CTRL[⚙️ Controllers]
+    subgraph BACKEND[Backend Layer 🚀]
+        API[Express.js API]
+        MIDDLEWARE[Security Middleware]
+        ROUTES[Route Handlers]
+        CTRL[Controllers]
+        FILES[Uploads Folder]
     end
 
-    subgraph "AI Services"
-        ML[🤖 Python ML Service]
-        AUTOENC[🧠 Autoencoder Model]
-        PREPROC[⚡ Data Preprocessor]
-        GEMINI[✨ Google Gemini API]
+    subgraph AI[AI & ML Layer 🤖]
+        PYAPI[Flask API]
+        MODEL[Autoencoder Model]
+        PREPROC[Preprocessor]
+        GEMINI[Gemini API Integration]
     end
 
-    subgraph "Data Layer"
-        DB[(🗄️ PostgreSQL Database)]
-        UPLOADS[📁 File Storage]
+    subgraph DATA[Data Layer 🗄️]
+        DB[(PostgreSQL DB)]
+        STORAGE[File Storage]
     end
 
-    subgraph "External Services"
-        GOOGLE[🔑 Google OAuth]
-        GEMINI_API[🌟 Gemini AI API]
+    subgraph EXTERNAL[External Services 🌐]
+        GOOGLE[Google OAuth]
+        GEMINI_API[Google Gemini API]
     end
 
-    WEB --> UI
-    MOB --> UI
+    %% Client to Frontend
+    WEB & MOB --> UI
     UI --> AUTH
     UI --> UPLOAD
     UI --> CHAT
     UI --> RESULTS
 
+    %% Frontend to Backend
     AUTH --> API
     UPLOAD --> API
     CHAT --> API
     RESULTS --> API
 
+    %% Backend internals
     API --> MIDDLEWARE
     MIDDLEWARE --> ROUTES
     ROUTES --> CTRL
-
-    CTRL --> ML
     CTRL --> DB
-    CTRL --> UPLOADS
-    CTRL --> GEMINI_API
+    CTRL --> FILES
+    CTRL --> PYAPI
+    CTRL --> GEMINI
 
-    ML --> AUTOENC
-    ML --> PREPROC
+    %% AI Layer
+    PYAPI --> MODEL
+    PYAPI --> PREPROC
+    GEMINI --> GEMINI_API
 
+    %% Data Layer
+    FILES --> STORAGE
+    DB --> STORAGE
+
+    %% External
     AUTH --> GOOGLE
-    CHAT --> GEMINI_API
+    GEMINI --> GEMINI_API
 
-    style UI fill:#e1f5fe
-    style API fill:#fff3e0
-    style ML fill:#f3e5f5
-    style DB fill:#e8f5e8
-    style GEMINI_API fill:#fff8e1
+    %% Styling
+    style CLIENT fill:#e1f5fe,stroke:#2196f3,stroke-width:2px
+    style FRONTEND fill:#f3e5f5,stroke:#8e24aa,stroke-width:2px
+    style BACKEND fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    style AI fill:#e8f5e9,stroke:#43a047,stroke-width:2px
+    style DATA fill:#ede7f6,stroke:#5e35b1,stroke-width:2px
+    style EXTERNAL fill:#fff8e1,stroke:#fbc02d,stroke-width:2px
 ```
 
 ### Detailed Component Architecture
@@ -243,14 +255,14 @@ graph TB
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## 🛠️ Teknologi yang Digunakan
+## 🛠️ Tech Stack & Tools
 
-### Backend (Node.js)
+### Backend Development (Node.js)
 
-- **Express.js**: Web framework
+- **Express.js**: Web framework untuk server
 - **Prisma**: Database ORM dengan generated client
-- **PostgreSQL**: Database relasional
-- **JWT (jsonwebtoken)**: Token-based authentication
+- **PostgreSQL**: Database relational
+- **JWT (jsonwebtoken)**: Token-based authentication system
 - **bcryptjs**: Password hashing dan security
 - **Passport.js**: Authentication middleware dengan Google OAuth
 - **Multer**: File upload handling
@@ -259,100 +271,103 @@ graph TB
 - **CORS**: Cross-origin resource sharing
 - **Google Generative AI**: Integration dengan Google Gemini API
 
-### AI Model (Python)
+### AI Model Development (Python)
 
-- **TensorFlow/Keras**: Neural network framework untuk autoencoder
-- **Flask**: Web API framework
-- **Flask-CORS**: CORS support untuk Flask
+- **TensorFlow/Keras**: Neural network framework untuk autoencoder model
+- **Flask**: Web API framework untuk AI service
+- **Flask-CORS**: CORS support untuk Flask API
 - **Pandas**: Data manipulation dan analysis
-- **NumPy**: Numerical computing
+- **NumPy**: Numerical computing untuk array operations
 - **Scikit-learn**: Preprocessing utilities (StandardScaler, OneHotEncoder)
 - **Joblib**: Model serialization dan loading
 
-### Frontend
+### Frontend Development
 
 - **HTML5/CSS3**: Modern markup dan styling
 - **JavaScript (Vanilla)**: Client-side logic dan DOM manipulation
 - **Tailwind CSS**: Utility-first CSS framework untuk responsive design
-- **Font Awesome**: Icon library
-- **Google Fonts (Inter)**: Typography
-- **Fetch API**: HTTP client untuk browser
+- **Font Awesome**: Icon library untuk UI components
+- **Google Fonts (Inter)**: Typography system
+- **Fetch API**: HTTP client untuk browser communication
 
-### AI & Intelligence
+### AI & Intelligence Services
 
-- **Google Gemini**: AI untuk fraud explanation dan chat
+- **Google Gemini**: AI untuk fraud explanation dan intelligent chat
 - **Custom Autoencoder**: Model untuk anomaly detection
-- **Hybrid AI Approach**: Kombinasi ML model + LLM
+- **Hybrid AI Approach**: Kombinasi ML model + LLM technology
 
-### Authentication & Security
+### Authentication & Security Implementation
 
-- **JWT (JSON Web Tokens)**: Stateless authentication
-- **Google OAuth 2.0**: Third-party authentication
-- **bcrypt**: Password hashing dengan salt
-- **Middleware Protection**: Route-level security
+- **JWT (JSON Web Tokens)**: Stateless authentication system
+- **Google OAuth 2.0**: Third-party authentication provider
+- **bcrypt**: Password hashing dengan salt untuk security
+- **Middleware Protection**: Route-level security implementation
 
-## 📁 Struktur Proyek
+## 📁 Project Structure
 
 ```
 fraud-detector/
-├── backend/                    # Backend Node.js application
-│   ├── index.js               # Main server file
-│   ├── package.json           # Dependencies
-│   ├── lib/
-│   │   └── prisma.js         # Prisma client configuration
-│   ├── controllers/
-│   │   └── authController.js # Authentication logic
-│   ├── middleware/
-│   │   └── authMiddleware.js # JWT protection middleware
+├── backend/                      # Backend Node.js application
+│   ├── index.js                  # Main server file
+│   ├── package.json              # Backend dependencies
 │   ├── config/
-│   │   └── passport-setup.js # Google OAuth configuration
-│   ├── routes/
-│   │   ├── authRoutes.js     # Authentication routes
-│   │   ├── transactionRoutes.js # Transaction routes + AI integration
-│   │   └── frontendRoutes.js # Frontend page routes
-│   ├── prisma/
-│   │   ├── schema.prisma     # Database schema
-│   │   └── migrations/       # Database migrations
+│   │   └── passport-setup.js     # Google OAuth config
+│   ├── controllers/
+│   │   └── authController.js     # Auth logic
 │   ├── generated/
-│   │   └── prisma/          # Auto-generated Prisma client
-│   └── uploads/              # Temporary file storage
+│   │   └── prisma/               # Auto-generated Prisma client (JS/TS)
+│   ├── lib/
+│   │   └── prisma.js             # Prisma client config
+│   ├── middleware/
+│   │   └── authMiddleware.js     # JWT protection middleware
+│   ├── prisma/
+│   │   ├── schema.prisma         # Database schema
+│   │   └── migrations/           # Prisma migrations
+│   ├── routes/
+│   │   ├── authRoutes.js         # Auth routes
+│   │   ├── frontendRoutes.js     # Frontend page routes
+│   │   └── transactionRoutes.js  # Transaction + AI routes
+│   ├── uploads/                  # Temporary file storage
+│   └── utils/
+│       └── logger.js             # Logging utility
 │
-├── frontend/                  # Frontend web application
-│   ├── pages/                # HTML pages with Tailwind CSS
-│   │   ├── index.html        # Dashboard page
-│   │   ├── ai-chat.html      # AI Chat interface
-│   │   ├── login.html        # Login page
-│   │   ├── register.html     # Registration page
-│   │   └── auth-success.html # OAuth success page
-│   ├── css/                  # Stylesheets
-│   │   └── main.css          # Global Tailwind customizations
-│   ├── js/                   # JavaScript modules
-│   │   ├── main.js           # Global utilities and API configuration
-│   │   ├── config.js         # Configuration management
-│   │   ├── tailwind-config.js # Tailwind CSS configuration
-│   │   ├── index.js          # Dashboard page logic
-│   │   ├── ai-chat.js        # AI Chat page logic
-│   │   └── auth.js           # Authentication logic
+├── frontend/                     # Frontend web application
+│   ├── css/
+│   │   └── main.css              # Tailwind customizations
+│   ├── js/
+│   │   ├── ai-chat.js            # AI Chat page logic
+│   │   ├── auth.js               # Auth logic
+│   │   ├── config.js             # Frontend config
+│   │   ├── index.js              # Dashboard logic
+│   │   ├── logger.js             # Frontend logger
+│   │   ├── main.js               # Global utilities
+│   │   └── tailwind-config.js    # Tailwind config
+│   └── pages/
+│       ├── ai-chat.html          # AI Chat interface
+│       ├── auth-success.html     # OAuth success page
+│       ├── index.html            # Dashboard
+│       ├── login.html            # Login page
+│       └── register.html         # Registration page
 │
-├── model/                     # AI/ML Python components
-│   ├── app.py                # Flask API server
-│   ├── train.py              # Model training script
-│   ├── requirements.txt      # Python dependencies
-│   ├── autoencoder_model.keras # Trained model file
-│   ├── preprocessor_pipeline.joblib # Data preprocessor
-│   └── data/                 # Training datasets
-│       ├── transactions_realistic_multi_feature.csv
+├── model/                        # AI/ML Python components
+│   ├── app.py                    # Flask API server
+│   ├── autoencoder_model.keras   # Trained model file
+│   ├── preprocessor_pipeline.joblib # Preprocessing pipeline
+│   ├── requirements.txt          # Python dependencies
+│   ├── train.py                  # Model training script
+│   └── data/
 │       ├── bank_transactions_data_2.csv
-│       └── transactions_large.csv
+│       ├── transactions_large.csv
+│       └── transactions_realistic_multi_feature.csv
+│   └── __pycache__/              # Python bytecode cache
 │
-├── start-dev.sh              # Development startup script
-├── test-api.sh               # API endpoint testing script
-├── test-frontend.sh          # Frontend testing script
-├── test-routes.sh            # Route testing script
-├── test-system.sh            # System integration testing
-├── LICENSE                   # MIT License
-├── .gitignore               # Git ignore rules
-└── README.md                # Documentation (this file)
+├── start-dev.sh                  # Development startup script
+├── test-frontend.sh              # Frontend testing script
+├── test-routes.sh                # Route testing script
+├── test-system.sh                # System integration testing
+├── LICENSE                       # MIT License
+├── .gitignore                    # Git ignore rules
+└── README.md                     # Documentation (this file)
 ```
 
 > **🎯 Modern Frontend Architecture**: Frontend menggunakan Tailwind CSS dengan arsitektur modular untuk maintainability dan responsive design.
@@ -371,14 +386,14 @@ fraud-detector/
 > - **Environment Validation**: Backend memvalidasi required environment variables
 > - **Modular Configuration**: Centralized config management di frontend
 
-## 🚀 Instalasi dan Setup
+## 🚀 Installation & Setup Guide
 
-### Prasyarat
+### Prerequisites (Prasyarat)
 
 - Node.js (>= 16.0.0)
 - Python (>= 3.8)
 - PostgreSQL (>= 12)
-- npm atau yarn
+- npm atau yarn package manager
 - Google Developer Console account (untuk OAuth)
 - Google AI Studio account (untuk Gemini API key)
 
@@ -396,14 +411,14 @@ cd fraud-detector
 chmod +x start-dev.sh
 ./start-dev.sh
 
-# Script akan otomatis:
+# Script akan otomatis melakukan:
 # - Check dependencies (Node.js, Python, PostgreSQL)
 # - Install backend dependencies
 # - Setup Python virtual environment
-# - Start services secara berurutan
+# - Start services secara sequential
 ```
 
-### 3. Manual Setup (Alternative)
+### 3. Manual Setup (Alternative Method)
 
 #### Backend Setup
 
@@ -413,10 +428,10 @@ npm install
 
 # Setup environment variables
 cp .env.example .env
-# Edit .env dengan konfigurasi berikut:
+# Edit .env dengan configuration berikut:
 ```
 
-#### Environment Variables (.env)
+#### Environment Variables (.env Configuration)
 
 ```bash
 # Database Configuration
@@ -440,7 +455,7 @@ GEMINI_API_KEY="your-gemini-api-key-here"
 AI_MODEL_URL=http://localhost:5000
 ```
 
-> **🔑 Important**: System akan melakukan validasi otomatis untuk semua environment variables yang required. Jika ada yang missing, server tidak akan start dan akan menampilkan error message yang clear.
+> **🔑 Important Note**: System akan melakukan automatic validation untuk semua required environment variables. Jika ada yang missing, server tidak akan start dan akan menampilkan clear error message.
 
 #### Database Setup
 
@@ -462,7 +477,7 @@ npx prisma studio  # Optional: untuk melihat database via web interface
 3. Enable Google+ API dan Google OAuth 2.0
 4. Buat OAuth 2.0 credentials
 5. Set authorized redirect URIs: `http://localhost:3001/auth/google/callback`
-6. Copy Client ID dan Secret ke file .env
+6. Copy Client ID dan Secret ke .env file
 
 #### Google Gemini API Setup
 
@@ -472,7 +487,7 @@ npx prisma studio  # Optional: untuk melihat database via web interface
 4. Copy API key ke .env file sebagai `GEMINI_API_KEY`
 5. Verify API access dengan test request
 
-### 5. Setup AI Model
+### 5. AI Model Setup
 
 ```bash
 cd model
@@ -480,10 +495,10 @@ cd model
 # Install Python dependencies dari requirements.txt
 pip install -r requirements.txt
 
-# Atau manual install:
+# Atau manual install packages:
 pip install flask==3.0.0 flask-cors==4.0.0 pandas==2.1.4 numpy==1.24.3 scikit-learn==1.3.2 tensorflow==2.15.0 joblib==1.3.2
 
-# Train model (opsional - model sudah terlatih)
+# Train model (optional - model sudah terlatih)
 python train.py
 
 # Start AI service
@@ -512,11 +527,11 @@ npm run dev
 ./test-system.sh
 ```
 
-### 8. Akses Aplikasi
+### 8. Access Application
 
-- **Main Dashboard**: `http://localhost:3001` (akan redirect ke login jika belum authenticate)
+- **Main Dashboard**: `http://localhost:3001` (akan redirect ke login jika belum authenticated)
 - **AI Chat Interface**: `http://localhost:3001/ai-chat` (setelah login)
-- **Direct Pages**:
+- **Direct Page Access**:
   - Login: `http://localhost:3001/login`
   - Register: `http://localhost:3001/register`
   - Dashboard: `http://localhost:3001/dashboard`
@@ -714,7 +729,7 @@ GET /auth/google/callback
 # Google callback URL, redirects to frontend with token
 ```
 
-### Transaction Endpoints (Protected)
+### Transaction Endpoints (Protected Routes)
 
 **Note**: Semua endpoint ini membutuhkan `Authorization: Bearer <token>` header
 
@@ -876,18 +891,18 @@ Content-Type: application/json
 GET http://localhost:5000/test-format
 ```
 
-## 💡 Cara Penggunaan
+## 💡 Usage Guide (Cara Penggunaan)
 
-### 1. Registrasi dan Login
+### 1. Registration & Login
 
-#### Registrasi Manual
+#### Manual Registration
 
 1. Buka aplikasi di browser (`http://localhost:3001`)
 2. Klik "Register" pada halaman login
 3. Isi form registrasi (nama, email, password)
 4. Klik "Register" - akan redirect ke halaman login
 
-#### Login Manual
+#### Manual Login
 
 1. Masukkan email dan password yang telah didaftarkan
 2. Klik "Login"
@@ -900,27 +915,27 @@ GET http://localhost:5000/test-format
 3. Berikan permission yang diminta
 4. Akan otomatis membuat akun dan login ke dashboard
 
-### 2. Upload Data Transaksi
+### 2. Upload Transaction Data
 
 1. Setelah login, Anda akan masuk ke dashboard utama
 2. Pada section "Unggah File Transaksi Baru":
    - Klik "Choose File" dan pilih file CSV
    - Pastikan format CSV sesuai dengan template
    - Klik "Unggah File"
-3. File akan diproses dan muncul di tabel "Dashboard Batch Upload"
+3. File akan diprocess dan muncul di tabel "Dashboard Batch Upload"
 4. Status akan berubah dari PENDING ke COMPLETED
 
-### 3. Analisis Transaksi
+### 3. Transaction Analysis
 
 1. Pada tabel batch, cari batch yang ingin dianalisis
 2. Klik tombol "▶️ Analisis" pada baris batch tersebut
-3. Sistem akan mengirim data ke AI model untuk processing
+3. System akan mengirim data ke AI model untuk processing
 4. Tunggu hingga muncul pesan "Analisis selesai"
-5. Proses ini akan mengupdate database dengan hasil anomali
+5. Process ini akan mengupdate database dengan hasil anomali
 
-### 4. Melihat Hasil Deteksi
+### 4. View Detection Results
 
-1. Setelah analisis selesai, klik tombol "📄 Lihat Hasil"
+1. Setelah analysis selesai, klik tombol "📄 Lihat Hasil"
 2. Anomali akan ditampilkan di tabel "Hasil Deteksi Anomali"
 3. Setiap anomali menunjukkan:
    - Timestamp transaksi
@@ -930,7 +945,7 @@ GET http://localhost:5000/test-format
 4. **Filtering & Sorting**: Gunakan filter dropdown dan klik header kolom untuk sorting
 5. **Export**: Klik tombol "Export" untuk download hasil dalam format CSV
 
-### 5. Manajemen Batch
+### 5. Batch Management
 
 1. **Melihat History**: Semua batch upload Anda tersimpan per user
 2. **Menghapus Batch**: Klik tombol "🗑️ Hapus" untuk menghapus batch
@@ -940,7 +955,7 @@ GET http://localhost:5000/test-format
 
 ### 6. AI Chat Interface
 
-1. **Akses AI Chat**: Setelah login, klik menu "AI Chat" atau langsung ke `/ai-chat`
+1. **Access AI Chat**: Setelah login, klik menu "AI Chat" atau langsung ke `/ai-chat`
 2. **Interactive Consultation**: Chat dengan AI untuk:
    - Konsultasi tentang pola transaksi mencurigakan
    - Penjelasan detail tentang hasil deteksi fraud
@@ -954,9 +969,9 @@ GET http://localhost:5000/test-format
 2. **Deep Analysis**: Fitur analisis mendalam untuk batch tertentu
 3. **Results Export**: Download hasil analisis dalam format CSV untuk reporting
 
-## ⚙️ Konfigurasi
+## ⚙️ Configuration Setup
 
-#### Environment Variables (.env)
+#### Environment Variables (.env Configuration)
 
 ```bash
 # Database Configuration
@@ -980,11 +995,11 @@ GEMINI_API_KEY="your-gemini-api-key-here"
 AI_MODEL_URL=http://localhost:5000
 ```
 
-> **⚠️ Environment Validation**: Backend akan melakukan validasi otomatis untuk semua required environment variables saat startup. Jika `GEMINI_API_KEY` atau variable lain hilang, server akan menampilkan error dan tidak akan start.
+> **⚠️ Environment Validation**: Backend akan melakukan automatic validation untuk semua required environment variables saat startup. Jika `GEMINI_API_KEY` atau variable lain hilang, server akan menampilkan error dan tidak akan start.
 
 ### CSV Column Mapping
 
-Sistem mendukung berbagai format kolom CSV dengan mapping otomatis:
+System mendukung berbagai format kolom CSV dengan automatic mapping:
 
 ```javascript
 const MAPPER_CONFIG = {
@@ -1040,14 +1055,14 @@ jumlah,waktu,merchant,Location,userid
    - Redirect URI: `http://localhost:3001/auth/google/callback`
 
 3. **Scopes yang diminta**:
-   - `profile`: Akses nama dan foto profil
-   - `email`: Akses alamat email
+   - `profile`: Access nama dan foto profil
+   - `email`: Access alamat email
 
-## 🧪 Testing
+## 🧪 Testing & Validation
 
 ### Automated Testing Scripts
 
-Proyek ini menyediakan beberapa script testing untuk memverifikasi fungsionalitas:
+Project ini menyediakan beberapa script testing untuk memverifikasi functionality:
 
 ```bash
 # Test semua API endpoints
@@ -1103,9 +1118,9 @@ curl -X POST http://localhost:5000/predict \
 
 File sample tersedia di `model/data/`:
 
-- `transactions_realistic_multi_feature.csv` - Dataset realistis dengan berbagai fitur
+- `transactions_realistic_multi_feature.csv` - Dataset realistis dengan berbagai features
 - `bank_transactions_data_2.csv` - Data transaksi bank
-- `transactions_large.csv` - Dataset besar untuk testing performa
+- `transactions_large.csv` - Dataset besar untuk testing performance
 
 ## 🛡️ Security Features
 
@@ -1120,7 +1135,7 @@ File sample tersedia di `model/data/`:
 ### Data Security
 
 - **Input Validation**: Validasi file CSV dan data input
-- **SQL Injection Prevention**: Prisma ORM memberikan protection otomatis
+- **SQL Injection Prevention**: Prisma ORM memberikan automatic protection
 - **File Upload Security**: Validasi tipe file dan temporary storage
 - **CORS Configuration**: Controlled cross-origin requests
 - **Environment Variables**: Sensitive data disimpan di .env
@@ -1131,14 +1146,14 @@ File sample tersedia di `model/data/`:
 - **Error Handling**: Comprehensive error handling tanpa data exposure
 - **Input Sanitization**: Data cleaning sebelum database storage
 
-## 📈 Performance
+## 📈 Performance & Optimization
 
-- **Async Processing**: Processing asinkron untuk performa optimal
+- **Async Processing**: Processing asinkron untuk optimal performance
 - **Memory Management**: Efficient memory usage untuk datasets
 - **Batch Processing**: Mendukung file CSV berukuran menengah
-- **API Response**: Fast response time untuk operasi CRUD
+- **API Response**: Fast response time untuk CRUD operations
 
-## 🔧 Troubleshooting
+## 🔧 Troubleshooting Guide
 
 ### Common Issues
 
@@ -1259,7 +1274,7 @@ Proyek ini dilisensikan di bawah [MIT License](LICENSE).
 
 **Solo Developer with AI Coding Partners**
 
-Proyek Fraud Detection System ini dikembangkan sebagai **solo development project** dengan dukungan penuh dari AI coding partners terdepan:
+Project Fraud Detection System ini dikembangkan sebagai **solo development project** dengan dukungan penuh dari AI coding partners terdepan:
 
 #### 👨‍💻 Lead Developer
 
@@ -1333,11 +1348,11 @@ Proyek Fraud Detection System ini dikembangkan sebagai **solo development projec
 
 ## 🚀 Deployment Guide
 
-> **📌 IMPORTANT NOTE**: Bagian ini adalah **panduan untuk future deployment**, bukan bukti bahwa sistem sudah di-deploy ke production.
+> **📌 IMPORTANT NOTE**: Bagian ini adalah **panduan untuk future deployment**, bukan bukti bahwa system sudah di-deploy ke production.
 >
-> **Current Status**: Sistem berjalan di **local development environment** (`localhost:3001`).
+> **Current Status**: System berjalan di **local development environment** (`localhost:3001`).
 >
-> **Purpose**: Dokumentasi ini menunjukkan bahwa sistem sudah siap untuk deployment dan menyediakan langkah-langkah yang diperlukan untuk deploy ke production server di masa depan.
+> **Purpose**: Documentation ini menunjukkan bahwa system sudah siap untuk deployment dan menyediakan langkah-langkah yang diperlukan untuk deploy ke production server di masa depan.
 
 ### Production Deployment Checklist
 
@@ -1383,20 +1398,20 @@ npx prisma generate
 
 ### Learning Project
 
-Proyek ini dibuat sebagai sarana belajar dan eksplorasi teknologi oleh seorang pelajar dengan bantuan AI coding partners (GitHub Copilot, Gemini, ChatGPT, Claude). Jika ada pertanyaan, saran, atau ingin berdiskusi seputar kode, silakan:
+Project ini dibuat sebagai sarana belajar dan eksplorasi teknologi oleh seorang pelajar dengan bantuan AI coding partners (GitHub Copilot, Gemini, ChatGPT, Claude). Jika ada pertanyaan, saran, atau ingin berdiskusi seputar kode, silakan:
 
 - **GitHub Issues**: [Create New Issue](https://github.com/hasib-ashari/fraud-detector/issues)
 - **Email**: hasibashari@gmail.com
 - **LinkedIn**: [Hasib Ashari](https://linkedin.com/in/hasib-ashari)
 
-> **Catatan:** Saya masih dalam tahap belajar dan proyek ini dikembangkan dengan bantuan AI coding partners. Jika Anda ingin menggunakan, memodifikasi, atau belajar dari proyek ini, silakan! Namun, saya belum bisa memberikan dukungan teknis profesional.
+> **Catatan:** Saya masih dalam tahap belajar dan project ini dikembangkan dengan bantuan AI coding partners. Jika Anda ingin menggunakan, memodifikasi, atau belajar dari project ini, silakan! Namun, saya belum bisa memberikan dukungan teknis profesional.
 
 ### Documentation & Resources
 
 - **Technical Documentation**: Tersedia lengkap dalam file README.md ini
 - **API Reference**: Lihat bagian API Documentation di atas
-- **Setup Guides**: Lihat bagian Instalasi dan Setup
-- **Troubleshooting**: Lihat bagian Troubleshooting untuk masalah umum
+- **Setup Guides**: Lihat bagian Installation & Setup Guide
+- **Troubleshooting**: Lihat bagian Troubleshooting Guide untuk masalah umum
 
 ---
 
@@ -1480,6 +1495,6 @@ Proyek ini dibuat sebagai sarana belajar dan eksplorasi teknologi oleh seorang p
 - **ChatGPT**: 20% documentation dan debugging support
 - **Claude**: 10% code review dan best practices guidance
 
-> **💡 Learning Achievement**: Proyek ini dikembangkan dengan bantuan AI coding partners untuk mengeksplorasi teknologi modern. Sistem berhasil dibangun dengan fitur-fitur yang solid dan bisa berjalan dengan baik di development environment.
+> **💡 Learning Achievement**: Project ini dikembangkan dengan bantuan AI coding partners untuk mengeksplorasi teknologi modern. System berhasil dibangun dengan fitur-fitur yang solid dan bisa berjalan dengan baik di development environment.
 
 ---

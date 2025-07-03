@@ -1051,17 +1051,16 @@ Proyek ini menyediakan beberapa script testing untuk memverifikasi fungsionalita
 
 ```bash
 # Test semua API endpoints
-./test-api.sh
+./test-system.sh
 
 # Test frontend functionality
 ./test-frontend.sh
 
 # Test routes accessibility
 ./test-routes.sh
-
-# Comprehensive system integration test
-./test-system.sh
 ```
+
+> **Note**: Scripts ini adalah basic testing tools untuk development, bukan comprehensive automated test suite.
 
 ### Manual Testing
 
@@ -1134,10 +1133,10 @@ File sample tersedia di `model/data/`:
 
 ## 📈 Performance
 
-- **Database Optimization**: Proper indexing untuk query yang efisien
-- **Batch Processing**: Mendukung file CSV berukuran menengah
 - **Async Processing**: Processing asinkron untuk performa optimal
 - **Memory Management**: Efficient memory usage untuk datasets
+- **Batch Processing**: Mendukung file CSV berukuran menengah
+- **API Response**: Fast response time untuk operasi CRUD
 
 ## 🔧 Troubleshooting
 
@@ -1269,9 +1268,9 @@ Proyek Fraud Detection System ini dikembangkan sebagai **solo development projec
   - Backend Development (Node.js, Express, Prisma)
   - Frontend Development (HTML, CSS, JavaScript, Tailwind)
   - AI/ML Integration (TensorFlow, Google Gemini)
-  - Database Design & Optimization
+  - Database Design & Implementation
   - Security Implementation & Testing
-  - DevOps & Production Deployment
+  - Development Environment Setup
 
 #### 🤖 AI Coding Partners & Assistants
 
@@ -1415,7 +1414,7 @@ Proyek ini dibuat sebagai sarana belajar dan eksplorasi teknologi oleh seorang p
 - ✅ **Enhanced UI/UX**: Modern responsive design dengan Tailwind CSS
 - ✅ **Results Management**: Filtering, sorting, dan CSV export
 - ✅ **Security Implementation**: Authentication dan data protection
-- ✅ **Testing Suite**: 4 automated testing scripts
+- ✅ **Testing Suite**: 3 basic testing scripts
 - ✅ **Development Tools**: Setup scripts dan development workflow
 
 **🔧 Technical Implementation:**

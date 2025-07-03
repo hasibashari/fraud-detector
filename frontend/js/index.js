@@ -1,52 +1,57 @@
 // =============================
 // INDEX.JS - Dashboard Page Specific JavaScript
-// Fungsionalitas khusus untuk halaman dashboard/index
+//
+// Fungsionalitas utama untuk halaman dashboard:
+// - Upload & validasi file CSV
+// - Manajemen batch upload & hasil deteksi
+// - Interaksi tabel, filter, sort, dan ekspor data
+// - Integrasi dengan API backend untuk analisis AI
+// - UI feedback & notifikasi
 // =============================
 
 // =============================
-// DashboardManager: Controller untuk Dashboard
+// DashboardManager: Controller utama dashboard
 // =============================
 class DashboardManager {
   constructor() {
-    // API endpoint utama
+    // Endpoint utama API transaksi
     this.API_BASE_URL = window.AppUtils.API_BASE_URL + '/api/transactions';
-    // Data batch yang diupload
+    // Data batch upload user
     this.batchData = [];
-    // Data hasil deteksi saat ini
+    // Data hasil deteksi anomali (current batch)
     this.currentResults = [];
-    // Data hasil filter
+    // Data hasil filter pencarian/risiko
     this.filteredResults = [];
-    // Field urutan sort saat ini
+    // Field sort aktif & arah sort
     this.currentSortField = null;
     this.currentSortDirection = 'asc';
     this.currentSort = { column: 'anomalyScore', direction: 'desc' };
     this.pageSize = 50;
 
-    this.init();
+    this.init(); // Inisialisasi fitur dashboard
   }
 
   // =============================
-  // Inisialisasi semua fitur dashboard
+  // Inisialisasi seluruh fitur dashboard (dipanggil di constructor)
   // =============================
   init() {
-    this.loadUserInfo();
-    this.setupFileUpload();
-    this.loadBatchData();
-    this.setupTableInteractions();
-    this.setupResultsFilter();
-    this.hideLoadingSkeleton();
-    this.updateStatsDisplay();
-    this.initializeAdvancedFilters();
+    this.loadUserInfo(); // Info user login
+    this.setupFileUpload(); // Fitur upload file CSV
+    this.loadBatchData(); // Load data batch upload
+    this.setupTableInteractions(); // Interaksi tabel (sort)
+    this.setupResultsFilter(); // Filter & ekspor hasil
+    this.hideLoadingSkeleton(); // Sembunyikan skeleton loading
+    this.updateStatsDisplay(); // Statistik dashboard
+    this.initializeAdvancedFilters(); // Filter lanjutan & search
   }
 
   // =============================
-  // Load informasi user saat ini
+  // Ambil & tampilkan info user login
   // =============================
   async loadUserInfo() {
     try {
       const userData = await window.AppUtils.apiCall('/auth/me');
       const userNameElement = document.getElementById('user-name');
-
       if (userNameElement && userData) {
         userNameElement.textContent = userData.name || userData.email || 'User';
       }
@@ -63,7 +68,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Fitur upload file CSV
+  // Setup fitur upload file CSV (drag & drop, validasi, tombol)
   // =============================
   setupFileUpload() {
     const uploadZone = document.getElementById('uploadZone');
@@ -118,7 +123,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Validasi file upload
+  // Validasi file upload (type, size, kosong)
   // =============================
   validateFile(file) {
     if (!file) {
@@ -148,7 +153,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Handler saat file dipilih
+  // Handler saat file dipilih (update UI info file)
   // =============================
   handleFileSelect() {
     const csvFile = document.getElementById('csvFile');
@@ -172,7 +177,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Reset pilihan file
+  // Reset pilihan file & progress upload
   // =============================
   clearFileSelection() {
     const csvFile = document.getElementById('csvFile');
@@ -198,7 +203,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Upload file ke server (dengan progress)
+  // Upload file ke server (dengan progress bar & feedback)
   // =============================
   async uploadFile() {
     const csvFile = document.getElementById('csvFile');
@@ -253,22 +258,16 @@ class DashboardManager {
         }
       });
 
-      // Handle completion
+      // Handle upload selesai (success/error)
       xhr.addEventListener('load', async () => {
         if (xhr.status === 200 || xhr.status === 201) {
           try {
             const response = JSON.parse(xhr.responseText);
-
-            if (progressText) {
-              progressText.textContent = 'Processing completed!';
-            }
-            if (progressBar) {
-              progressBar.style.width = '100%';
-            }
-
+            // Update UI progress
+            if (progressText) progressText.textContent = 'Processing completed!';
+            if (progressBar) progressBar.style.width = '100%';
             window.AppUtils.showToast('success', 'File uploaded and processed successfully!');
-
-            // Wait a moment then reload data and reset UI
+            // Tunggu sebentar, reload data batch, reset UI
             setTimeout(async () => {
               try {
                 // Reload batch data to show new upload
@@ -333,7 +332,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Load data batch dari server
+  // Load data batch upload user dari server
   // =============================
   async loadBatchData() {
     ClientLogger.info('Loading batch data...');
@@ -349,7 +348,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Render tabel batch
+  // Render tabel batch upload (tampilan utama dashboard)
   // =============================
   renderBatchTable() {
     const batchBody = document.getElementById('batchBody');
@@ -461,7 +460,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Helper: badge status batch
+  // Helper: badge warna status batch
   // =============================
   getStatusBadgeClass(status) {
     switch (status) {
@@ -493,7 +492,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Hapus batch
+  // Hapus batch upload (beserta transaksi di dalamnya)
   // =============================
   async deleteBatch(batchId) {
     if (!confirm('Are you sure you want to delete this batch? This action cannot be undone.')) {
@@ -514,7 +513,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Lihat hasil deteksi untuk batch tertentu
+  // Lihat hasil deteksi anomali untuk batch tertentu
   // =============================
   async viewResults(batchId) {
     try {
@@ -539,7 +538,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Helper: badge risiko
+  // Helper: badge warna risiko anomali
   // =============================
   getRiskBadgeClass(score) {
     const safeScore = score || 0;
@@ -549,7 +548,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Update ringkasan anomali
+  // Update ringkasan statistik anomali batch
   // =============================
   updateAnomalySummary(data = null) {
     if (data) {
@@ -584,7 +583,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Update tampilan statistik dashboard
+  // Update tampilan statistik summary dashboard
   // =============================
   updateStatsDisplay() {
     const totalBatches = this.batchData.length;
@@ -603,7 +602,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Animasi statistik dashboard
+  // Animasi statistik dashboard (angka berjalan)
   // =============================
   animateStats(batches, transactions, anomalies, riskScore) {
     const totalBatchesElement = document.getElementById('totalBatches');
@@ -624,7 +623,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Setup interaksi tabel (sort)
+  // Setup interaksi tabel (klik header untuk sort)
   // =============================
   setupTableInteractions() {
     // Setup sortable headers
@@ -638,7 +637,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Setup filter hasil deteksi
+  // Setup filter hasil deteksi & tombol ekspor
   // =============================
   setupResultsFilter() {
     const filterSelect = document.getElementById('resultsFilter');
@@ -666,7 +665,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Inisialisasi filter lanjutan & search
+  // Inisialisasi filter lanjutan & fitur pencarian
   // =============================
   initializeAdvancedFilters() {
     // Create search input with debounced search
@@ -694,7 +693,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Inisialisasi dropdown filter
+  // Inisialisasi dropdown filter (risiko, amount, tanggal)
   // =============================
   initializeFilterDropdowns() {
     // Risk level filter
@@ -719,7 +718,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Fitur pencarian transaksi
+  // Fitur pencarian transaksi (client-side search)
   // =============================
   async performSearch(query) {
     if (!query || query.length < 2) {
@@ -770,7 +769,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Reset pencarian
+  // Reset pencarian transaksi
   // =============================
   clearSearch() {
     const searchInput = document.getElementById('searchInput');
@@ -785,7 +784,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Terapkan filter hasil deteksi
+  // Terapkan filter hasil deteksi (risiko, amount, tanggal)
   // =============================
   async applyFilters() {
     const filters = this.getActiveFilters();
@@ -877,7 +876,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Ambil filter yang aktif
+  // Ambil filter yang aktif dari UI
   // =============================
   getActiveFilters() {
     const filters = {};
@@ -916,7 +915,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Reset semua filter
+  // Reset semua filter pencarian & filter lanjutan
   // =============================
   clearAllFilters() {
     // Clear search input
@@ -949,7 +948,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Filter hasil berdasarkan tipe risiko
+  // Filter hasil berdasarkan tipe risiko (dropdown utama)
   // =============================
   filterResults(filterType) {
     if (this.currentResults.length === 0) return;
@@ -980,7 +979,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Render hasil deteksi (dengan filter)
+  // Render hasil deteksi (dengan filter/search)
   // =============================
   renderFilteredResults() {
     const resultsTableContainer = document.getElementById('resultsTableContainer');
@@ -1038,7 +1037,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Update ringkasan hasil filter
+  // Update ringkasan hasil filter/search
   // =============================
   updateFilterSummary() {
     const resultsInfo = document.getElementById('resultsInfo');
@@ -1063,7 +1062,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Urutkan hasil deteksi
+  // Urutkan hasil deteksi (sort by kolom)
   // =============================
   sortResults(sortBy) {
     const dataToSort = this.filteredResults.length > 0 ? this.filteredResults : this.currentResults;
@@ -1161,7 +1160,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Ekspor hasil deteksi ke CSV
+  // Ekspor hasil deteksi ke CSV (filtered/current)
   // =============================
   exportResults() {
     const dataToExport =
@@ -1217,7 +1216,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Download hasil deteksi batch tertentu
+  // Download hasil deteksi batch tertentu (CSV dari backend)
   // =============================
   async downloadResults(batchId) {
     try {
@@ -1247,7 +1246,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Analisa batch dengan AI
+  // Trigger analisa batch dengan AI (POST ke backend)
   // =============================
   async analyzeBatch(batchId) {
     if (!confirm('Start AI analysis for this batch? This process may take a few minutes.')) {
@@ -1299,7 +1298,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Load hasil deteksi (dengan optimasi performa)
+  // Load hasil deteksi (dengan optimasi performa, paginasi)
   // =============================
   async loadResults(sortBy = 'amount', sortOrder = 'desc', page = 1, pageSize = 25) {
     window.AppUtils.performanceMonitor.start('loadResults');
@@ -1430,7 +1429,7 @@ class DashboardManager {
     tbody.appendChild(fragment);
   }
   // =============================
-  // Sembunyikan skeleton loading
+  // Sembunyikan skeleton loading (setelah data siap)
   // =============================
   hideLoadingSkeleton() {
     setTimeout(() => {
@@ -1442,7 +1441,7 @@ class DashboardManager {
   }
 
   // =============================
-  // Toggle Advanced Filters visibility
+  // Toggle visibilitas advanced filter/search
   // =============================
   toggleAdvancedFilters() {
     const searchFilterContainer = document.getElementById('searchFilterContainer');
@@ -1469,12 +1468,12 @@ class DashboardManager {
 // Inisialisasi dashboard saat DOM siap
 // =============================
 document.addEventListener('DOMContentLoaded', () => {
-  // Cek autentikasi user
+  // Cek autentikasi user sebelum load dashboard
   if (!window.AppUtils.isAuthenticated()) {
     window.location.href = '/login';
     return;
   }
-
+  // Inisialisasi controller dashboard
   window.dashboardManager = new DashboardManager();
   window.dashboard = window.dashboardManager; // Alias untuk HTML compatibility
 });

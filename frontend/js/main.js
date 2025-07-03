@@ -12,6 +12,7 @@ window.AppUtils = {
   // Ambil base URL API dari config
   // =============================
   get API_BASE_URL() {
+    // Fallback untuk development jika config belum loaded
     return window.AppConfig ? window.AppConfig.getApiUrl() : 'http://localhost:3001';
   },
 
@@ -154,7 +155,9 @@ window.AppUtils = {
       const start = this.marks.get(label);
       if (start) {
         const duration = performance.now() - start;
-        console.log(`Performance [${label}]: ${duration.toFixed(2)}ms`);
+        if (window.ClientLogger) {
+          ClientLogger.debug(`Performance [${label}]: ${duration.toFixed(2)}ms`);
+        }
         this.marks.delete(label);
         return duration;
       }
@@ -215,7 +218,9 @@ window.AppUtils = {
           const errorData = await response.json();
           errorMessage = errorData.message || errorData.error || errorMessage;
         } catch (parseError) {
-          console.warn('Could not parse error response:', parseError);
+          if (window.ClientLogger) {
+            ClientLogger.warn('Could not parse error response', parseError);
+          }
         }
 
         // Handle specific error codes
@@ -236,7 +241,9 @@ window.AppUtils = {
 
       return await response.json();
     } catch (error) {
-      console.error(`API Error [${endpoint}]:`, error);
+      if (window.ClientLogger) {
+        ClientLogger.error(`API Error [${endpoint}]`, error);
+      }
 
       // Network error handling
       if (error.name === 'TypeError' && error.message.includes('fetch')) {
@@ -253,7 +260,9 @@ window.AppUtils = {
   // Handler error API
   // =============================
   handleApiError(error, context = '') {
-    console.error(`API Error ${context}:`, error);
+    if (window.ClientLogger) {
+      ClientLogger.error(`API Error ${context}`, error);
+    }
 
     if (error.message.includes('401')) {
       this.showToast('error', 'Session expired. Please login again.');
@@ -335,31 +344,6 @@ window.AppUtils = {
       hour: '2-digit',
       minute: '2-digit',
     }).format(new Date(dateString));
-  },
-
-  // =============================
-  // Helper tema (future use)
-  // =============================
-  getPreferredColorScheme() {
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
-    }
-    return 'light';
-  },
-
-  // =============================
-  // Deteksi device
-  // =============================
-  isMobile() {
-    return window.innerWidth <= 768;
-  },
-
-  isTablet() {
-    return window.innerWidth > 768 && window.innerWidth <= 1024;
-  },
-
-  isDesktop() {
-    return window.innerWidth > 1024;
   },
 
   // =============================
@@ -472,7 +456,9 @@ window.AppUtils = {
 
       this.showToast('success', `${filename} downloaded successfully`);
     } catch (error) {
-      console.error('Download failed:', error);
+      if (window.ClientLogger) {
+        ClientLogger.error('Download failed', error);
+      }
       this.showToast('error', 'Failed to download file');
     }
   },

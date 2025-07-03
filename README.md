@@ -66,7 +66,7 @@
 
 ### High-Level Architecture Overview
 
-> **Penjelasan Arsitektur Sistem (Narasi Mendalam):**
+> **Penjelasan Arsitektur Sistem:**
 >
 > Fraud Detection System mengadopsi arsitektur multi-layer yang dirancang untuk memisahkan tanggung jawab, meningkatkan keamanan, dan memudahkan pengembangan serta pembelajaran. Setiap layer dan komponen memiliki peran yang jelas dan saling terintegrasi secara modular:
 >

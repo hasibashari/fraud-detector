@@ -109,39 +109,40 @@
 Diagram berikut menggambarkan alur utama komunikasi antar layer dan layanan eksternal:
 
 ```mermaid
+%% 🎨 Colorful, Emoji-enhanced System Architecture Diagram
 flowchart TB
-    subgraph CLIENT_SIDE["Client Side"]
-        CLIENT["User (Web/Mobile)"]
+    subgraph CLIENT_SIDE["🧑‍💻 Client Side"]
+        CLIENT["🌐 User (Web/Mobile)"]
     end
-    subgraph PRESENTATION["Frontend (Tailwind CSS, JS)"]
-        UI["UI Pages (Login, Register, Dashboard, AI Chat)"]
-        UPLOAD["CSV Upload Module"]
-        CHAT["AI Chat Module"]
-        RESULT["Results Table & Export"]
+    subgraph PRESENTATION["🎨 Frontend (Tailwind CSS, JS)"]
+        UI["🖥️ UI Pages (Login, Register, Dashboard, AI Chat)"]
+        UPLOAD["📤 CSV Upload Module"]
+        CHAT["🤖 AI Chat Module"]
+        RESULT["📊 Results Table & Export"]
     end
-    subgraph BACKEND["Backend (Express.js, Prisma, Middleware)"]
-        API["REST API Layer"]
-        AUTH["Auth Controller (JWT, OAuth)"]
-        ROUTES["Routes (auth, transaction, frontend)"]
-        MIDDLEWARE["Security Middleware"]
-        BATCH["Batch Processor"]
-        FILES["File Upload Handler"]
-        LOGGER["Logger"]
-        ORM["Prisma ORM"]
+    subgraph BACKEND["🛠️ Backend (Express.js, Prisma, Middleware)"]
+        API["🔗 REST API Layer"]
+        AUTH["🔐 Auth Controller (JWT, OAuth)"]
+        ROUTES["🛣️ Routes (auth, transaction, frontend)"]
+        MIDDLEWARE["🛡️ Security Middleware"]
+        BATCH["📦 Batch Processor"]
+        FILES["📁 File Upload Handler"]
+        LOGGER["📝 Logger"]
+        ORM["🗄️ Prisma ORM"]
     end
-    subgraph AI_ML["AI/ML Service (Flask, TensorFlow, Gemini)"]
-        FLASK["Flask API"]
-        MODEL["Autoencoder Model"]
-        PREPROC["Preprocessing Pipeline"]
-        GEMINI_PROXY["Gemini Proxy"]
+    subgraph AI_ML["🤖 AI/ML Service (Flask, TensorFlow, Gemini)"]
+        FLASK["🌟 Flask API"]
+        MODEL["🧠 Autoencoder Model"]
+        PREPROC["🧹 Preprocessing Pipeline"]
+        GEMINI_PROXY["✨ Gemini Proxy"]
     end
-    subgraph DATA["Data Layer"]
-        DB["PostgreSQL Database"]
-        STORAGE["File Storage"]
+    subgraph DATA["💾 Data Layer"]
+        DB["🗃️ PostgreSQL Database"]
+        STORAGE["🗂️ File Storage"]
     end
-    subgraph EXTERNAL["External Services"]
-        OAUTH["Google OAuth"]
-        GEMINI["Google Gemini API"]
+    subgraph EXTERNAL["🌍 External Services"]
+        OAUTH["🔑 Google OAuth"]
+        GEMINI["🌈 Google Gemini API"]
     end
 
     CLIENT -->|HTTP/HTTPS| UI
@@ -179,10 +180,19 @@ flowchart TB
 
     DB <--> STORAGE
 
-    %% Styling: Black & White only
-    classDef bw fill:#fff,color:#111,stroke:#111,stroke-width:1.5px;
-    class CLIENT,UI,UPLOAD,CHAT,RESULT,API,AUTH,ROUTES,MIDDLEWARE,BATCH,FILES,LOGGER,ORM,FLASK,MODEL,PREPROC,GEMINI_PROXY,DB,STORAGE,OAUTH,GEMINI bw;
-    class CLIENT_SIDE,PRESENTATION,BACKEND,AI_ML,DATA,EXTERNAL bw;
+    %% Styling: Colorful for better clarity
+    classDef client fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#0d47a1;
+    classDef frontend fill:#fffde7,stroke:#fbc02d,stroke-width:2px,color:#f57c00;
+    classDef backend fill:#e8f5e9,stroke:#388e3c,stroke-width:2px,color:#1b5e20;
+    classDef ai fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#880e4f;
+    classDef data fill:#ede7f6,stroke:#512da8,stroke-width:2px,color:#311b92;
+    classDef external fill:#f3e5f5,stroke:#8e24aa,stroke-width:2px,color:#4a148c;
+    class CLIENT,CLIENT_SIDE client;
+    class UI,UPLOAD,CHAT,RESULT,PRESENTATION frontend;
+    class API,AUTH,ROUTES,MIDDLEWARE,BATCH,FILES,LOGGER,ORM,BACKEND backend;
+    class FLASK,MODEL,PREPROC,GEMINI_PROXY,AI_ML ai;
+    class DB,STORAGE,DATA data;
+    class OAUTH,GEMINI,EXTERNAL external;
 ```
 
 **Ringkasan Layer (Textual Summary):**

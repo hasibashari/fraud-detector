@@ -1,20 +1,16 @@
 # Fraud Detection System
 
-**🎯 AI-based Anomaly Detection System for Financial Fraud Prevention**
+**🎯 AI-Powered Financial Fraud Detection System**
 
 ![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)
 ![Status](https://img.shields.io/badge/status-Development-yellow.svg)
 ![Node.js](https://img.shields.io/badge/node-%3E%3D%2016.0.0-brightgreen.svg)
 ![Python](https://img.shields.io/badge/python-%3E%3D%203.8-brightgreen.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
-![TensorFlow](https://img.shields.io/badge/tensorflow-2.19.0-orange.svg)
-![Google AI](https://img.shields.io/badge/Google%20Gemini-AI%20Powered-green.svg)
 
-> **⚡ Quick Start**: Clone repo → Setup .env (include GEMINI_API_KEY) → `./start-dev.sh` → Open http://localhost:3001
-
-> **🚀 Learning Project**: Sistem deteksi fraud dengan AI untuk pembelajaran dan eksplorasi teknologi
-
-> **✨ Features**: Custom ML model + Google Gemini AI, Batch processing, User authentication, Modern web interface
+> **⚡ Quick Start**: Clone → Setup .env → `./start-dev.sh` → Open http://localhost:3001
+>
+> **🎓 Learning Project**: Advanced fraud detection system built for BI-OJK 2025 Hackathon
 
 ## 📚 Table of Contents
 
@@ -42,9 +38,9 @@
 
 ## 📋 Deskripsi Project
 
-**Fraud Detection System** adalah aplikasi web full-stack berbasis AI yang dirancang untuk mendeteksi transaksi keuangan yang mencurigakan menggunakan teknik machine learning dan AI. System ini mengintegrasikan custom autoencoder neural network dengan Google Gemini AI untuk memberikan fraud analysis dan anomaly explanation.
+**Fraud Detection System** adalah aplikasi web full-stack berbasis AI yang dirancang untuk mendeteksi transaksi keuangan mencurigakan menggunakan teknik machine learning dan kecerdasan buatan. Sistem ini mengintegrasikan custom autoencoder neural network dengan Google Gemini AI untuk memberikan analisis kecurangan (fraud analysis) serta penjelasan anomali (anomaly explanation) yang lebih mendalam.
 
-**🎓 Learning Project**: Ini adalah proyek pembelajaran yang dikembangkan dengan bantuan AI coding partners untuk mengeksplorasi teknologi AI, machine learning, dan pengembangan web modern.
+**🎓 Learning Project**: Ini adalah proyek pembelajaran yang dikembangkan dengan bantuan AI coding partners untuk mengeksplorasi teknologi AI, machine learning, dan pengembangan web modern. Selain sebagai sarana pembelajaran, proyek ini juga disiapkan secara serius untuk mengikuti Hackathon BI-OJK 2025 (tema: Fraud Detection & Risk Mitigation) sebagai bagian dari kontribusi nyata dalam membangun solusi teknologi berbasis data dan keamanan.
 
 ### ✨ Fitur Utama & Key Features
 
@@ -68,19 +64,19 @@
 
 > **Penjelasan Arsitektur Sistem:**
 >
-> Fraud Detection System mengadopsi arsitektur multi-layer yang dirancang untuk memisahkan tanggung jawab, meningkatkan keamanan, dan memudahkan pengembangan serta pembelajaran. Setiap layer dan komponen memiliki peran yang jelas dan saling terintegrasi secara modular:
+> Fraud Detection System mengadopsi arsitektur multi-layer yang dirancang untuk memisahkan tanggung jawab, meningkatkan keamanan, serta mempermudah proses pengembangan dan pembelajaran. Setiap layer memiliki fungsi spesifik dan saling terintegrasi secara modular untuk memastikan skalabilitas dan maintainability.
 >
 > 1. **Client & Presentation Layer:**
 >
->    - Pengguna (web/mobile) berinteraksi melalui antarmuka modern berbasis Tailwind CSS dan JavaScript. Semua aksi (login, upload, analisis, chat AI) dilakukan melalui UI yang responsif dan aman.
+>    - Pengguna (web atau mobile) berinteraksi melalui antarmuka modern yang dibangun dengan Tailwind CSS dan JavaScript. Seluruh aktivitas mulai dari login, unggah file, analisis transaksi, hingga percakapan AI dilakukan melalui UI yang responsif dan aman.
 >
 > 2. **Frontend Layer:**
 >
->    - Frontend bertugas sebagai jembatan antara user dan backend, mengelola state aplikasi, validasi input, serta mengirim request ke backend API. Desain modular memudahkan maintainability dan pengembangan fitur baru.
+>    - Berfungsi sebagai jembatan antara pengguna dan backend. Layer ini mengelola state aplikasi, melakukan validasi input, serta mengirimkan permintaan ke API backend. Struktur modular pada frontend memudahkan pemeliharaan dan penambahan fitur baru.
 >
 > 3. **Backend/API Layer:**
 >
->    - Backend (Express.js + Prisma) menangani seluruh logic aplikasi, autentikasi (JWT & Google OAuth), manajemen data, proteksi route, serta integrasi ke AI/ML service. Middleware digunakan untuk validasi, logging, dan keamanan (rate limiting, CORS, dsb).
+>    - Backend dikembangkan menggunakan Express.js dan Prisma ORM. Layer ini menangani logika bisnis utama seperti autentikasi (JWT & Google OAuth), manajemen data, proteksi endpoint, serta komunikasi dengan layanan AI. Middleware digunakan untuk validasi, logging, dan pengamanan (rate limiting, CORS, dll).
 >
 > 4. **AI/ML Service Layer:**
 >
@@ -105,8 +101,8 @@
 > - Memudahkan debugging, scaling, dan pengembangan fitur baru.
 > - Setiap layer dapat di-upgrade atau diganti tanpa mengganggu sistem lain.
 > - Cocok untuk pembelajaran, eksplorasi teknologi, dan pengembangan profesional.
-
-Diagram berikut menggambarkan alur utama komunikasi antar layer dan layanan eksternal:
+>
+> Diagram berikut menggambarkan alur utama komunikasi antar layer dan layanan eksternal:
 
 ```mermaid
 %% 🎨 Colorful, Emoji-enhanced System Architecture Diagram
@@ -1394,14 +1390,20 @@ Project Fraud Detection System ini dikembangkan sebagai **solo development proje
 
 #### 🏆 Achievement Recognition
 
-**Solo Project dengan AI Partnership:**
+**🧑‍💻 Solo Project with AI Partnership**
 
-- Successfully delivered fraud detection system dengan modern tech stack
-- Implemented advanced AI integration dengan cutting-edge technology
-- Created comprehensive testing suite dan development workflow
-- Developed modern security dan data protection features
-- Built responsive user interface dengan excellent UX
-- Established robust architecture untuk scalability
+- Successfully developed a complete fraud detection system using a modern, full-stack tech stack
+  _→ Sistem deteksi fraud yang lengkap dibangun dengan teknologi full-stack modern_
+- Integrated advanced AI capabilities using cutting-edge technologies, including custom ML models and Google Gemini AI
+  _→ Integrasi AI canggih melalui model ML kustom dan Google Gemini AI_
+- Designed a comprehensive testing suite and efficient development workflow
+  _→ Pengujian menyeluruh dan alur kerja pengembangan yang terstruktur_
+- Implemented robust security measures and data protection best practices
+  _→ Fitur keamanan modern dan perlindungan data yang kuat_
+- Built a responsive and intuitive user interface with excellent user experience (UX)
+  _→ Antarmuka pengguna yang responsif dan ramah pengguna_
+- Established a scalable and modular system architecture
+  _→ Arsitektur sistem yang modular dan siap untuk diskalakan_
 
 **AI Partnership Success:**
 
@@ -1463,13 +1465,17 @@ npx prisma generate
 
 ### Learning Project
 
-Project ini dibuat sebagai sarana belajar dan eksplorasi teknologi oleh seorang pelajar dengan bantuan AI coding partners (GitHub Copilot, Gemini, ChatGPT, Claude). Jika ada pertanyaan, saran, atau ingin berdiskusi seputar kode, silakan:
+Proyek ini dibuat sebagai sarana belajar dan eksplorasi teknologi oleh seorang pelajar, dengan dukungan AI coding partners seperti GitHub Copilot, Google Gemini, ChatGPT, dan Claude. Selain sebagai bahan pembelajaran, proyek ini juga disiapkan untuk berpartisipasi dalam Hackathon BI‑OJK 2025 (tema: Fraud Detection & Risk Mitigation).
+
+Jika Anda memiliki pertanyaan, saran, atau ingin berdiskusi seputar kode, silakan membuka issue atau menghubungi maintainer di repositori ini.
 
 - **GitHub Issues**: [Create New Issue](https://github.com/hasib-ashari/fraud-detector/issues)
 - **Email**: hasibashari@gmail.com
 - **LinkedIn**: [Hasib Ashari](https://linkedin.com/in/hasib-ashari)
 
-> **Catatan:** Saya masih dalam tahap belajar dan project ini dikembangkan dengan bantuan AI coding partners. Jika Anda ingin menggunakan, memodifikasi, atau belajar dari project ini, silakan! Namun, saya belum bisa memberikan dukungan teknis profesional.
+> **Catatan:** Saya masih dalam tahap pembelajaran, dan proyek ini dikembangkan dengan bantuan AI coding partners sebagai bagian dari eksplorasi teknologi AI dan pengembangan web modern.
+>
+> Jika Anda ingin menggunakan, memodifikasi, atau belajar dari proyek ini—silakan! Proyek ini bersifat terbuka untuk pembelajaran dan eksperimen. Namun, mohon dipahami bahwa saya belum dapat memberikan dukungan teknis secara profesional.
 
 ### Documentation & Resources
 
@@ -1560,6 +1566,8 @@ Project ini dibuat sebagai sarana belajar dan eksplorasi teknologi oleh seorang 
 - **ChatGPT**: 20% documentation dan debugging support
 - **Claude**: 10% code review dan best practices guidance
 
-> **💡 Learning Achievement**: Project ini dikembangkan dengan bantuan AI coding partners untuk mengeksplorasi teknologi modern. System berhasil dibangun dengan fitur-fitur yang solid dan bisa berjalan dengan baik di development environment.
+> **💡 Learning Achievement**: Proyek ini dikembangkan dengan bantuan AI coding partners untuk mengeksplorasi teknologi modern, termasuk AI, machine learning, dan pengembangan web full-stack. Sistem berhasil dibangun dengan fitur-fitur yang solid dan berjalan dengan baik di lingkungan pengembangan (development environment).
+>
+> Selain sebagai media pembelajaran, proyek ini juga dipersiapkan secara serius untuk mengikuti Hackathon BI-OJK 2025 (tema: Fraud Detection & Risk Mitigation), sebagai bentuk kontribusi nyata dalam menciptakan solusi teknologi yang mendukung keamanan dan integritas sistem keuangan di Indonesia.
 
 ---

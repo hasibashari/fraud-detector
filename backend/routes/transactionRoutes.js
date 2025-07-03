@@ -1,20 +1,31 @@
 // =====================================================
 // TRANSACTION ROUTES - Fraud Detection System
 //
-// This module handles all transaction-related operations including:
+// Modul ini menangani seluruh operasi terkait transaksi, termasuk:
 //
 // 📁 FILE OPERATIONS:
-// - CSV file upload and processing with field mapping
-// - File validation and error handling
+// - Upload & proses file CSV dengan pemetaan field otomatis
+// - Validasi file dan penanganan error upload
 //
 // 🤖 AI ANALYSIS:
-// - Trigger ML model analysis via Flask API
-// - Generate AI explanations using Google Gemini
-// - Interactive AI chat about fraud patterns
-// - Deep analysis reports with recommendations
+// - Trigger analisis ML model via Flask API
+// - Penjelasan AI (Gemini) untuk anomali
+// - Chat interaktif AI seputar pola fraud
+// - Laporan analisis mendalam & rekomendasi
 //
 // 📊 DATA MANAGEMENT:
-// - Batch creation and management
+// - Manajemen batch upload & transaksi
+// - Query data transaksi & hasil deteksi anomali
+//
+// 📤 EXPORT FEATURES:
+// - Download hasil analisis dalam format CSV
+//
+// 🔐 SECURITY:
+// - Semua operasi membutuhkan autentikasi user
+// - Validasi kepemilikan batch & sanitasi input
+//
+// Dependencies: Prisma ORM, Multer, CSV-Parser, Axios, Google Gemini AI
+// =====================================================
 // - Anomaly detection results retrieval
 // - Transaction data querying with security controls
 //
@@ -30,10 +41,9 @@
 // Dependencies: Prisma ORM, Multer, CSV-Parser, Axios, Google Gemini AI
 // =====================================================
 
-// =====================================================
+// =========================
 // SECTION: Import Dependencies
-// =====================================================
-// Add path import at the top
+// =========================
 const express = require('express');
 const multer = require('multer');
 const csv = require('csv-parser');
@@ -45,17 +55,18 @@ const { protect } = require('../middleware/authMiddleware');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const Logger = require('../utils/logger');
 
+// Inisialisasi router Express
 const router = express.Router();
 
-// =====================================================
-// SECTION: AI Configuration (Global Gemini Setup)
-// =====================================================
+// =========================
+// SECTION: AI Configuration (Gemini Setup)
+// =========================
+// Inisialisasi Gemini AI dengan API Key dari environment variable
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 /**
- * Get Gemini model instance with professional banking configuration
- * Optimized for financial risk analysis and fraud detection
- * @returns {Object} Configured Gemini model instance
+ * Mendapatkan instance model Gemini dengan konfigurasi profesional
+ * @returns {Object} Gemini model instance siap pakai
  */
 const getGeminiModel = () => {
   return genAI.getGenerativeModel({
@@ -68,63 +79,55 @@ const getGeminiModel = () => {
   });
 };
 
-// =====================================================
+// =========================
 // SECTION: AI Configuration Constants
-// =====================================================
-
+// =========================
 /**
- * Professional AI prompt templates and configurations
- * Optimized for financial risk analysis and fraud detection
+ * Konfigurasi parameter model AI, batas respons, dan konteks profesional
  */
 const AI_CONFIG = {
   MODEL_PARAMETERS: {
-    temperature: 0.6, // Balanced for creativity and reliability
-    topP: 0.95, // High diversity for comprehensive analysis
-    maxTokens: 4000, // Significantly increased for complete analysis
+    temperature: 0.6, // Keseimbangan kreativitas & reliabilitas
+    topP: 0.95, // Diversitas tinggi untuk analisis komprehensif
+    maxTokens: 4000, // Output panjang untuk analisis lengkap
   },
-
   RESPONSE_LIMITS: {
-    explanation: { min: 30, max: 500 }, // Increased for better explanations
-    chat: { min: 80, max: 800 }, // Increased for comprehensive responses
-    'deep-analysis': { min: 300, max: 3000 }, // Much higher limit for complete analysis
+    explanation: { min: 30, max: 500 },
+    chat: { min: 80, max: 800 },
+    'deep-analysis': { min: 300, max: 3000 },
   },
-
   PROFESSIONAL_CONTEXT: {
     institution: 'Institusi Perbankan Indonesia',
     regulations: ['OJK', 'BI', 'PPATK'],
     standards: ['ISO 27001', 'PCI DSS', 'Basel III'],
     certifications: ['CFE', 'CAMS', 'FRM'],
   },
-
   QUALITY_THRESHOLDS: {
-    minConfidence: 0.5, // Lowered threshold
+    minConfidence: 0.5,
     requiredKeywords: ['risiko', 'anomali', 'analisis', 'rekomendasi'],
     bannedPhrases: ['saya adalah ai', 'sebagai model', 'tidak dapat membantu'],
   },
-
   RETRY_CONFIG: {
     maxRetries: 3,
-    retryDelay: 1500, // Increased delay between retries
-    timeoutMs: 45000, // Increased timeout for longer analysis
+    retryDelay: 1500,
+    timeoutMs: 45000,
   },
 };
 
-// =====================================================
+// =========================
 // SECTION: CSV Processing Configuration
-// =====================================================
-
+// =========================
 /**
- * Multer configuration for file uploads with enhanced security
- * Files are temporarily stored in 'uploads/' directory with size limits
+ * Konfigurasi Multer untuk upload file CSV dengan keamanan & validasi
  */
 const upload = multer({
   dest: path.join(__dirname, '../uploads/'),
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
-    files: 1, // Only one file at a time
+    fileSize: 10 * 1024 * 1024, // Maksimal 10MB
+    files: 1, // Hanya 1 file per upload
   },
   fileFilter: (req, file, cb) => {
-    // Additional file validation
+    // Validasi tipe file
     if (file.mimetype === 'text/csv' || file.originalname.toLowerCase().endsWith('.csv')) {
       cb(null, true);
     } else {
@@ -134,9 +137,8 @@ const upload = multer({
 });
 
 /**
- * CSV column mapping configuration
- * Maps various CSV column names to standardized database fields
- * Supports multiple naming conventions for flexibility
+ * Konfigurasi pemetaan kolom CSV ke field database
+ * Mendukung berbagai variasi nama kolom
  */
 const MAPPER_CONFIG = {
   amount: ['transactionamount', 'amount', 'jumlah', 'nilai', 'TransactionAmount'],
@@ -146,25 +148,23 @@ const MAPPER_CONFIG = {
   user_id: ['accountid', 'user_id', 'userid', 'AccountID'],
 };
 
-// =====================================================
+// =========================
 // SECTION: Utility Functions
-// =====================================================
+// =========================
 
 /**
- * Maps and cleans a single CSV row to database fields
- * @param {Object} rawRow - Raw CSV row data
- * @returns {Object} Cleaned and mapped row data
+ * Membersihkan dan memetakan satu baris CSV ke field database
+ * @param {Object} rawRow - Data mentah dari CSV
+ * @returns {Object} Data yang sudah dipetakan & dibersihkan
  */
 function mapAndCleanRow(rawRow) {
   const cleanRow = {};
-
-  // Normalize keys to lowercase without spaces
+  // Normalisasi key ke lowercase tanpa spasi
   const rawKeys = Object.keys(rawRow).reduce((acc, key) => {
     acc[key.toLowerCase().replace(/\s/g, '')] = rawRow[key];
     return acc;
   }, {});
-
-  // Map CSV fields to database fields using configuration
+  // Pemetaan field CSV ke field database
   for (const targetField in MAPPER_CONFIG) {
     for (const sourceField of MAPPER_CONFIG[targetField]) {
       if (rawKeys[sourceField]) {
@@ -173,35 +173,30 @@ function mapAndCleanRow(rawRow) {
       }
     }
   }
-
-  // Clean amount field (remove currency symbols, spaces, dots; replace comma with dot)
+  // Bersihkan field amount (hilangkan simbol, spasi, titik, ganti koma jadi titik)
   if (cleanRow.amount) {
     let amountStr = String(cleanRow.amount)
       .replace(/Rp|\s|\./g, '')
       .replace(',', '.');
     cleanRow.amount = parseFloat(amountStr);
   }
-
-  // Clean timestamp field (convert to Date object)
+  // Bersihkan field timestamp (jadikan Date object)
   if (cleanRow.timestamp) {
     cleanRow.timestamp = new Date(cleanRow.timestamp);
   } else {
-    // If no timestamp, set default to current time
     cleanRow.timestamp = new Date();
   }
-
   return cleanRow;
 }
 
 /**
- * Generates AI explanation for anomalous transactions using Gemini
- * @param {Object} transaction - Transaction data with anomaly information
- * @returns {Promise<string>} AI-generated explanation in Indonesian
+ * Generate penjelasan AI (Gemini) untuk transaksi anomali
+ * @param {Object} transaction - Data transaksi anomali
+ * @returns {Promise<string>} Penjelasan AI dalam Bahasa Indonesia
  */
 async function getGeminiExplanation(transaction) {
   try {
     const model = getGeminiModel();
-
     const prompt = `
 # SISTEM ANALISIS RISIKO TRANSAKSI PERBANKAN
 
@@ -211,18 +206,11 @@ Anda adalah Senior Risk Analyst pada institusi perbankan di Indonesia dengan spe
 ## DATA TRANSAKSI ANOMALI
 **Nilai Transaksi:** Rp ${new Intl.NumberFormat('id-ID').format(transaction.amount)}
 **Timestamp:** ${new Date(transaction.timestamp).toLocaleString('id-ID', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
     })}
 **Merchant:** ${transaction.merchant}
 **Lokasi:** ${transaction.location}
-**Anomaly Score:** ${
-      transaction.anomalyScore?.toFixed(3) || 'N/A'
-    } (0.0 = Normal, 1.0 = Highly Suspicious)
+**Anomaly Score:** ${transaction.anomalyScore?.toFixed(3) || 'N/A'} (0.0 = Normal, 1.0 = Highly Suspicious)
 
 ## TUGAS ANALISIS
 Berikan analisis singkat dan profesional dalam SATU KALIMAT yang menjelaskan alasan spesifik mengapa transaksi ini diklasifikasikan sebagai anomali berdasarkan:
@@ -238,12 +226,10 @@ Berikan HANYA satu kalimat analisis dalam Bahasa Indonesia formal perbankan, tan
 "Transaksi mencurigakan karena nilai Rp X.XXX.XXX pada jam Y:YY di merchant Z sangat tidak sesuai dengan pattern normal nasabah dan lokasi berisiko tinggi."
 
 ANALISIS:`;
-
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
-
-    // Validate and enhance the AI response
+    // Validasi & perbaiki respons AI
     const enhancedResponse = validateAndEnhanceAIResponse(text, 'explanation');
     return enhancedResponse;
   } catch (error) {
@@ -253,101 +239,62 @@ ANALISIS:`;
 }
 
 /**
- * Validates and enhances AI response quality
- * @param {string} aiResponse - Raw AI response
- * @param {string} type - Type of analysis ('explanation', 'chat', 'deep-analysis')
- * @returns {string} Enhanced and validated response
+ * Validasi & perbaiki kualitas respons AI
+ * @param {string} aiResponse - Respons mentah dari AI
+ * @param {string} type - Jenis analisis ('explanation', 'chat', 'deep-analysis')
+ * @returns {string} Respons yang sudah divalidasi & dibersihkan
  */
 function validateAndEnhanceAIResponse(aiResponse, type = 'explanation') {
   Logger.ai(`Processing ${type} response with length: ${aiResponse?.length || 0} chars`);
-
   if (!aiResponse || aiResponse.trim().length === 0) {
     Logger.warn(`Empty AI response detected for type: ${type}`);
     return getDefaultResponse(type);
   }
-
   let cleanedResponse = aiResponse.trim();
-
-  // Remove any unwanted prefixes or AI artifacts
+  // Hilangkan prefix/pola tidak diinginkan
   const unwantedPrefixes = [
-    'ANALISIS:',
-    'JAWABAN:',
-    'RESPONS:',
-    'A:',
-    'LAPORAN ANALISIS:',
-    'HASIL:',
-    '**ANALISIS:**',
-    '**JAWABAN:**',
-    '**LAPORAN:**',
-    'HTML:',
-    'FORMAT HTML:',
-    'BERIKAN ANALISIS:',
-    'BERIKAN RESPONS:',
-    '```html',
-    '```',
-    '`html`',
+    'ANALISIS:', 'JAWABAN:', 'RESPONS:', 'A:', 'LAPORAN ANALISIS:', 'HASIL:',
+    '**ANALISIS:**', '**JAWABAN:**', '**LAPORAN:**', 'HTML:', 'FORMAT HTML:',
+    'BERIKAN ANALISIS:', 'BERIKAN RESPONS:', '```html', '```', '`html`',
   ];
-
   unwantedPrefixes.forEach(prefix => {
     if (cleanedResponse.toUpperCase().startsWith(prefix.toUpperCase())) {
       cleanedResponse = cleanedResponse.substring(prefix.length).trim();
     }
   });
-
-  // More flexible minimum length validation
+  // Validasi panjang minimum
   const minLengths = {
-    explanation: 30, // Reduced from 50
-    chat: 80, // Increased for better responses
-    'deep-analysis': 300, // Increased for comprehensive analysis
+    explanation: 30,
+    chat: 80,
+    'deep-analysis': 300,
   };
-
   if (cleanedResponse.length < minLengths[type]) {
-    Logger.warn(
-      `Response too short (${cleanedResponse.length} < ${minLengths[type]}) for type: ${type}`
-    );
+    Logger.warn(`Response too short (${cleanedResponse.length} < ${minLengths[type]}) for type: ${type}`);
     return getDefaultResponse(type);
   }
-
-  // Clean up unwanted AI self-references more aggressively
+  // Bersihkan referensi AI yang tidak profesional
   const inappropriatePatterns = [
-    /sebagai ai/gi,
-    /saya adalah ai/gi,
-    /sebagai model bahasa/gi,
-    /saya tidak dapat/gi,
-    /maaf, saya tidak/gi,
-    /sebagai asisten/gi,
+    /sebagai ai/gi, /saya adalah ai/gi, /sebagai model bahasa/gi, /saya tidak dapat/gi, /maaf, saya tidak/gi, /sebagai asisten/gi,
   ];
-
   inappropriatePatterns.forEach(pattern => {
     cleanedResponse = cleanedResponse.replace(pattern, '');
   });
-
-  // Clean up HTML-related artifacts and unwanted text
+  // Bersihkan artefak HTML
   const htmlArtifacts = [
-    /```html\s*/gi, // Remove ```html markers
-    /```\s*/gi, // Remove ``` markers
-    /`html`/gi, // Remove `html` text
-    /format html/gi, // Remove "format html" text
-    /dalam format html/gi, // Remove "dalam format html" text
-    /gunakan html/gi, // Remove "gunakan html" text
+    /```html\s*/gi, /```\s*/gi, /`html`/gi, /format html/gi, /dalam format html/gi, /gunakan html/gi,
   ];
-
   htmlArtifacts.forEach(pattern => {
     cleanedResponse = cleanedResponse.replace(pattern, '');
   });
-
-  // Final cleanup
   cleanedResponse = cleanedResponse.trim();
-
   Logger.ai(`Final response length: ${cleanedResponse.length} chars`);
-
   return cleanedResponse.length > 10 ? cleanedResponse : getDefaultResponse(type);
 }
 
 /**
- * Provides default professional responses when AI fails
- * @param {string} type - Type of analysis
- * @returns {string} Default professional response
+ * Default respons profesional jika AI gagal
+ * @param {string} type - Jenis analisis
+ * @returns {string} Respons default
  */
 function getDefaultResponse(type) {
   const defaults = {
@@ -357,7 +304,7 @@ function getDefaultResponse(type) {
     'deep-analysis': `
 <div class="analysis-report">
 <h3>RINGKASAN RISIKO</h3>
-<p>Sistem sedang mengalami kendala dalam menganalisis pattern kompleks pada batch ini. Diperlukan review manual oleh tim specialist untuk memberikan assessment yang akurat.</p>
+<p>Sistem sedang mengalami kendala dalam menganalisis pattern kompleks pada batch ini. Diperlukan review manual oleh tim specialist untuk assessment akurat.</p>
 <h3>TEMUAN UTAMA</h3>
 <ol>
 <li>Data batch memerlukan validasi manual lebih lanjut</li>
@@ -381,7 +328,6 @@ function getDefaultResponse(type) {
 </div>
     `,
   };
-
   return defaults[type] || defaults.explanation;
 }
 

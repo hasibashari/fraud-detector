@@ -33,14 +33,17 @@
 // =====================================================
 // SECTION: Import Dependencies
 // =====================================================
+// Add path import at the top
 const express = require('express');
 const multer = require('multer');
 const csv = require('csv-parser');
 const fs = require('fs');
+const path = require('path');
 const prisma = require('../lib/prisma');
 const axios = require('axios');
 const { protect } = require('../middleware/authMiddleware');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Logger = require('../utils/logger');
 
 const router = express.Router();
 
@@ -111,10 +114,24 @@ const AI_CONFIG = {
 // =====================================================
 
 /**
- * Multer configuration for file uploads
- * Files are temporarily stored in 'uploads/' directory
+ * Multer configuration for file uploads with enhanced security
+ * Files are temporarily stored in 'uploads/' directory with size limits
  */
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({
+  dest: path.join(__dirname, '../uploads/'),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+    files: 1, // Only one file at a time
+  },
+  fileFilter: (req, file, cb) => {
+    // Additional file validation
+    if (file.mimetype === 'text/csv' || file.originalname.toLowerCase().endsWith('.csv')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only CSV files are allowed'), false);
+    }
+  },
+});
 
 /**
  * CSV column mapping configuration
@@ -168,6 +185,9 @@ function mapAndCleanRow(rawRow) {
   // Clean timestamp field (convert to Date object)
   if (cleanRow.timestamp) {
     cleanRow.timestamp = new Date(cleanRow.timestamp);
+  } else {
+    // If no timestamp, set default to current time
+    cleanRow.timestamp = new Date();
   }
 
   return cleanRow;
@@ -239,11 +259,10 @@ ANALISIS:`;
  * @returns {string} Enhanced and validated response
  */
 function validateAndEnhanceAIResponse(aiResponse, type = 'explanation') {
-  console.log(`[AI Validation] Processing ${type} response...`);
-  console.log(`[AI Validation] Original response length: ${aiResponse?.length || 0} chars`);
+  Logger.ai(`Processing ${type} response with length: ${aiResponse?.length || 0} chars`);
 
   if (!aiResponse || aiResponse.trim().length === 0) {
-    console.log(`[AI Validation] Empty response detected for type: ${type}`);
+    Logger.warn(`Empty AI response detected for type: ${type}`);
     return getDefaultResponse(type);
   }
 
@@ -283,8 +302,8 @@ function validateAndEnhanceAIResponse(aiResponse, type = 'explanation') {
   };
 
   if (cleanedResponse.length < minLengths[type]) {
-    console.log(
-      `[AI Validation] Response too short (${cleanedResponse.length} < ${minLengths[type]}) for type: ${type}`
+    Logger.warn(
+      `Response too short (${cleanedResponse.length} < ${minLengths[type]}) for type: ${type}`
     );
     return getDefaultResponse(type);
   }
@@ -320,7 +339,7 @@ function validateAndEnhanceAIResponse(aiResponse, type = 'explanation') {
   // Final cleanup
   cleanedResponse = cleanedResponse.trim();
 
-  console.log(`[AI Validation] Final response length: ${cleanedResponse.length} chars`);
+  Logger.ai(`Final response length: ${cleanedResponse.length} chars`);
 
   return cleanedResponse.length > 10 ? cleanedResponse : getDefaultResponse(type);
 }
@@ -367,6 +386,47 @@ function getDefaultResponse(type) {
 }
 
 // =====================================================
+// SECTION: Multer Error Handling Middleware
+// =====================================================
+
+/**
+ * Middleware to handle Multer-specific errors
+ */
+function handleMulterError(err, req, res, next) {
+  if (err instanceof multer.MulterError) {
+    console.error('Multer Error:', err);
+
+    switch (err.code) {
+      case 'LIMIT_FILE_SIZE':
+        return res.status(400).json({
+          message: 'File terlalu besar. Maksimal ukuran file adalah 10MB.',
+        });
+      case 'LIMIT_FILE_COUNT':
+        return res.status(400).json({
+          message: 'Terlalu banyak file. Hanya diizinkan 1 file per upload.',
+        });
+      case 'LIMIT_UNEXPECTED_FILE':
+        return res.status(400).json({
+          message: 'Field file tidak diharapkan. Gunakan field "file".',
+        });
+      default:
+        return res.status(400).json({
+          message: 'Error upload file.',
+          error: err.message,
+        });
+    }
+  }
+
+  if (err.message === 'Only CSV files are allowed') {
+    return res.status(400).json({
+      message: 'Hanya file CSV yang diizinkan.',
+    });
+  }
+
+  next(err);
+}
+
+// =====================================================
 // SECTION: File Upload & Processing Routes
 // =====================================================
 
@@ -377,8 +437,11 @@ function getDefaultResponse(type) {
  * @param   {file} file - CSV file containing transaction data
  * @returns {Object} Upload batch information
  */
-router.post('/upload', protect, upload.single('file'), async (req, res) => {
-  if (!req.file) return res.status(400).json({ message: 'File tidak diunggah.' });
+// Temporary debug route without auth and without user constraint
+router.post('/upload-debug', upload.single('file'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'File tidak diunggah.' });
+  }
 
   // Validasi format file
   const allowedExtensions = ['.csv'];
@@ -398,22 +461,15 @@ router.post('/upload', protect, upload.single('file'), async (req, res) => {
   }
 
   const filePath = req.file.path;
+  const results = [];
+
   try {
-    // Buat batch upload baru
-    const newBatch = await prisma.uploadBatch.create({
-      data: {
-        fileName: req.file.originalname,
-        status: 'PENDING',
-        userId: req.user.id, // User yang login
-      },
-    });
-    const batchId = newBatch.id;
-    const results = [];
-    // Baca dan proses file CSV
+    // Baca dan proses file CSV tanpa simpan ke database dulu
     fs.createReadStream(filePath)
       .pipe(csv())
       .on('data', rawRow => {
         const cleanRow = mapAndCleanRow(rawRow);
+
         // Pastikan semua field wajib ada
         if (
           typeof cleanRow.amount === 'number' &&
@@ -427,70 +483,264 @@ router.post('/upload', protect, upload.single('file'), async (req, res) => {
             timestamp: cleanRow.timestamp,
             merchant: cleanRow.merchant,
             location: cleanRow.location,
-            uploadBatchId: batchId,
           });
         }
       })
       .on('end', async () => {
         try {
-          // Simpan transaksi ke database
-          await prisma.transaction.createMany({ data: results, skipDuplicates: true });
-          // Update status batch
-          await prisma.uploadBatch.update({
-            where: { id: batchId },
-            data: { status: 'COMPLETED' },
-          });
           fs.unlinkSync(filePath); // Hapus file upload
-          res.status(201).json({ message: 'File berhasil diunggah.', batch: newBatch });
+          res.status(201).json({
+            message: 'File berhasil diproses (debug mode).',
+            results: results.length,
+            sample: results.slice(0, 2),
+          });
         } catch (error) {
-          console.error('Error processing CSV file:', error);
           try {
             fs.unlinkSync(filePath);
           } catch (unlinkError) {
             console.error('Error deleting file:', unlinkError);
           }
-
-          // Update batch status to FAILED
-          try {
-            await prisma.uploadBatch.update({
-              where: { id: batchId },
-              data: { status: 'FAILED' },
-            });
-          } catch (updateError) {
-            console.error('Error updating batch status:', updateError);
-          }
-
           res.status(500).json({ message: 'Gagal memproses file.', error: error.message });
         }
       })
       .on('error', async err => {
-        console.error('Error reading CSV file:', err);
+        console.error('🐛 Error reading CSV file:', err);
         try {
           fs.unlinkSync(filePath);
         } catch (unlinkError) {
           console.error('Error deleting file:', unlinkError);
         }
-
-        // Update batch status to FAILED
-        try {
-          await prisma.uploadBatch.update({
-            where: { id: batchId },
-            data: { status: 'FAILED' },
-          });
-        } catch (updateError) {
-          console.error('Error updating batch status:', updateError);
-        }
-
         res.status(500).json({ message: 'Gagal membaca file.', error: err.message });
       });
   } catch (error) {
-    console.error('Error creating upload batch:', error);
+    console.error('🐛 Error starting CSV processing:', error);
     try {
       fs.unlinkSync(filePath);
     } catch (unlinkError) {
       console.error('Error deleting file:', unlinkError);
     }
-    res.status(500).json({ message: 'Gagal memproses file.', error: error.message });
+    res.status(500).json({ message: 'Gagal memulai proses file.', error: error.message });
+  }
+});
+
+router.post('/upload', protect, upload.single('file'), async (req, res) => {
+  // Enhanced validation for user authentication
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({ message: 'User tidak terautentikasi dengan benar.' });
+  }
+
+  if (!req.file) {
+    return res.status(400).json({ message: 'File tidak diunggah.' });
+  }
+
+  // Enhanced file extension validation
+  const originalName = req.file.originalname.toLowerCase();
+  const dotIndex = originalName.lastIndexOf('.');
+
+  if (dotIndex === -1) {
+    try {
+      fs.unlinkSync(req.file.path);
+    } catch (unlinkError) {
+      console.error('Error deleting invalid file:', unlinkError);
+    }
+    return res.status(400).json({ message: 'File harus memiliki ekstensi.' });
+  }
+
+  const fileExtension = originalName.substring(dotIndex);
+  const allowedExtensions = ['.csv'];
+
+  if (!allowedExtensions.includes(fileExtension)) {
+    try {
+      fs.unlinkSync(req.file.path);
+    } catch (unlinkError) {
+      console.error('Error deleting invalid file:', unlinkError);
+    }
+    return res
+      .status(400)
+      .json({ message: 'Format file tidak didukung. Hanya file CSV yang diizinkan.' });
+  }
+
+  const filePath = req.file.path;
+  try {
+    // Check if file exists before processing
+    if (!fs.existsSync(filePath)) {
+      console.log('❌ Uploaded file not found');
+      return res.status(400).json({ message: 'File upload gagal, file tidak ditemukan.' });
+    }
+
+    // Buat batch upload baru
+    const newBatch = await prisma.uploadBatch.create({
+      data: {
+        fileName: req.file.originalname,
+        status: 'PENDING',
+        userId: req.user.id, // User yang login
+      },
+    });
+
+    const batchId = newBatch.id;
+    const results = [];
+    let processedRows = 0;
+    let validRows = 0;
+    let invalidRows = 0;
+
+    // Create a promise to handle CSV processing
+    const processCSV = new Promise((resolve, reject) => {
+      const stream = fs
+        .createReadStream(filePath)
+        .pipe(csv())
+        .on('data', rawRow => {
+          processedRows++;
+          console.log(`📁 Processing row ${processedRows}:`, Object.keys(rawRow));
+
+          const cleanRow = mapAndCleanRow(rawRow);
+
+          // Pastikan semua field wajib ada
+          if (
+            typeof cleanRow.amount === 'number' &&
+            !isNaN(cleanRow.amount) &&
+            cleanRow.amount > 0 &&
+            cleanRow.timestamp &&
+            cleanRow.merchant &&
+            cleanRow.location
+          ) {
+            validRows++;
+            results.push({
+              amount: cleanRow.amount,
+              timestamp: cleanRow.timestamp,
+              merchant: cleanRow.merchant,
+              location: cleanRow.location,
+              uploadBatchId: batchId,
+            });
+          } else {
+            invalidRows++;
+            Logger.debug(`Invalid row ${processedRows}`, {
+              amount: cleanRow.amount,
+              timestamp: cleanRow.timestamp,
+              merchant: cleanRow.merchant,
+              location: cleanRow.location,
+            });
+          }
+        })
+        .on('end', () => {
+          Logger.upload(
+            `CSV processing complete: ${processedRows} rows processed, ${validRows} valid, ${invalidRows} invalid`
+          );
+          resolve();
+        })
+        .on('error', err => {
+          console.error('Error reading CSV file:', err);
+          reject(err);
+        });
+
+      // Add timeout for CSV processing
+      setTimeout(() => {
+        stream.destroy();
+        reject(new Error('CSV processing timeout after 30 seconds'));
+      }, 30000);
+    });
+
+    // Wait for CSV processing to complete
+    await processCSV;
+
+    // Validate that we have some valid data
+    if (results.length === 0) {
+      throw new Error(
+        `Tidak ada data valid yang ditemukan. Total baris: ${processedRows}, Valid: ${validRows}, Invalid: ${invalidRows}`
+      );
+    }
+
+    // Simpan transaksi ke database in batches to avoid memory issues
+    const batchSize = 1000;
+    for (let i = 0; i < results.length; i += batchSize) {
+      const batch = results.slice(i, i + batchSize);
+      await prisma.transaction.createMany({
+        data: batch,
+        skipDuplicates: true,
+      });
+    }
+
+    // Update status batch
+    await prisma.uploadBatch.update({
+      where: { id: batchId },
+      data: {
+        status: 'COMPLETED',
+        // Add processing stats
+        createdAt: new Date(), // Update timestamp
+      },
+    });
+
+    // Clean up file
+    try {
+      fs.unlinkSync(filePath);
+    } catch (unlinkError) {
+      console.error('Error deleting file after processing:', unlinkError);
+    }
+
+    res.status(201).json({
+      message: 'File berhasil diunggah dan diproses.',
+      batch: newBatch,
+      stats: {
+        totalProcessed: processedRows,
+        validRows: validRows,
+        invalidRows: invalidRows,
+        savedTransactions: results.length,
+      },
+    });
+  } catch (error) {
+    console.error('Error creating upload batch or processing CSV:', error);
+
+    // Clean up file if it exists
+    try {
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    } catch (unlinkError) {
+      console.error('Error deleting file during error handling:', unlinkError);
+    }
+
+    // Try to update batch status to FAILED if batch was created
+    try {
+      const batch = await prisma.uploadBatch.findFirst({
+        where: {
+          fileName: req.file.originalname,
+          userId: req.user.id,
+          status: 'PENDING',
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      if (batch) {
+        await prisma.uploadBatch.update({
+          where: { id: batch.id },
+          data: { status: 'FAILED' },
+        });
+      }
+    } catch (updateError) {
+      console.error('Error updating batch status to FAILED:', updateError);
+    }
+
+    // Return appropriate error message based on error type
+    if (error.message.includes('timeout')) {
+      res.status(408).json({
+        message: 'Upload timeout. File terlalu besar atau koneksi lambat.',
+        error: 'Processing timeout',
+      });
+    } else if (error.message.includes('Tidak ada data valid')) {
+      res.status(400).json({
+        message: 'File CSV tidak mengandung data yang valid. Periksa format kolom dan data.',
+        error: error.message,
+      });
+    } else if (error.code === 'ENOENT') {
+      res.status(400).json({
+        message: 'File tidak dapat dibaca. Coba upload ulang.',
+        error: 'File not found',
+      });
+    } else {
+      res.status(500).json({
+        message: 'Gagal memproses file. Silakan coba lagi.',
+        error: error.message,
+      });
+    }
   }
 });
 
@@ -529,9 +779,10 @@ router.post('/analyze/:batchId', protect, async (req, res) => {
         id: t.id,
         amount: t.amount,
         timestamp: t.timestamp,
+        hour: new Date(t.timestamp).getHours(), // Ekstrak hour dinamis dari timestamp
         merchant: t.merchant,
         location: t.location,
-        // user_id and hour will be generated automatically by the Flask API
+        // user_id will be generated automatically by the Flask API
       })),
     });
     const analysisResults = aiResponse.data;
@@ -803,6 +1054,48 @@ router.post('/chat/:batchId', protect, async (req, res) => {
         ? normalTransactions.reduce((sum, t) => sum + t.amount, 0) / normalTransactions.length
         : 0;
 
+    // Analisis waktu dari anomali
+    const timeAnalysis = anomalies.reduce(
+      (acc, t) => {
+        const timeInfo = getTimeAnalysis(t.timestamp);
+
+        // Group by hour
+        acc.hourPattern[timeInfo.hour] = (acc.hourPattern[timeInfo.hour] || 0) + 1;
+
+        // Group by time category
+        acc.timeCategoryPattern[timeInfo.timeCategory] =
+          (acc.timeCategoryPattern[timeInfo.timeCategory] || 0) + 1;
+
+        // Group by day name
+        acc.dayPattern[timeInfo.dayName] = (acc.dayPattern[timeInfo.dayName] || 0) + 1;
+
+        // Business hours vs non-business hours
+        if (timeInfo.isBusinessHour) {
+          acc.businessHours++;
+        } else {
+          acc.nonBusinessHours++;
+        }
+
+        // Weekend vs weekday
+        if (timeInfo.isWeekend) {
+          acc.weekendCount++;
+        } else {
+          acc.weekdayCount++;
+        }
+
+        return acc;
+      },
+      {
+        hourPattern: {},
+        timeCategoryPattern: {},
+        dayPattern: {},
+        businessHours: 0,
+        nonBusinessHours: 0,
+        weekendCount: 0,
+        weekdayCount: 0,
+      }
+    );
+
     // Buat konteks data untuk AI
     const dataContext = `
 KONTEKS DATA ANALISIS FRAUD DETECTION:
@@ -815,15 +1108,45 @@ STATISTIK KEUANGAN:
 - Rata-rata Nilai Anomali: Rp ${new Intl.NumberFormat('id-ID').format(avgAnomalyAmount)}
 - Rata-rata Nilai Normal: Rp ${new Intl.NumberFormat('id-ID').format(avgNormalAmount)}
 
-CONTOH ANOMALI TERDETEKSI (Top 5):
+ANALISIS WAKTU TRANSAKSI ANOMALI:
+Pattern Jam (Top 5 jam dengan anomali terbanyak):
+${Object.entries(timeAnalysis.hourPattern)
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 5)
+  .map(([hour, count]) => `- Jam ${hour}:00 - ${count} anomali`)
+  .join('\n')}
+
+Kategori Waktu Anomali:
+${Object.entries(timeAnalysis.timeCategoryPattern)
+  .sort((a, b) => b[1] - a[1])
+  .map(([category, count]) => `- ${category}: ${count} anomali`)
+  .join('\n')}
+
+Distribusi Hari Anomali:
+${Object.entries(timeAnalysis.dayPattern)
+  .sort((a, b) => b[1] - a[1])
+  .map(([day, count]) => `- ${day}: ${count} anomali`)
+  .join('\n')}
+
+Jam Kerja vs Non-Jam Kerja:
+- Jam Kerja (08:00-17:00): ${timeAnalysis.businessHours} anomali
+- Luar Jam Kerja: ${timeAnalysis.nonBusinessHours} anomali
+
+Hari Kerja vs Weekend:
+- Hari Kerja: ${timeAnalysis.weekdayCount} anomali
+- Weekend: ${timeAnalysis.weekendCount} anomali
+
+CONTOH ANOMALI TERDETEKSI (Top 5 dengan info waktu):
 ${anomalies
   .slice(0, 5)
-  .map(
-    (t, i) =>
-      `${i + 1}. Rp ${new Intl.NumberFormat('id-ID').format(t.amount)} - ${t.merchant} di ${
-        t.location
-      } (Skor: ${t.anomalyScore?.toFixed(3) || 'N/A'})`
-  )
+  .map((t, i) => {
+    const timeInfo = getTimeAnalysis(t.timestamp);
+    return `${i + 1}. Rp ${new Intl.NumberFormat('id-ID').format(t.amount)} - ${t.merchant} di ${
+      t.location
+    } pada ${timeInfo.formatted} (${timeInfo.timeCategory}) - Skor: ${
+      t.anomalyScore?.toFixed(3) || 'N/A'
+    }`;
+  })
   .join('\n')}
 
 MERCHANT YANG SERING MUNCUL DALAM ANOMALI:
@@ -844,18 +1167,31 @@ Anda adalah AI Risk Analyst Level Senior dengan 10+ tahun pengalaman di fraud de
 ## KONTEKS DATA ANALISIS
 ${dataContext}
 
+## KETERSEDIAAN DATA
+✅ INFORMASI WAKTU LENGKAP TERSEDIA: 
+- Jam transaksi (0-23)
+- Hari dalam seminggu
+- Kategori waktu (Pagi, Siang, Sore, Malam, Dini Hari)
+- Klasifikasi jam kerja vs non-jam kerja
+- Hari kerja vs weekend
+
+✅ INFORMASI FINANSIAL:
+- Amount transaksi
+- Merchant dan lokasi
+- Skor anomali (0.0-1.0)
+
 ## PEDOMAN RESPONS PROFESIONAL
-1. **AKURASI DATA**: Gunakan HANYA data yang tersedia di konteks di atas
+1. **AKURASI DATA**: Gunakan HANYA data yang tersedia di konteks di atas - SEMUA INFO WAKTU TERSEDIA
 2. **TONE PROFESIONAL**: Gunakan bahasa Indonesia formal sektor perbankan
 3. **INSIGHT ACTIONABLE**: Berikan rekomendasi yang dapat langsung diimplementasikan
 4. **STRUKTUR JELAS**: Gunakan format yang terstruktur untuk readability yang optimal
-5. **KONTEKS TERBATAS**: Jika pertanyaan di luar scope data, arahkan kembali ke analisis fraud detection
+5. **ANALISIS WAKTU**: Manfaatkan data waktu yang lengkap untuk insight temporal fraud pattern
 6. **PANJANG OPTIMAL**: Maksimal 600 kata untuk analisis komprehensif
 
 ## STANDAR KUALITAS RESPONS
 - Sertakan statistik spesifik dan persentase
 - Berikan perbandingan dengan benchmark industri jika relevan
-- Identifikasi pattern dan trend yang terdeteksi
+- Identifikasi pattern waktu yang mencurigakan
 - Rekomendakan tindakan prioritas berdasarkan tingkat risiko
 - Gunakan terminologi fraud detection yang tepat
 
@@ -1002,12 +1338,38 @@ ${allTransactions
       });
     }
 
-    // Analisis pattern waktu
+    // Analisis pattern waktu yang lebih comprehensive
     const timePattern = anomalies.reduce((acc, t) => {
-      const hour = new Date(t.timestamp).getHours();
-      acc[hour] = (acc[hour] || 0) + 1;
+      const timeInfo = getTimeAnalysis(t.timestamp);
+      acc[timeInfo.hour] = (acc[timeInfo.hour] || 0) + 1;
       return acc;
     }, {});
+
+    // Analisis berdasarkan hari dan kategori waktu
+    const dayPattern = anomalies.reduce((acc, t) => {
+      const timeInfo = getTimeAnalysis(t.timestamp);
+      acc[timeInfo.dayName] = (acc[timeInfo.dayName] || 0) + 1;
+      return acc;
+    }, {});
+
+    const timeCategoryPattern = anomalies.reduce((acc, t) => {
+      const timeInfo = getTimeAnalysis(t.timestamp);
+      acc[timeInfo.timeCategory] = (acc[timeInfo.timeCategory] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Hitung anomali di luar jam kerja vs jam kerja
+    const businessHourAnomalies = anomalies.filter(t =>
+      isBusinessHour(new Date(t.timestamp).getHours())
+    ).length;
+    const nonBusinessHourAnomalies = anomalies.length - businessHourAnomalies;
+
+    // Hitung anomali weekend vs weekday
+    const weekendAnomalies = anomalies.filter(t => {
+      const day = new Date(t.timestamp).getDay();
+      return day === 0 || day === 6;
+    }).length;
+    const weekdayAnomalies = anomalies.length - weekendAnomalies;
 
     // Analisis merchant dan lokasi
     const merchantPattern = anomalies.reduce((acc, t) => {
@@ -1045,12 +1407,33 @@ OVERVIEW:
         : 'RENDAH'
     }
 
-PATTERN WAKTU ANOMALI (per jam):
+PATTERN WAKTU ANOMALI:
+Jam dengan anomali terbanyak:
 ${Object.entries(timePattern)
   .sort((a, b) => b[1] - a[1])
   .slice(0, 5)
   .map(([hour, count]) => `Jam ${hour}:00 - ${count} anomali`)
   .join('\n')}
+
+Distribusi berdasarkan hari:
+${Object.entries(dayPattern)
+  .sort((a, b) => b[1] - a[1])
+  .map(([day, count]) => `${day}: ${count} anomali`)
+  .join('\n')}
+
+Kategori waktu:
+${Object.entries(timeCategoryPattern)
+  .sort((a, b) => b[1] - a[1])
+  .map(([category, count]) => `${category}: ${count} anomali`)
+  .join('\n')}
+
+Jam Kerja vs Non-Jam Kerja:
+- Jam Kerja (08:00-17:00): ${businessHourAnomalies} anomali
+- Luar Jam Kerja: ${nonBusinessHourAnomalies} anomali
+
+Weekday vs Weekend:
+- Hari Kerja: ${weekdayAnomalies} anomali  
+- Weekend: ${weekendAnomalies} anomali
 
 TOP MERCHANT BERISIKO:
 ${Object.entries(merchantPattern)
@@ -1066,7 +1449,7 @@ ${Object.entries(locationPattern)
   .map(([location, count]) => `${location}: ${count} anomali`)
   .join('\n')}
 
-DISTRIBUSI AMOUNT ANOMALI:
+DISTRIBUSI NILAI:
 ${Object.entries(amountRanges)
   .map(([range, count]) => `${range}: ${count} transaksi`)
   .join('\n')}
@@ -1204,46 +1587,17 @@ PENTING: Gunakan struktur di atas dan bahasa Indonesia formal perbankan.`;
         locationPattern: {},
         amountRanges: {},
       },
-      analysis: `
-<div class="error-analysis">
-<h3>STATUS ERROR</h3>
-<p>Terjadi kesalahan sistem dalam melakukan analisis mendalam.</p>
-<h4>DETAIL ERROR</h4>
-<ul>
-<li>Error Type: ${error.constructor.name}</li>
-<li>Error Message: ${error.message}</li>
-<li>Timestamp: ${new Date().toLocaleString('id-ID')}</li>
-</ul>
-<h4>TINDAKAN YANG DIREKOMENDASIKAN</h4>
-<ol>
-<li>Refresh halaman dan coba lagi setelah beberapa saat</li>
-<li>Periksa koneksi internet dan coba kembali</li>
-<li>Jika masalah berlanjut, hubungi administrator sistem</li>
-<li>Sebagai alternatif, gunakan fitur AI Chat untuk analisis manual</li>
-</ol>
-<h4>INFORMASI TEKNIS</h4>
-<p>Sistem mencoba menganalisis batch tetapi mengalami kendala teknis. Tim IT telah menerima log error untuk investigasi lebih lanjut.</p>
-</div>
-      `,
+      analysis: getDefaultResponse('deep-analysis'),
       error: true,
-      errorDetails: {
-        type: error.constructor.name,
-        message: error.message,
-        timestamp: new Date().toISOString(),
-      },
     };
 
-    res.status(500).json({
-      message: 'Gagal melakukan analisis mendalam.',
-      error: error.message,
-      ...detailedErrorResponse,
-    });
+    res.status(500).json(detailedErrorResponse);
   }
 });
 
 /**
  * @route   POST /api/transactions/explain/:transactionId
- * @desc    Get AI explanation for a specific anomalous transaction
+ * @desc    Generate AI explanation for a specific anomalous transaction
  * @access  Private (requires authentication)
  * @param   {string} transactionId - ID of the transaction to explain
  * @returns {Object} Transaction details with AI-generated explanation
@@ -1344,19 +1698,27 @@ router.get('/download/:batchId', protect, async (req, res) => {
       return res.status(404).json({ message: 'Tidak ada transaksi untuk batch ini.' });
     }
     // Buat CSV header
-    const header = 'ID,Amount,Timestamp,Merchant,Location,IsAnomaly,AnomalyScore\n';
-    // Buat isi CSV
-    const rows = transactions.map(t =>
-      [
+    const header = 'ID,Amount,Timestamp,Hour,Date,Day,Merchant,Location,IsAnomaly,AnomalyScore\n';
+    // Buat isi CSV dengan informasi waktu yang lengkap
+    const rows = transactions.map(t => {
+      const date = new Date(t.timestamp);
+      const hour = date.getHours();
+      const dateStr = date.toLocaleDateString('id-ID');
+      const dayName = date.toLocaleDateString('id-ID', { weekday: 'long' });
+
+      return [
         t.id,
         t.amount,
         t.timestamp instanceof Date ? t.timestamp.toISOString() : t.timestamp,
+        hour,
+        `"${dateStr}"`,
+        `"${dayName}"`,
         `"${t.merchant}"`,
         `"${t.location}"`,
         t.isAnomaly ? 'Yes' : 'No',
         t.anomalyScore ?? '',
-      ].join(',')
-    );
+      ].join(',');
+    });
     const csv = header + rows.join('\n');
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', `attachment; filename=fraud_results_${batchId}.csv`);
@@ -1366,6 +1728,9 @@ router.get('/download/:batchId', protect, async (req, res) => {
     res.status(500).json({ message: 'Gagal mengunduh hasil batch.', error: error.message });
   }
 });
+
+// Apply error handling middleware to all routes
+router.use(handleMulterError);
 
 // =====================================================
 // SECTION: Module Export
@@ -1491,3 +1856,43 @@ router.get('/ai-health', protect, async (req, res) => {
     });
   }
 });
+
+/**
+ * Fungsi utility untuk mengekstrak informasi waktu yang lengkap dari timestamp
+ * @param {Date} timestamp - Timestamp transaksi
+ * @returns {Object} Objek dengan informasi waktu yang lengkap
+ */
+function getTimeAnalysis(timestamp) {
+  const date = new Date(timestamp);
+
+  return {
+    hour: date.getHours(),
+    day: date.getDay(), // 0 = Sunday, 1 = Monday, etc.
+    dayName: date.toLocaleDateString('id-ID', { weekday: 'long' }),
+    date: date.toLocaleDateString('id-ID'),
+    month: date.getMonth() + 1,
+    year: date.getFullYear(),
+    timeCategory: getTimeCategory(date.getHours()),
+    isWeekend: date.getDay() === 0 || date.getDay() === 6,
+    isBusinessHour: isBusinessHour(date.getHours()),
+    formatted: date.toLocaleString('id-ID'),
+  };
+}
+
+/**
+ * Kategorikan waktu berdasarkan jam
+ */
+function getTimeCategory(hour) {
+  if (hour >= 6 && hour < 12) return 'Pagi';
+  if (hour >= 12 && hour < 15) return 'Siang';
+  if (hour >= 15 && hour < 18) return 'Sore';
+  if (hour >= 18 && hour < 21) return 'Malam';
+  return 'Dini Hari';
+}
+
+/**
+ * Cek apakah jam termasuk jam kerja
+ */
+function isBusinessHour(hour) {
+  return hour >= 8 && hour <= 17;
+}

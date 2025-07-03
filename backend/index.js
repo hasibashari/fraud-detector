@@ -3,7 +3,6 @@
 // =========================
 const express = require('express');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 require('dotenv').config(); // Memuat variabel dari .env
 
 // =========================
@@ -52,8 +51,8 @@ const PORT = process.env.PORT || 3001;
 // Middleware Global
 // =========================
 app.use(cors()); // Mengizinkan request dari origin lain
-app.use(bodyParser.json()); // Parsing body JSON
-app.use(bodyParser.urlencoded({ extended: true })); // Parsing body URL-encoded
+app.use(express.json()); // Built-in JSON parsing (Express 5+)
+app.use(express.urlencoded({ extended: true })); // Built-in URL-encoded parsing
 app.use(passport.initialize()); // Inisialisasi Passport
 
 // =========================

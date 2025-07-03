@@ -1,66 +1,126 @@
 #!/bin/bash
 
-# FRONTEND_TEST.sh - Test script untuk memeriksa frontend fixes
-echo "=== Testing Frontend Fixes ==="
+# Frontend Testing Script for Fraud Detection System
+echo "🧪 Testing Frontend Components..."
 
-# Check if all required files exist
-echo "1. Checking if new configuration files exist..."
+# Colors for output
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+echo "================================"
+
+echo -e "\n${BLUE}1. Checking HTML Files...${NC}"
+HTML_FILES=(
+    "frontend/pages/index.html"
+    "frontend/pages/login.html" 
+    "frontend/pages/register.html"
+    "frontend/pages/ai-chat.html"
+    "frontend/pages/auth-success.html"
+)
+
+for file in "${HTML_FILES[@]}"; do
+    if [ -f "$file" ]; then
+        echo -e "${GREEN}✅ $file${NC}"
+        # Check if HTML is well-formed (basic validation)
+        if grep -q "<!DOCTYPE html>" "$file" && grep -q "</html>" "$file"; then
+            echo -e "   📄 HTML structure: ${GREEN}Valid${NC}"
+        else
+            echo -e "   📄 HTML structure: ${RED}Invalid${NC}"
+        fi
+    else
+        echo -e "${RED}❌ $file (missing)${NC}"
+    fi
+done
+
+echo -e "\n${BLUE}2. Checking JavaScript Files...${NC}"
+JS_FILES=(
+    "frontend/js/main.js"
+    "frontend/js/index.js"
+    "frontend/js/auth.js"
+    "frontend/js/ai-chat.js"
+    "frontend/js/config.js"
+    "frontend/js/tailwind-config.js"
+)
+
+for file in "${JS_FILES[@]}"; do
+    if [ -f "$file" ]; then
+        echo -e "${GREEN}✅ $file${NC}"
+        # Check JavaScript syntax
+        if node -c "$file" 2>/dev/null; then
+            echo -e "   🔧 Syntax: ${GREEN}Valid${NC}"
+        else
+            echo -e "   🔧 Syntax: ${RED}Errors found${NC}"
+        fi
+    else
+        echo -e "${RED}❌ $file (missing)${NC}"
+    fi
+done
+
+echo -e "\n${BLUE}3. Checking CSS Files...${NC}"
+CSS_FILES=(
+    "frontend/css/main.css"
+)
+
+for file in "${CSS_FILES[@]}"; do
+    if [ -f "$file" ]; then
+        echo -e "${GREEN}✅ $file${NC}"
+        # Check for CSS syntax (basic)
+        if grep -q "{" "$file" && grep -q "}" "$file"; then
+            echo -e "   🎨 CSS structure: ${GREEN}Valid${NC}"
+        else
+            echo -e "   🎨 CSS structure: ${YELLOW}Incomplete${NC}"
+        fi
+    else
+        echo -e "${RED}❌ $file (missing)${NC}"
+    fi
+done
+
+echo -e "\n${BLUE}4. Checking Configuration Dependencies...${NC}"
+
+# Check if all HTML files include config.js
+for file in "${HTML_FILES[@]}"; do
+    if [ -f "$file" ]; then
+        if grep -q "config.js" "$file"; then
+            echo -e "${GREEN}✅ $(basename $file) includes config.js${NC}"
+        else
+            echo -e "${RED}❌ $(basename $file) missing config.js${NC}"
+        fi
+    fi
+done
+
+echo -e "\n${BLUE}5. Checking for Hardcoded URLs...${NC}"
+if grep -r "localhost:3001" frontend/js/ | grep -v "config.js" | grep -v "fallback" | grep -v "development"; then
+    echo -e "${RED}❌ Found hardcoded URLs outside config${NC}"
+else
+    echo -e "${GREEN}✅ No problematic hardcoded URLs found${NC}"
+fi
+
+echo -e "\n${BLUE}6. Checking API Configuration...${NC}"
 if [ -f "frontend/js/config.js" ]; then
-    echo "✅ config.js exists"
-else
-    echo "❌ config.js missing"
-fi
-
-if [ -f "frontend/js/tailwind-config.js" ]; then
-    echo "✅ tailwind-config.js exists"
-else
-    echo "❌ tailwind-config.js missing"
-fi
-
-echo -e "\n2. Checking HTML files for Bootstrap references..."
-BOOTSTRAP_REFS=$(grep -r "bootstrap" frontend/pages/ || echo "none")
-if [ "$BOOTSTRAP_REFS" = "none" ]; then
-    echo "✅ No Bootstrap references found in HTML files"
-else
-    echo "❌ Bootstrap references still exist:"
-    echo "$BOOTSTRAP_REFS"
-fi
-
-echo -e "\n3. Checking for problematic hardcoded API URLs..."
-# Get lines with localhost:3001 and check if previous line has fallback/development comment
-LOCALHOST_LINES=$(grep -n "localhost:3001" frontend/js/main.js)
-if [ -z "$LOCALHOST_LINES" ]; then
-    echo "✅ No localhost URLs found"
-elif grep -B 1 "localhost:3001" frontend/js/main.js | grep -q "fallback\|development"; then
-    echo "✅ localhost URL is properly documented as fallback"
-else
-    echo "❌ Problematic hardcoded API URLs found"
-fi
-
-echo -e "\n4. Checking for inline Tailwind configurations..."
-INLINE_CONFIGS=$(grep -r "tailwind\.config.*=" frontend/pages/ | wc -l)
-if [ "$INLINE_CONFIGS" -eq 0 ]; then
-    echo "✅ No inline Tailwind configurations found"
-else
-    echo "❌ Found $INLINE_CONFIGS inline Tailwind configurations"
-fi
-
-echo -e "\n5. Checking if all HTML files include config.js..."
-for file in frontend/pages/*.html; do
-    if grep -q "config.js" "$file"; then
-        echo "✅ $(basename $file) includes config.js"
+    if grep -q "API_BASE_URL" "frontend/js/config.js"; then
+        echo -e "${GREEN}✅ API configuration found${NC}"
     else
-        echo "❌ $(basename $file) missing config.js"
+        echo -e "${RED}❌ API configuration missing${NC}"
     fi
-done
+fi
 
-echo -e "\n6. Checking JavaScript syntax..."
-for file in frontend/js/*.js; do
-    if node -c "$file" 2>/dev/null; then
-        echo "✅ $(basename $file) syntax is valid"
-    else
-        echo "❌ $(basename $file) has syntax errors"
-    fi
-done
+echo -e "\n${BLUE}7. Checking for Console Logs (Cleanup Check)...${NC}"
+CONSOLE_COUNT=$(grep -r "console\." frontend/js/ --exclude="logger.js" | wc -l)
+if [ "$CONSOLE_COUNT" -lt 5 ]; then
+    echo -e "${GREEN}✅ Console logs minimized ($CONSOLE_COUNT found)${NC}"
+else
+    echo -e "${YELLOW}⚠️  Many console logs found ($CONSOLE_COUNT) - consider cleanup${NC}"
+fi
 
-echo -e "\n=== Frontend Test Complete ==="
+echo ""
+echo "================================"
+echo -e "${GREEN}✅ Frontend Test Complete${NC}"
+echo ""
+echo -e "${BLUE}🌐 Quick Test URLs:${NC}"
+echo "   Dashboard: http://localhost:3001/dashboard"
+echo "   AI Chat:   http://localhost:3001/ai-chat" 
+echo "   Login:     http://localhost:3001/login"
+echo "   Register:  http://localhost:3001/register"

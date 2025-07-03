@@ -64,39 +64,125 @@
 
 ## 🏗️ System Architecture
 
-
-
 ### High-Level Architecture Overview
 
-> **Penjelasan Arsitektur Sistem:**
+> **Penjelasan Arsitektur Sistem (Narasi Mendalam):**
 >
-> Fraud Detection System dirancang dengan pendekatan multi-layer yang terstruktur dan mudah dipelajari. Setiap layer memiliki peran spesifik untuk menjaga keamanan, skalabilitas, dan kemudahan pengembangan. Proses dimulai dari client (web/mobile) yang berinteraksi dengan frontend modern berbasis Tailwind CSS dan JavaScript. Frontend mengirim request ke backend API (Express.js & Prisma) yang menangani autentikasi, manajemen data, serta integrasi ke layanan AI/ML. Layanan AI/ML berjalan terpisah menggunakan Python Flask dan TensorFlow, serta terhubung ke Google Gemini untuk penjelasan anomali. Semua data disimpan di PostgreSQL dan file storage, dengan dukungan Google OAuth untuk autentikasi eksternal. Arsitektur ini memudahkan proses belajar, debugging, dan pengembangan fitur baru secara modular.
+> Fraud Detection System mengadopsi arsitektur multi-layer yang dirancang untuk memisahkan tanggung jawab, meningkatkan keamanan, dan memudahkan pengembangan serta pembelajaran. Setiap layer dan komponen memiliki peran yang jelas dan saling terintegrasi secara modular:
+>
+> 1. **Client & Presentation Layer:**
+>
+>    - Pengguna (web/mobile) berinteraksi melalui antarmuka modern berbasis Tailwind CSS dan JavaScript. Semua aksi (login, upload, analisis, chat AI) dilakukan melalui UI yang responsif dan aman.
+>
+> 2. **Frontend Layer:**
+>
+>    - Frontend bertugas sebagai jembatan antara user dan backend, mengelola state aplikasi, validasi input, serta mengirim request ke backend API. Desain modular memudahkan maintainability dan pengembangan fitur baru.
+>
+> 3. **Backend/API Layer:**
+>
+>    - Backend (Express.js + Prisma) menangani seluruh logic aplikasi, autentikasi (JWT & Google OAuth), manajemen data, proteksi route, serta integrasi ke AI/ML service. Middleware digunakan untuk validasi, logging, dan keamanan (rate limiting, CORS, dsb).
+>
+> 4. **AI/ML Service Layer:**
+>
+>    - Layanan AI/ML berjalan terpisah (Python Flask) untuk deteksi anomali menggunakan autoencoder neural network. Backend berkomunikasi dengan service ini via REST API. Untuk penjelasan anomali, backend meneruskan permintaan ke Google Gemini API melalui AI service.
+>
+> 5. **Data & Storage Layer:**
+>
+>    - Semua data transaksi, user, dan hasil analisis disimpan di PostgreSQL (via Prisma ORM). File upload (CSV, model, log) disimpan di file storage terpisah. Skema database dirancang untuk integritas data dan efisiensi query.
+>
+> 6. **External Services:**
+>    - Google OAuth digunakan untuk third-party authentication, memastikan user management yang aman dan mudah. Google Gemini API diintegrasikan untuk memberikan penjelasan AI yang kontekstual dan mendalam atas hasil deteksi anomali.
+>
+> **Alur Data & Keamanan:**
+>
+> - Setiap request dari client divalidasi di frontend dan backend.
+> - Autentikasi dilakukan via JWT atau Google OAuth, memastikan hanya user terotorisasi yang dapat mengakses data.
+> - Data transaksi diupload, diproses, dan dianalisis secara batch, dengan hasil anomaly detection dan AI explanation yang tersimpan di database.
+> - Semua komunikasi antar layer menggunakan protokol aman (HTTPS/REST), dan environment variable digunakan untuk menjaga kerahasiaan credential.
+>
+> **Manfaat Desain Modular:**
+>
+> - Memudahkan debugging, scaling, dan pengembangan fitur baru.
+> - Setiap layer dapat di-upgrade atau diganti tanpa mengganggu sistem lain.
+> - Cocok untuk pembelajaran, eksplorasi teknologi, dan pengembangan profesional.
 
 Diagram berikut menggambarkan alur utama komunikasi antar layer dan layanan eksternal:
 
 ```mermaid
 flowchart TB
-    CLIENT["Client (Web/Mobile)"]
-    FRONTEND["Frontend (Tailwind CSS, JS)"]
-    BACKEND["Backend (Express.js, Prisma)"]
-    AI["AI/ML Service (Flask, TensorFlow, Gemini)"]
-    DB["Database (PostgreSQL)"]
-    STORAGE["File Storage"]
-    OAUTH["Google OAuth"]
-    GEMINI["Google Gemini API"]
+    subgraph CLIENT_SIDE["Client Side"]
+        CLIENT["User (Web/Mobile)"]
+    end
+    subgraph PRESENTATION["Frontend (Tailwind CSS, JS)"]
+        UI["UI Pages (Login, Register, Dashboard, AI Chat)"]
+        UPLOAD["CSV Upload Module"]
+        CHAT["AI Chat Module"]
+        RESULT["Results Table & Export"]
+    end
+    subgraph BACKEND["Backend (Express.js, Prisma, Middleware)"]
+        API["REST API Layer"]
+        AUTH["Auth Controller (JWT, OAuth)"]
+        ROUTES["Routes (auth, transaction, frontend)"]
+        MIDDLEWARE["Security Middleware"]
+        BATCH["Batch Processor"]
+        FILES["File Upload Handler"]
+        LOGGER["Logger"]
+        ORM["Prisma ORM"]
+    end
+    subgraph AI_ML["AI/ML Service (Flask, TensorFlow, Gemini)"]
+        FLASK["Flask API"]
+        MODEL["Autoencoder Model"]
+        PREPROC["Preprocessing Pipeline"]
+        GEMINI_PROXY["Gemini Proxy"]
+    end
+    subgraph DATA["Data Layer"]
+        DB["PostgreSQL Database"]
+        STORAGE["File Storage"]
+    end
+    subgraph EXTERNAL["External Services"]
+        OAUTH["Google OAuth"]
+        GEMINI["Google Gemini API"]
+    end
 
-    CLIENT -->|HTTP/HTTPS| FRONTEND
-    FRONTEND -->|REST API| BACKEND
-    BACKEND -->|API Call| AI
-    BACKEND -->|DB Query| DB
-    BACKEND -->|File Ops| STORAGE
-    BACKEND -->|OAuth| OAUTH
-    AI -->|AI API| GEMINI
-    DB --> STORAGE
+    CLIENT -->|HTTP/HTTPS| UI
+    UI --> UPLOAD
+    UI --> CHAT
+    UI --> RESULT
+    UI -->|REST API| API
+    UPLOAD -->|CSV File| API
+    CHAT -->|User Query| API
+    RESULT -->|Export| API
+
+    API --> ROUTES
+    ROUTES --> AUTH
+    ROUTES --> BATCH
+    ROUTES --> FILES
+    ROUTES -->|AI/ML| GEMINI_PROXY
+    ROUTES -->|DB| ORM
+    ROUTES -->|File| FILES
+    ROUTES -->|Logger| LOGGER
+    AUTH --> MIDDLEWARE
+    BATCH --> MIDDLEWARE
+    FILES --> MIDDLEWARE
+    MIDDLEWARE --> API
+    ORM --> DB
+    FILES --> STORAGE
+
+    GEMINI_PROXY --> FLASK
+    FLASK --> MODEL
+    FLASK --> PREPROC
+    FLASK --> GEMINI
+    GEMINI_PROXY --> GEMINI
+
+    AUTH --> OAUTH
+    OAUTH -->|Token| AUTH
+
+    DB <--> STORAGE
 
     %% Styling: Black & White only
     classDef bw fill:#fff,color:#111,stroke:#111,stroke-width:1.5px;
-    class CLIENT,FRONTEND,BACKEND,AI,DB,STORAGE,OAUTH,GEMINI bw;
+    class CLIENT,UI,UPLOAD,CHAT,RESULT,API,AUTH,ROUTES,MIDDLEWARE,BATCH,FILES,LOGGER,ORM,FLASK,MODEL,PREPROC,GEMINI_PROXY,DB,STORAGE,OAUTH,GEMINI bw;
+    class CLIENT_SIDE,PRESENTATION,BACKEND,AI_ML,DATA,EXTERNAL bw;
 ```
 
 **Ringkasan Layer (Textual Summary):**
@@ -266,68 +352,64 @@ flowchart TB
 
 ```
 fraud-detector/
-├── backend/                      # Backend Node.js application
-│   ├── index.js                  # Main server file
-│   ├── package.json              # Backend dependencies
-│   ├── config/
-│   │   └── passport-setup.js     # Google OAuth config
-│   ├── controllers/
-│   │   └── authController.js     # Auth logic
-│   ├── generated/
-│   │   └── prisma/               # Auto-generated Prisma client (JS/TS)
-│   ├── lib/
-│   │   └── prisma.js             # Prisma client config
-│   ├── middleware/
-│   │   └── authMiddleware.js     # JWT protection middleware
-│   ├── prisma/
-│   │   ├── schema.prisma         # Database schema
-│   │   └── migrations/           # Prisma migrations
-│   ├── routes/
-│   │   ├── authRoutes.js         # Auth routes
-│   │   ├── frontendRoutes.js     # Frontend page routes
-│   │   └── transactionRoutes.js  # Transaction + AI routes
-│   ├── uploads/                  # Temporary file storage
-│   └── utils/
-│       └── logger.js             # Logging utility
+├── backend/                # Node.js backend (API, auth, DB, AI integration)
+│   ├── config/             # Passport & config files
+│   ├── controllers/        # Controller logic (auth, etc)
+│   ├── generated/          # (IGNORED) Prisma generated client (do not commit)
+│   ├── lib/                # Prisma client config
+│   ├── middleware/         # JWT & security middleware
+│   ├── prisma/             # Prisma schema & migrations
+│   ├── routes/             # Express route handlers
+│   ├── uploads/            # Temp file storage (auto-cleaned)
+│   ├── utils/              # Logger & utilities
+│   ├── index.js            # Main server entrypoint
+│   ├── package.json        # Backend dependencies
+│   └── ...
 │
-├── frontend/                     # Frontend web application
-│   ├── css/
-│   │   └── main.css              # Tailwind customizations
-│   ├── js/
-│   │   ├── ai-chat.js            # AI Chat page logic
-│   │   ├── auth.js               # Auth logic
-│   │   ├── config.js             # Frontend config
-│   │   ├── index.js              # Dashboard logic
-│   │   ├── logger.js             # Frontend logger
-│   │   ├── main.js               # Global utilities
-│   │   └── tailwind-config.js    # Tailwind config
-│   └── pages/
-│       ├── ai-chat.html          # AI Chat interface
-│       ├── auth-success.html     # OAuth success page
-│       ├── index.html            # Dashboard
-│       ├── login.html            # Login page
-│       └── register.html         # Registration page
+├── frontend/               # Frontend (HTML, JS, CSS)
+│   ├── css/                # Tailwind customizations
+│   ├── js/                 # Modular JS (auth, chat, dashboard, etc)
+│   └── pages/              # HTML pages (login, register, dashboard, chat)
 │
-├── model/                        # AI/ML Python components
-│   ├── app.py                    # Flask API server
-│   ├── autoencoder_model.keras   # Trained model file
+├── model/                  # Python AI/ML service
+│   ├── app.py              # Flask API server
+│   ├── autoencoder_model.keras   # Trained model
 │   ├── preprocessor_pipeline.joblib # Preprocessing pipeline
-│   ├── requirements.txt          # Python dependencies
-│   ├── train.py                  # Model training script
-│   └── data/
-│       ├── bank_transactions_data_2.csv
-│       ├── transactions_large.csv
-│       └── transactions_realistic_multi_feature.csv
-│   └── __pycache__/              # Python bytecode cache
+│   ├── requirements.txt    # Python dependencies
+│   ├── train.py            # Model training script
+│   ├── data/               # Sample/test datasets
+│   ├── __pycache__/        # (IGNORED) Python bytecode
+│   └── venv/               # (IGNORED) Python virtualenv
 │
-├── start-dev.sh                  # Development startup script
-├── test-frontend.sh              # Frontend testing script
-├── test-routes.sh                # Route testing script
-├── test-system.sh                # System integration testing
-├── LICENSE                       # MIT License
-├── .gitignore                    # Git ignore rules
-└── README.md                     # Documentation (this file)
+├── start-dev.sh            # Dev startup script (all-in-one)
+├── test-frontend.sh        # Frontend test script
+├── test-routes.sh          # API route test script
+├── test-system.sh          # System integration test
+├── LICENSE                 # MIT License
+├── .gitignore              # Ignore rules (see below)
+└── README.md               # Documentation (this file)
 ```
+
+> **Note:**
+>
+> - Folder `backend/generated/`, `model/__pycache__/`, dan `model/venv/` **harus di-ignore** di VCS (lihat `.gitignore`).
+> - Folder `uploads/` hanya untuk file sementara dan akan kosong jika tidak ada upload aktif.
+> - Tidak ada file duplikat/tidak relevan di repo ini.
+
+### .gitignore (penting)
+
+Tambahkan/cek baris berikut di `.gitignore`:
+
+```
+backend/generated/
+model/__pycache__/
+model/venv/
+node_modules/
+*.log
+uploads/
+```
+
+---
 
 > **🎯 Modern Frontend Architecture**: Frontend menggunakan Tailwind CSS dengan arsitektur modular untuk maintainability dan responsive design.
 >
@@ -1219,15 +1301,29 @@ python app.py
 
 ## 🤝 Contributing
 
-1. Fork repository
-2. Create feature branch: `git checkout -b feature/new-feature`
-3. Commit changes: `git commit -am 'Add new feature'`
-4. Push branch: `git push origin feature/new-feature`
-5. Submit Pull Request
+We welcome contributions from everyone! To get started:
+
+1. **Fork** this repository
+2. **Create a feature branch**: `git checkout -b feature/your-feature`
+3. **Commit** your changes: `git commit -am 'Add your feature'`
+4. **Push** to your fork: `git push origin feature/your-feature`
+5. **Open a Pull Request** on GitHub
+
+**Contribution Tips:**
+
+- Baca README dan pahami arsitektur sebelum coding
+- Ikuti style guide dan struktur folder yang ada
+- Tambahkan/memperbarui dokumentasi jika perlu
+- Sertakan deskripsi jelas pada PR
+- Untuk pertanyaan, gunakan [GitHub Issues](https://github.com/hasib-ashari/fraud-detector/issues)
+
+---
 
 ## 📄 License
 
-Proyek ini dilisensikan di bawah [MIT License](LICENSE).
+This project is licensed under the [MIT License](LICENSE).
+
+---
 
 ## 👥 Development Team
 

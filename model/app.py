@@ -83,7 +83,7 @@ def predict():
 
         if 'transactions' not in json_data:
             logging.error("Missing 'transactions' field in JSON data")
-            return jsonify({'error': 'Format data tidak valid. Harus memiliki field \"transactions\".'}), 400
+            return jsonify({'error': 'Format data tidak valid. Harus memiliki field "transactions".'}), 400
 
         transactions = json_data['transactions']
         logging.info(
@@ -91,22 +91,20 @@ def predict():
 
         if not isinstance(transactions, list):
             logging.error("'transactions' field is not a list")
-            return jsonify({'error': 'Field \"transactions\" harus berupa list.'}), 400
+            return jsonify({'error': 'Field "transactions" harus berupa list.'}), 400
 
         if len(transactions) == 0:
             logging.error("Empty transactions list")
-            return jsonify({'error': 'Field \"transactions\" tidak boleh kosong.'}), 400
+            return jsonify({'error': 'Field "transactions" tidak boleh kosong.'}), 400
 
         df = pd.DataFrame(transactions)
         logging.info(f"DataFrame columns: {list(df.columns)}")
 
         # Add missing fields with defaults if they don't exist
         if 'user_id' not in df.columns:
-            df['user_id'] = 0  # Default user_id sebagai integer
+            df['user_id'] = 0
             logging.info("Added default user_id field (0)")
-
         if 'hour' not in df.columns:
-            # Extract hour from timestamp (selalu tersedia dari backend)
             if 'timestamp' in df.columns:
                 try:
                     temp_timestamps = pd.to_datetime(
@@ -118,52 +116,64 @@ def predict():
                     logging.info(
                         f"Extracted hour from timestamp. Sample hours: {df['hour'].head().tolist()}")
                 except Exception as e:
-                    df['hour'] = 12  # Default ke jam 12
+                    df['hour'] = 12
                     logging.warning(
                         f"Could not extract hour from timestamp ({e}), using default value 12")
             else:
-                df['hour'] = 12  # Default ke jam 12
+                df['hour'] = 12
                 logging.info(
                     "No timestamp field found, added default hour field (12)")
         else:
-            # Hour sudah dikirim dari backend (hasil ekstraksi timestamp)
             df['hour'] = pd.to_numeric(
                 df['hour'], errors='coerce').fillna(12).astype(int)
-            # Ensure hour is in valid range (0-23)
             df['hour'] = df['hour'].clip(0, 23)
             logging.info(
                 f"Using provided hour values. Sample hours: {df['hour'].head().tolist()}")
 
-        # Add default values for merchant and location if missing
+        # Add default values for all required fields if missing
+        if 'transaction_type' not in df.columns:
+            df['transaction_type'] = 'purchase'
+            logging.info("Added default transaction_type field (purchase)")
+        if 'channel' not in df.columns:
+            df['channel'] = 'mobile'
+            logging.info("Added default channel field (mobile)")
         if 'merchant' not in df.columns:
             df['merchant'] = 'Unknown'
             logging.info("Added default merchant field (Unknown)")
+        if 'device_type' not in df.columns:
+            df['device_type'] = 'Android'
+            logging.info("Added default device_type field (Android)")
+        # Handle missing values dengan nilai yang bermakna untuk model
+        if 'city' not in df.columns:
+            if 'location' in df.columns:
+                df['city'] = df['location']
+                logging.info("Mapped location to city")
+            else:
+                df['city'] = 'Unknown'
+                logging.info("Added default city field (Unknown)")
 
-        if 'location' not in df.columns:
-            df['location'] = 'Unknown'
-            logging.info("Added default location field (Unknown)")
+        # Handle missing values untuk field optional
+        df['user_id'] = df['user_id'].fillna('Unknown')
+        df['transaction_type'] = df['transaction_type'].fillna('Unknown')
+        df['channel'] = df['channel'].fillna('Unknown')
+        df['device_type'] = df['device_type'].fillna('Unknown')
+        df['city'] = df['city'].fillna('Unknown')
 
-        # Clean and convert user_id to numeric format
-        if 'user_id' in df.columns:
-            # Convert user_id to numeric, use hash for string values
-            def convert_user_id(user_id):
-                if pd.isna(user_id) or user_id == '' or user_id is None:
-                    return 0
-                try:
-                    # Try to convert to int first
-                    return int(float(str(user_id)))
-                except (ValueError, TypeError):
-                    # If string, use hash to convert to numeric
-                    # Keep it reasonable size
-                    return abs(hash(str(user_id))) % 1000000
-
-            df['user_id'] = df['user_id'].apply(convert_user_id)
-            logging.info(
-                f"Converted user_id to numeric. Sample values: {df['user_id'].head().tolist()}")
+        # Clean and convert user_id to numeric format (optional, OneHotEncoder can handle string)
+        def convert_user_id(user_id):
+            if pd.isna(user_id) or user_id == '' or user_id is None:
+                return 0
+            try:
+                return int(float(str(user_id)))
+            except (ValueError, TypeError):
+                return str(user_id)
+        df['user_id'] = df['user_id'].apply(convert_user_id)
+        logging.info(
+            f"Processed user_id. Sample values: {df['user_id'].head().tolist()}")
 
         # Fitur yang digunakan sesuai dengan train.py
-        required_features = ['amount', 'user_id',
-                             'hour', 'merchant', 'location']
+        required_features = ['amount', 'hour', 'user_id',
+                             'transaction_type', 'channel', 'merchant', 'device_type', 'city']
         missing_cols = set(required_features) - set(df.columns)
         if missing_cols:
             logging.error(f"Missing required columns: {missing_cols}")
@@ -174,29 +184,21 @@ def predict():
 
         # Transformasi fitur sesuai dengan yang digunakan di train.py
         try:
-            # Pilih fitur yang sama dengan train.py
             X_features = df[required_features]
-
             logging.info(
                 f"Data types before preprocessing: {X_features.dtypes.to_dict()}")
             logging.info(
                 f"Sample data before preprocessing:\n{X_features.head()}")
-
             X = preprocessor.transform(X_features)
             X = np.asarray(X).astype(np.float32)
             logging.info(f"Data shape after preprocessing: {X.shape}")
-
         except Exception as e:
             logging.error(f"Preprocessing error: {str(e)}")
             return jsonify({'error': f"Gagal memproses data dengan preprocessor: {str(e)}"}), 500
-        # Prediksi menggunakan autoencoder
+
         reconstructed = autoencoder.predict(X)
-
-        # Hitung reconstruction error
         errors = np.mean(np.square(X - reconstructed), axis=1)
-
-        # Gunakan threshold dinamis berdasarkan percentile 95
-        threshold = np.percentile(errors, 95)
+        threshold = np.percentile(errors, 96)
         is_anomaly = errors > threshold
 
         logging.info(
@@ -207,17 +209,18 @@ def predict():
 
         results = []
         for i in range(len(df)):
-            # Use original timestamp if available, otherwise use the ID-based index
             timestamp_value = original_timestamps.iloc[i] if original_timestamps is not None else None
-
             results.append({
                 'id': str(df.iloc[i].get('id', i)),
                 'timestamp': str(timestamp_value) if timestamp_value is not None else None,
                 'merchant': str(df.iloc[i].get('merchant', '')),
-                'location': str(df.iloc[i].get('location', '')),
+                'location': str(df.iloc[i].get('city', '')),
                 'amount': float(df.iloc[i]['amount']),
                 'hour': int(df.iloc[i].get('hour', 12)),
-                'user_id': int(df.iloc[i].get('user_id', 0)),
+                'user_id': str(df.iloc[i].get('user_id', 0)),
+                'transaction_type': str(df.iloc[i].get('transaction_type', '')),
+                'channel': str(df.iloc[i].get('channel', '')),
+                'device_type': str(df.iloc[i].get('device_type', '')),
                 'isAnomaly': bool(is_anomaly[i]),
                 'anomalyScore': float(errors[i])
             })
@@ -243,28 +246,36 @@ def test_format():
             {
                 "id": "1",
                 "amount": 100.50,
-                "timestamp": "2025-06-29T14:30:00Z",  # Optional, untuk output saja
-                "user_id": 123,  # Bisa string atau number
-                "hour": 14,  # 0-23, akan diekstrak dari timestamp jika tidak ada
+                "timestamp": "2025-06-29T14:30:00Z",
+                "user_id": 123,
+                "hour": 14,
+                "transaction_type": "purchase",
+                "channel": "mobile",
                 "merchant": "Amazon",
-                "location": "Online"
+                "device_type": "Android",
+                "city": "Jakarta"
             },
             {
                 "id": "2",
                 "amount": 25.00,
-                "timestamp": "2025-06-29T15:45:00Z",  # Optional
-                "user_id": "user456",  # String akan dikonversi ke hash
+                "timestamp": "2025-06-29T15:45:00Z",
+                "user_id": "user456",
                 "hour": 15,
+                "transaction_type": "transfer",
+                "channel": "web",
                 "merchant": "Starbucks",
-                "location": "New York"
+                "device_type": "iOS",
+                "city": "New York"
             },
             {
                 "id": "3",
-                "amount": 1500.00,  # High amount - potential anomaly
+                "amount": 1500.00,
                 "user_id": 789,
+                "transaction_type": "withdrawal",
+                "channel": "atm",
                 "merchant": "Unknown",
-                "location": "Unknown"
-                # hour akan default ke 12 jika tidak ada timestamp
+                "device_type": "ATM",
+                "city": "Unknown"
             }
         ]
     }
@@ -272,21 +283,25 @@ def test_format():
     return jsonify({
         "message": "Sample data format for /predict endpoint",
         "sample_data": sample_data,
-        "required_fields": ["amount"],
-        "auto_generated_fields": ["user_id", "hour", "merchant", "location"],
-        "optional_fields": ["id", "timestamp"],
+        "required_fields": ["amount", "timestamp", "merchant"],
+        "optional_fields": ["user_id", "transaction_type", "channel", "device_type", "city"],
         "field_details": {
             "amount": "Numeric value (e.g., 100.50) - REQUIRED",
-            "user_id": "Numeric or string identifier. Missing -> 0, String -> hash conversion",
-            "hour": "Integer 0-23. Missing -> extracted from timestamp or default 12",
-            "merchant": "String identifier. Missing -> 'Unknown'",
-            "location": "String location. Missing -> 'Unknown'",
+            "timestamp": "ISO timestamp string - REQUIRED",
+            "merchant": "String nama merchant - REQUIRED",
+            "user_id": "String user ID. Missing -> 'Unknown'",
+            "transaction_type": "String jenis transaksi. Missing -> 'Unknown'",
+            "channel": "String channel transaksi. Missing -> 'Unknown'",
+            "device_type": "String tipe device. Missing -> 'Unknown'",
+            "city": "String city. Missing -> 'Unknown'",
+            "device_type": "String, e.g., Android/iOS/ATM. Missing -> 'Android'",
+            "city": "String city. Missing -> 'Unknown'",
             "timestamp": "Optional ISO format string for output reference and hour extraction",
             "id": "Optional transaction ID for reference"
         },
         "model_info": {
-            "features_used": ["amount", "user_id", "hour", "merchant", "location"],
-            "preprocessing": "StandardScaler for [amount, user_id, hour], OneHotEncoder for [merchant, location]",
+            "features_used": ["amount", "hour", "user_id", "transaction_type", "channel", "merchant", "device_type", "city"],
+            "preprocessing": "StandardScaler for [amount, hour], OneHotEncoder for [user_id, transaction_type, channel, merchant, device_type, city]",
             "model_type": "AutoEncoder for anomaly detection",
             "threshold": "Dynamic threshold based on 95th percentile of reconstruction errors",
             "trained_on": "Normal transactions only (is_true_anomaly == 0)"
@@ -295,10 +310,13 @@ def test_format():
             "id": "Transaction ID",
             "timestamp": "Original timestamp if provided",
             "merchant": "Merchant name",
-            "location": "Location",
+            "location": "City",
             "amount": "Transaction amount",
             "hour": "Hour of transaction",
             "user_id": "Processed user ID",
+            "transaction_type": "Transaction type",
+            "channel": "Channel",
+            "device_type": "Device type",
             "isAnomaly": "Boolean - true if anomalous",
             "anomalyScore": "Float - reconstruction error score"
         }

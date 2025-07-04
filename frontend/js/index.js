@@ -626,14 +626,71 @@ class DashboardManager {
   // Setup interaksi tabel (klik header untuk sort)
   // =============================
   setupTableInteractions() {
-    // Setup sortable headers
-    const sortableHeaders = document.querySelectorAll('.sortable');
-    sortableHeaders.forEach(header => {
-      header.addEventListener('click', () => {
-        const sortType = header.getAttribute('data-sort');
-        this.sortResults(sortType);
-      });
+    const resultsBody = document.getElementById('resultsBody');
+    if (!resultsBody) return;
+    // Delegasi event: klik baris
+    resultsBody.addEventListener('click', e => {
+      let tr = e.target;
+      while (tr && tr.tagName !== 'TR') tr = tr.parentElement;
+      if (!tr) return;
+      // Ambil index baris
+      const rowIndex = Array.from(resultsBody.children).indexOf(tr);
+      const dataToRender =
+        this.filteredResults.length > 0 ? this.filteredResults : this.currentResults;
+      const result = dataToRender[rowIndex];
+      if (!result) return;
+      this.showTransactionDetailModal(result);
     });
+    // Close modal
+    const closeBtn = document.getElementById('closeDetailModal');
+    if (closeBtn) {
+      closeBtn.onclick = () => {
+        document.getElementById('transactionDetailModal').classList.add('hidden');
+      };
+    }
+    // Click outside modal to close
+    const modal = document.getElementById('transactionDetailModal');
+    if (modal) {
+      modal.addEventListener('click', e => {
+        if (e.target === modal) modal.classList.add('hidden');
+      });
+    }
+  }
+
+  // =============================
+  // Tampilkan detail transaksi di modal
+  // =============================
+  showTransactionDetailModal(result) {
+    const modal = document.getElementById('transactionDetailModal');
+    const content = document.getElementById('transactionDetailContent');
+    if (!modal || !content) return;
+    // Build detail HTML
+    content.innerHTML = `
+      <div><span class="font-semibold">Timestamp:</span> ${
+        result.timestamp ? new Date(result.timestamp).toLocaleString() : '-'
+      }</div>
+      <div><span class="font-semibold">Amount:</span> $${parseFloat(
+        result.amount
+      ).toLocaleString()}</div>
+      <div><span class="font-semibold">Merchant:</span> ${result.merchant || '-'}</div>
+      <div><span class="font-semibold">Location:</span> ${result.location || '-'}</div>
+      <div><span class="font-semibold">Risk Score:</span> ${(
+        (result.anomalyScore || 0) * 100
+      ).toFixed(1)}%</div>
+      <div><span class="font-semibold">User ID:</span> ${result.user_id || '-'}</div>
+      <div><span class="font-semibold">Transaction Type:</span> ${
+        result.transaction_type || '-'
+      }</div>
+      <div><span class="font-semibold">Channel:</span> ${result.channel || '-'}</div>
+      <div><span class="font-semibold">Device Type:</span> ${result.device_type || '-'}</div>
+      <div><span class="font-semibold">Transaction ID:</span> ${result.id || '-'}</div>
+      ${
+        result.geminiExplanation
+          ? `<div class='mt-2 p-2 bg-blue-50 rounded'><span class='font-semibold'>AI Explanation:</span><br>${result.geminiExplanation}</div>`
+          : ''
+      }
+    `;
+    modal.classList.remove('hidden');
   }
 
   // =============================
@@ -1010,7 +1067,7 @@ class DashboardManager {
           : (result.anomalyScore || 0) > 0.5
           ? 'bg-yellow-50 border-l-4 border-yellow-500'
           : ''
-      }">
+      }" title="Klik untuk detail transaksi">
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
           ${new Date(result.timestamp).toLocaleString()}
         </td>
@@ -1172,21 +1229,11 @@ class DashboardManager {
     }
 
     // Create CSV content dengan informasi waktu yang lengkap
-    const headers = [
-      'Timestamp',
-      'Date',
-      'Day',
-      'Hour',
-      'Amount',
-      'Merchant',
-      'Location',
-      'Risk Score',
-    ];
+    const headers = ['Timestamp', 'Date', 'Day', 'Amount', 'Merchant', 'Location', 'Risk Score'];
     const csvContent = [
       headers.join(','),
       ...dataToExport.map(row => {
         const date = new Date(row.timestamp);
-        const hour = date.getHours();
         const dateStr = date.toLocaleDateString('id-ID');
         const dayName = date.toLocaleDateString('id-ID', { weekday: 'long' });
 
@@ -1194,7 +1241,6 @@ class DashboardManager {
           `"${date.toLocaleString()}"`,
           `"${dateStr}"`,
           `"${dayName}"`,
-          hour,
           row.amount,
           `"${row.merchant}"`,
           `"${row.location}"`,

@@ -143,9 +143,12 @@ const upload = multer({
 const MAPPER_CONFIG = {
   amount: ['transactionamount', 'amount', 'jumlah', 'nilai', 'TransactionAmount'],
   timestamp: ['transactiondate', 'timestamp', 'waktu', 'TransactionDate'],
-  merchant: ['merchantid', 'merchant', 'MerchantID'],
-  location: ['location', 'Location'],
-  user_id: ['accountid', 'user_id', 'userid', 'AccountID'],
+  merchant: ['merchantid', 'merchant', 'MerchantID', 'merchantname','MerchantName'],
+  location: ['city', 'kota', 'lokasi', 'location', 'Location', 'City'],
+  user_id: ['accountid', 'user_id', 'userid', 'AccountID', 'UserID'],
+  transaction_type: ['transactiontype', 'jenis', 'tipe', 'TransactionType'],
+  channel: ['channel', 'saluran', 'Channel'],
+  device_type: ['devicetype', 'device', 'DeviceType'],
 };
 
 // =========================
@@ -206,11 +209,18 @@ Anda adalah Senior Risk Analyst pada institusi perbankan di Indonesia dengan spe
 ## DATA TRANSAKSI ANOMALI
 **Nilai Transaksi:** Rp ${new Intl.NumberFormat('id-ID').format(transaction.amount)}
 **Timestamp:** ${new Date(transaction.timestamp).toLocaleString('id-ID', {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     })}
 **Merchant:** ${transaction.merchant}
-**Lokasi:** ${transaction.location}
-**Anomaly Score:** ${transaction.anomalyScore?.toFixed(3) || 'N/A'} (0.0 = Normal, 1.0 = Highly Suspicious)
+**Lokasi:** ${transaction.location || 'Data tidak tersedia'}
+**Anomaly Score:** ${
+      transaction.anomalyScore?.toFixed(3) || 'N/A'
+    } (0.0 = Normal, 1.0 = Highly Suspicious)
 
 ## TUGAS ANALISIS
 Berikan analisis singkat dan profesional dalam SATU KALIMAT yang menjelaskan alasan spesifik mengapa transaksi ini diklasifikasikan sebagai anomali berdasarkan:
@@ -253,9 +263,22 @@ function validateAndEnhanceAIResponse(aiResponse, type = 'explanation') {
   let cleanedResponse = aiResponse.trim();
   // Hilangkan prefix/pola tidak diinginkan
   const unwantedPrefixes = [
-    'ANALISIS:', 'JAWABAN:', 'RESPONS:', 'A:', 'LAPORAN ANALISIS:', 'HASIL:',
-    '**ANALISIS:**', '**JAWABAN:**', '**LAPORAN:**', 'HTML:', 'FORMAT HTML:',
-    'BERIKAN ANALISIS:', 'BERIKAN RESPONS:', '```html', '```', '`html`',
+    'ANALISIS:',
+    'JAWABAN:',
+    'RESPONS:',
+    'A:',
+    'LAPORAN ANALISIS:',
+    'HASIL:',
+    '**ANALISIS:**',
+    '**JAWABAN:**',
+    '**LAPORAN:**',
+    'HTML:',
+    'FORMAT HTML:',
+    'BERIKAN ANALISIS:',
+    'BERIKAN RESPONS:',
+    '```html',
+    '```',
+    '`html`',
   ];
   unwantedPrefixes.forEach(prefix => {
     if (cleanedResponse.toUpperCase().startsWith(prefix.toUpperCase())) {
@@ -269,19 +292,31 @@ function validateAndEnhanceAIResponse(aiResponse, type = 'explanation') {
     'deep-analysis': 300,
   };
   if (cleanedResponse.length < minLengths[type]) {
-    Logger.warn(`Response too short (${cleanedResponse.length} < ${minLengths[type]}) for type: ${type}`);
+    Logger.warn(
+      `Response too short (${cleanedResponse.length} < ${minLengths[type]}) for type: ${type}`
+    );
     return getDefaultResponse(type);
   }
   // Bersihkan referensi AI yang tidak profesional
   const inappropriatePatterns = [
-    /sebagai ai/gi, /saya adalah ai/gi, /sebagai model bahasa/gi, /saya tidak dapat/gi, /maaf, saya tidak/gi, /sebagai asisten/gi,
+    /sebagai ai/gi,
+    /saya adalah ai/gi,
+    /sebagai model bahasa/gi,
+    /saya tidak dapat/gi,
+    /maaf, saya tidak/gi,
+    /sebagai asisten/gi,
   ];
   inappropriatePatterns.forEach(pattern => {
     cleanedResponse = cleanedResponse.replace(pattern, '');
   });
   // Bersihkan artefak HTML
   const htmlArtifacts = [
-    /```html\s*/gi, /```\s*/gi, /`html`/gi, /format html/gi, /dalam format html/gi, /gunakan html/gi,
+    /```html\s*/gi,
+    /```\s*/gi,
+    /`html`/gi,
+    /format html/gi,
+    /dalam format html/gi,
+    /gunakan html/gi,
   ];
   htmlArtifacts.forEach(pattern => {
     cleanedResponse = cleanedResponse.replace(pattern, '');
@@ -416,20 +451,29 @@ router.post('/upload-debug', upload.single('file'), async (req, res) => {
       .on('data', rawRow => {
         const cleanRow = mapAndCleanRow(rawRow);
 
-        // Pastikan semua field wajib ada
+        // Field wajib dengan validasi ketat
+        const row = {
+          amount:
+            typeof cleanRow.amount === 'number' && !isNaN(cleanRow.amount) ? cleanRow.amount : null,
+          timestamp: cleanRow.timestamp || null,
+          merchant: cleanRow.merchant || null,
+          // Field optional - biarkan null jika tidak ada
+          location: cleanRow.location || null,
+          user_id: cleanRow.user_id ? String(cleanRow.user_id) : null,
+          transaction_type: cleanRow.transaction_type || null,
+          channel: cleanRow.channel || null,
+          device_type: cleanRow.device_type || null,
+        };
+
+        // Validasi ketat: field wajib harus ada dan valid
         if (
-          typeof cleanRow.amount === 'number' &&
-          !isNaN(cleanRow.amount) &&
-          cleanRow.timestamp &&
-          cleanRow.merchant &&
-          cleanRow.location
+          row.amount &&
+          row.amount > 0 &&
+          row.timestamp &&
+          row.merchant &&
+          row.merchant.trim() !== ''
         ) {
-          results.push({
-            amount: cleanRow.amount,
-            timestamp: cleanRow.timestamp,
-            merchant: cleanRow.merchant,
-            location: cleanRow.location,
-          });
+          results.push(row);
         }
       })
       .on('end', async () => {
@@ -540,31 +584,36 @@ router.post('/upload', protect, upload.single('file'), async (req, res) => {
 
           const cleanRow = mapAndCleanRow(rawRow);
 
-          // Pastikan semua field wajib ada
+          // Field wajib dengan validasi ketat
+          const row = {
+            amount:
+              typeof cleanRow.amount === 'number' && !isNaN(cleanRow.amount)
+                ? cleanRow.amount
+                : null,
+            timestamp: cleanRow.timestamp || null,
+            merchant: cleanRow.merchant || null,
+            // Field optional - biarkan null jika tidak ada
+            location: cleanRow.location || null,
+            user_id: cleanRow.user_id ? String(cleanRow.user_id) : null,
+            transaction_type: cleanRow.transaction_type || null,
+            channel: cleanRow.channel || null,
+            device_type: cleanRow.device_type || null,
+            uploadBatchId: batchId,
+          };
+
+          // Validasi ketat: field wajib harus ada dan valid
           if (
-            typeof cleanRow.amount === 'number' &&
-            !isNaN(cleanRow.amount) &&
-            cleanRow.amount > 0 &&
-            cleanRow.timestamp &&
-            cleanRow.merchant &&
-            cleanRow.location
+            row.amount &&
+            row.amount > 0 &&
+            row.timestamp &&
+            row.merchant &&
+            row.merchant.trim() !== ''
           ) {
             validRows++;
-            results.push({
-              amount: cleanRow.amount,
-              timestamp: cleanRow.timestamp,
-              merchant: cleanRow.merchant,
-              location: cleanRow.location,
-              uploadBatchId: batchId,
-            });
+            results.push(row);
           } else {
             invalidRows++;
-            Logger.debug(`Invalid row ${processedRows}`, {
-              amount: cleanRow.amount,
-              timestamp: cleanRow.timestamp,
-              merchant: cleanRow.merchant,
-              location: cleanRow.location,
-            });
+            Logger.debug(`Invalid row ${processedRows}`, row);
           }
         })
         .on('end', () => {
@@ -718,17 +767,20 @@ router.post('/analyze/:batchId', protect, async (req, res) => {
     if (transactions.length === 0) {
       return res.status(404).json({ message: 'Tidak ada transaksi untuk batch ID ini.' });
     }
-    // 2. Kirim data ke API Flask untuk dianalisis
+    // 2. Kirim data ke API Flask untuk dianalisis (semua fitur model)
     console.log(`Mengirim ${transactions.length} transaksi ke model AI...`);
     const aiResponse = await axios.post('http://127.0.0.1:5000/predict', {
       transactions: transactions.map(t => ({
         id: t.id,
         amount: t.amount,
         timestamp: t.timestamp,
-        hour: new Date(t.timestamp).getHours(), // Ekstrak hour dinamis dari timestamp
+        // hour akan diekstrak otomatis dari timestamp di Flask
         merchant: t.merchant,
-        location: t.location,
-        // user_id will be generated automatically by the Flask API
+        city: t.location || 'Unknown', // Handle null location
+        user_id: t.user_id || 'Unknown',
+        transaction_type: t.transaction_type || 'Unknown',
+        channel: t.channel || 'Unknown',
+        device_type: t.device_type || 'Unknown',
       })),
     });
     const analysisResults = aiResponse.data;
@@ -978,7 +1030,7 @@ router.post('/chat/:batchId', protect, async (req, res) => {
       prisma.transaction.findMany({
         where: { uploadBatchId: batchId, isAnomaly: true },
         orderBy: { anomalyScore: 'desc' },
-        take: 10, // Ambil 10 anomali teratas
+        take: 20, // Ambil 20 anomali teratas
       }),
       prisma.transaction.findMany({
         where: { uploadBatchId: batchId, isAnomaly: false },
@@ -1042,12 +1094,24 @@ router.post('/chat/:batchId', protect, async (req, res) => {
       }
     );
 
+    // Buat catatan dinamis untuk jumlah anomali yang dianalisis
+    const anomalyLimit = 20;
+    const anomalyNote =
+      anomalyCount === 0
+        ? 'Catatan: Tidak ada transaksi anomali yang dianalisis.'
+        : `Catatan: Analisis di bawah ini hanya menggunakan ${
+            anomalyCount < anomalyLimit ? anomalyCount : anomalyLimit
+          } transaksi anomali teratas berdasarkan skor anomaly${
+            anomalyCount < anomalyLimit ? '' : ''
+          }.`;
+
     // Buat konteks data untuk AI
     const dataContext = `
 KONTEKS DATA ANALISIS FRAUD DETECTION:
 Nama File: ${batch.fileName}
 Total Transaksi: ${totalTransactions}
 Jumlah Anomali: ${anomalyCount} (${anomalyPercentage}%)
+${anomalyNote}
 Jumlah Normal: ${totalTransactions - anomalyCount}
 
 STATISTIK KEUANGAN:
@@ -1088,7 +1152,7 @@ ${anomalies
   .map((t, i) => {
     const timeInfo = getTimeAnalysis(t.timestamp);
     return `${i + 1}. Rp ${new Intl.NumberFormat('id-ID').format(t.amount)} - ${t.merchant} di ${
-      t.location
+      t.location || 'Lokasi tidak diketahui'
     } pada ${timeInfo.formatted} (${timeInfo.timeCategory}) - Skor: ${
       t.anomalyScore?.toFixed(3) || 'N/A'
     }`;
@@ -1099,7 +1163,7 @@ MERCHANT YANG SERING MUNCUL DALAM ANOMALI:
 ${[...new Set(anomalies.map(t => t.merchant))].slice(0, 5).join(', ')}
 
 LOKASI YANG SERING MUNCUL DALAM ANOMALI:
-${[...new Set(anomalies.map(t => t.location))].slice(0, 5).join(', ')}
+${[...new Set(anomalies.map(t => t.location || 'Tidak diketahui'))].slice(0, 5).join(', ')}
     `;
 
     const model = getGeminiModel();
@@ -1258,7 +1322,7 @@ ${allTransactions
   .map(
     (t, i) =>
       `<li>${i + 1}. Rp ${new Intl.NumberFormat('id-ID').format(t.amount)} | ${t.merchant} | ${
-        t.location
+        t.location || 'Unknown'
       }</li>`
   )
   .join('')}
@@ -1324,7 +1388,8 @@ ${allTransactions
     }, {});
 
     const locationPattern = anomalies.reduce((acc, t) => {
-      acc[t.location] = (acc[t.location] || 0) + 1;
+      const location = t.location || 'Unknown';
+      acc[location] = (acc[location] || 0) + 1;
       return acc;
     }, {});
 
@@ -1406,7 +1471,7 @@ ${anomalies
   .map(
     (t, i) =>
       `${i + 1}. Rp ${new Intl.NumberFormat('id-ID').format(t.amount)} | ${t.merchant} | ${
-        t.location
+        t.location || 'Unknown'
       } | Score: ${t.anomalyScore?.toFixed(3)}`
   )
   .join('\n')}
@@ -1595,7 +1660,7 @@ router.post('/explain/:transactionId', protect, async (req, res) => {
         amount: transaction.amount,
         timestamp: transaction.timestamp,
         merchant: transaction.merchant,
-        location: transaction.location,
+        location: transaction.location || 'Unknown',
         anomalyScore: transaction.anomalyScore,
         isAnomaly: transaction.isAnomaly,
       },
@@ -1643,8 +1708,9 @@ router.get('/download/:batchId', protect, async (req, res) => {
     if (!transactions.length) {
       return res.status(404).json({ message: 'Tidak ada transaksi untuk batch ini.' });
     }
-    // Buat CSV header
-    const header = 'ID,Amount,Timestamp,Hour,Date,Day,Merchant,Location,IsAnomaly,AnomalyScore\n';
+    // Buat CSV header dengan semua field model
+    const header =
+      'ID,Amount,Timestamp,Hour,Date,Day,Merchant,Location,UserID,TransactionType,Channel,DeviceType,IsAnomaly,AnomalyScore\n';
     // Buat isi CSV dengan informasi waktu yang lengkap
     const rows = transactions.map(t => {
       const date = new Date(t.timestamp);
@@ -1660,7 +1726,11 @@ router.get('/download/:batchId', protect, async (req, res) => {
         `"${dateStr}"`,
         `"${dayName}"`,
         `"${t.merchant}"`,
-        `"${t.location}"`,
+        `"${t.location || 'Unknown'}"`,
+        `"${t.user_id || '0'}"`,
+        `"${t.transaction_type || 'purchase'}"`,
+        `"${t.channel || 'mobile'}"`,
+        `"${t.device_type || 'Android'}"`,
         t.isAnomaly ? 'Yes' : 'No',
         t.anomalyScore ?? '',
       ].join(',');

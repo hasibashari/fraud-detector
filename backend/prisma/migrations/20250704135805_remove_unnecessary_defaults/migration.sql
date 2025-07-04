@@ -1,0 +1,7 @@
+-- AlterTable
+ALTER TABLE "Transaction" ALTER COLUMN "location" DROP NOT NULL,
+ALTER COLUMN "location" DROP DEFAULT,
+ALTER COLUMN "channel" DROP DEFAULT,
+ALTER COLUMN "device_type" DROP DEFAULT,
+ALTER COLUMN "transaction_type" DROP DEFAULT,
+ALTER COLUMN "user_id" DROP DEFAULT;

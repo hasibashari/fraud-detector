@@ -26,20 +26,6 @@
 //
 // Dependencies: Prisma ORM, Multer, CSV-Parser, Axios, Google Gemini AI
 // =====================================================
-// - Anomaly detection results retrieval
-// - Transaction data querying with security controls
-//
-// 📤 EXPORT FEATURES:
-// - CSV download of analysis results
-// - Filtered data export capabilities
-//
-// 🔐 SECURITY:
-// - User authentication required for all operations
-// - Batch ownership verification
-// - Input validation and sanitization
-//
-// Dependencies: Prisma ORM, Multer, CSV-Parser, Axios, Google Gemini AI
-// =====================================================
 
 // =========================
 // SECTION: Import Dependencies

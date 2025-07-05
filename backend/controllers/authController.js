@@ -14,7 +14,12 @@ exports.register = async (req, res) => {
   try {
     // 2. Validasi input: pastikan nama, email, dan password tidak kosong
     if (!name || !email || !password) {
-      return res.status(400).json({ message: 'All fields are required' });
+      return res.status(400).json({ message: 'Name, email, and password are required' });
+    }
+
+    // Validasi panjang password
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters long' });
     }
     // 3. Cek apakah email sudah terdaftar
     const existingUser = await prisma.user.findUnique({ where: { email: email } });
@@ -54,6 +59,13 @@ exports.login = async (req, res) => {
     // Jika user tidak ditemukan, kembalikan error
     if (!user) {
       return res.status(400).json({ message: 'Invalid email or password' });
+    }
+
+    // Jika user login via OAuth dan tidak ada password, kembalikan error
+    if (!user.password) {
+      return res.status(400).json({
+        message: 'This account was created with Google. Please use Google login.',
+      });
     }
     // 3. Bandingkan password yang dikirim dengan hashed password di database
     const isPasswordValid = await bcrypt.compare(password, user.password);

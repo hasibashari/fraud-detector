@@ -69,29 +69,38 @@ app.use('/api/transactions', transactionRoutes); // Route transaksi
 app.use('/auth', authRoutes); // Route autentikasi
 
 // =========================
+// API: Logout
+// =========================
+app.post('/api/logout', (req, res) => {
+  try {
+    // Clear any potential cookies
+    res.clearCookie('connect.sid');
+    res.clearCookie('token');
+    res.clearCookie('jwt');
+
+    // Logout berhasil - pada JWT, token akan invalid saat expire
+    // atau client menghapus token dari localStorage
+    res.json({
+      success: true,
+      message: 'Logout successful',
+    });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during logout',
+    });
+  }
+});
+
+// =========================
 // Routing Utama (Frontend)
 // =========================
-// Redirect root ke halaman login
+// Redirect root ke halaman yang sesuai
 app.get('/', (req, res) => {
-  // Check if user has valid token in header
-  const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (token) {
-    // If token exists, try to verify it
-    const jwt = require('jsonwebtoken');
-    try {
-      jwt.verify(token, process.env.JWT_SECRET);
-      // Token valid, redirect to dashboard
-      res.redirect('/dashboard');
-    } catch (err) {
-      // Token invalid, redirect to login
-      res.redirect('/login');
-    }
-  } else {
-    // No token, redirect to login
-    res.redirect('/login');
-  }
+  // Untuk root path, langsung redirect ke dashboard
+  // Auth verification akan dilakukan di frontend
+  res.redirect('/dashboard');
 });
 app.use('/', frontendRoutes); // Route frontend lain
 

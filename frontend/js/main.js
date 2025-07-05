@@ -29,9 +29,12 @@ window.AppUtils = {
 
   logout() {
     localStorage.removeItem('token');
-    fetch('/api/logout', { method: 'POST', credentials: 'include' }).finally(() => {
-      window.location.href = '/login';
-    });
+    // Call logout API to clear server-side session if needed
+    fetch('/api/logout', { method: 'POST', credentials: 'include' })
+      .catch(err => console.log('Logout API call failed:', err))
+      .finally(() => {
+        window.location.href = '/login';
+      });
   },
 
   // =============================

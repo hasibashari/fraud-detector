@@ -34,7 +34,7 @@ passport.use(
               googleId: profile.id,
               name: profile.displayName,
               email: profile.emails[0].value, // Ambil email dari profile
-              password: '', // Password kosong karena login via Google
+              password: null, // No password for OAuth users
             },
           });
           done(null, newUser); // Return user baru

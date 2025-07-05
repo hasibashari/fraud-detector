@@ -63,7 +63,7 @@
 - **Intelligent Chat Interface**: Interactive AI consultant for fraud analysis
 - **Dynamic Threshold**: Adaptive detection sensitivity based on data patterns
 
-**� Smart Data Management**
+**📊 Smart Data Management**
 
 - **Flexible CSV Processing**: Automatic column mapping for various CSV formats
 - **Batch Processing System**: User-specific batch management with full lifecycle tracking
@@ -921,25 +921,35 @@ Body:
 
 ## 🤖 AI Model Details
 
-### Model Architecture
+### **Model Architecture**
 
-- **Type**: Autoencoder Neural Network
-- **Purpose**: Unsupervised anomaly detection
-- **Features**: [amount, user_id, merchant, location, timestamp]
-- **Preprocessing**: StandardScaler + OneHotEncoder
-- **Threshold**: Dynamic (95th percentile)
+- **Type**: Autoencoder Neural Network (TensorFlow/Keras)
+- **Purpose**: Unsupervised anomaly detection for financial transactions
+- **Core Features**: [amount, hour, user_id, transaction_type, channel, merchant, device_type, location]
+- **Preprocessing Pipeline**: StandardScaler + OneHotEncoder with automatic data handling
+- **Dynamic Threshold**: Adaptive anomaly detection sensitivity based on data patterns
+- **Model Format**: Keras (.keras) with Joblib preprocessing pipeline
 
-### Data Format
+### **Data Processing Features**
 
-#### Input CSV Format:
+- **Automatic Field Mapping**: Smart column mapping for various CSV formats
+- **Missing Data Handling**: Automatic default values for missing fields
+- **Currency Detection**: Automatic USD to IDR conversion based on amount ranges
+- **Scale Optimization**: Automatic scaling for large transaction amounts
+- **Time Extraction**: Smart hour extraction from timestamp fields
+
+### **Supported Data Formats**
+
+#### **Flexible CSV Input Format:**
 
 ```csv
-TransactionAmount,TransactionDate,MerchantID,Location,AccountID
-100.50,2025-06-30T14:30:00Z,Amazon,Online,123
-25.00,2025-06-30T15:45:00Z,Starbucks,New York,456
+TransactionAmount,TransactionDate,MerchantID,Location,AccountID,TransactionType,Channel,DeviceType
+100.50,2025-06-30T14:30:00Z,Amazon,Online,123,purchase,mobile,Android
+25.00,2025-06-30T15:45:00Z,Starbucks,New York,456,purchase,web,iOS
+1500.00,2025-06-30T16:00:00Z,ATM,Jakarta,789,withdrawal,atm,ATM
 ```
 
-#### API Prediction Format:
+#### **API Prediction Format:**
 
 ```json
 {
@@ -949,32 +959,73 @@ TransactionAmount,TransactionDate,MerchantID,Location,AccountID
       "amount": 100.5,
       "timestamp": "2025-06-30T14:30:00Z",
       "merchant": "Amazon",
-      "location": "Online"
+      "location": "Online",
+      "user_id": "123",
+      "transaction_type": "purchase",
+      "channel": "mobile",
+      "device_type": "Android"
+    },
+    {
+      "id": "2", 
+      "amount": 25.00,
+      "timestamp": "2025-06-30T15:45:00Z",
+      "merchant": "Starbucks",
+      "location": "New York",
+      "user_id": "456",
+      "transaction_type": "purchase",
+      "channel": "web", 
+      "device_type": "iOS"
     }
   ]
 }
 ```
 
-### Model Endpoints
+### **AI Model Endpoints**
 
-#### Health Check
+#### **Health Check**
 
 ```http
 GET http://localhost:5000/health
+
+Response:
+{
+  "status": "healthy",
+  "model_status": "loaded",
+  "message": "Fraud Detection AI Service is running"
+}
 ```
 
-#### Predict Anomalies
+#### **Predict Anomalies**
 
 ```http
 POST http://localhost:5000/predict
 Content-Type: application/json
+
+Body: {JSON format above}
 ```
 
-#### Test Format
+#### **Test Format & Sample Data**
 
 ```http
 GET http://localhost:5000/test-format
+
+Response: Sample data format with examples
 ```
+
+### **Model Features & Capabilities**
+
+**Enhanced Processing:**
+- **Smart Preprocessing**: Automatic handling of missing fields with intelligent defaults
+- **Multi-Currency Support**: Automatic USD to IDR conversion based on amount analysis
+- **Flexible Schema**: Supports various CSV formats with automatic column mapping
+- **Time Intelligence**: Extracts hour information from timestamps for temporal analysis
+- **Scale Adaptation**: Automatic scaling for different transaction amount ranges
+
+**Anomaly Detection:**
+- **Unsupervised Learning**: No need for labeled fraud data
+- **Dynamic Thresholds**: Adapts to data distribution patterns
+- **Real-time Processing**: Fast inference for immediate fraud detection
+- **Comprehensive Scoring**: Anomaly scores from 0.0 (normal) to 1.0 (highly suspicious)
 
 ## 💡 Usage Guide (Cara Penggunaan)
 
@@ -1082,37 +1133,63 @@ AI_MODEL_URL=http://localhost:5000
 
 > **⚠️ Environment Validation**: Backend akan melakukan automatic validation untuk semua required environment variables saat startup. Jika `GEMINI_API_KEY` atau variable lain hilang, server akan menampilkan error dan tidak akan start.
 
-### CSV Column Mapping
+### **Enhanced CSV Column Mapping**
 
-System mendukung berbagai format kolom CSV dengan automatic mapping:
+System mendukung berbagai format kolom CSV dengan intelligent automatic mapping:
 
 ```javascript
 const MAPPER_CONFIG = {
   amount: ['transactionamount', 'amount', 'jumlah', 'nilai', 'TransactionAmount'],
   timestamp: ['transactiondate', 'timestamp', 'waktu', 'TransactionDate'],
-  merchant: ['merchantid', 'merchant', 'MerchantID'],
-  location: ['location', 'Location'],
-  user_id: ['accountid', 'user_id', 'userid', 'AccountID'],
+  merchant: ['merchantid', 'merchant', 'MerchantID', 'merchantname', 'MerchantName'],
+  location: ['city', 'kota', 'lokasi', 'location', 'Location', 'City'],
+  user_id: ['accountid', 'user_id', 'userid', 'AccountID', 'UserID'],
+  transaction_type: ['transactiontype', 'jenis', 'tipe', 'TransactionType'],
+  channel: ['channel', 'saluran', 'Channel'],
+  device_type: ['devicetype', 'device', 'DeviceType'],
 };
 ```
 
-### Supported CSV Formats
+**Enhanced Features:**
+- **Multi-language Support**: Supports both English and Indonesian column headers
+- **Case Insensitive**: Automatic normalization of column names
+- **Flexible Mapping**: Multiple variations for each field type
+- **Auto-completion**: Missing fields are automatically filled with intelligent defaults
 
-#### Format 1: English Headers
+### **Enhanced CSV Format Support**
 
-```csv
-TransactionAmount,TransactionDate,MerchantID,Location,AccountID
-100.50,2025-06-30T14:30:00Z,Amazon,Online,123
-25.00,2025-06-30T15:45:00Z,Starbucks,New York,456
-```
-
-#### Format 2: Indonesian Headers
+#### **Format 1: Complete English Headers**
 
 ```csv
-jumlah,waktu,merchant,Location,userid
-100500,2025-06-30 14:30:00,Amazon,Online,123
-25000,2025-06-30 15:45:00,Starbucks,New York,456
+TransactionAmount,TransactionDate,MerchantID,Location,AccountID,TransactionType,Channel,DeviceType
+100.50,2025-06-30T14:30:00Z,Amazon,Online,123,purchase,mobile,Android
+25.00,2025-06-30T15:45:00Z,Starbucks,New York,456,purchase,web,iOS
+1500.00,2025-06-30T16:00:00Z,ATM,Jakarta,789,withdrawal,atm,ATM
 ```
+
+#### **Format 2: Indonesian Headers**
+
+```csv
+jumlah,waktu,merchant,lokasi,userid,jenis,saluran,device
+100500,2025-06-30 14:30:00,Amazon,Online,123,purchase,mobile,Android
+25000,2025-06-30 15:45:00,Starbucks,New York,456,purchase,web,iOS
+1500000,2025-06-30 16:00:00,ATM,Jakarta,789,withdrawal,atm,ATM
+```
+
+#### **Format 3: Minimal Required Fields**
+
+```csv
+amount,timestamp,merchant
+100.50,2025-06-30T14:30:00Z,Amazon
+25.00,2025-06-30T15:45:00Z,Starbucks
+1500.00,2025-06-30T16:00:00Z,ATM
+```
+
+**Automatic Processing Features:**
+- **Smart Defaults**: Missing optional fields are filled with intelligent defaults
+- **Currency Detection**: Automatic USD to IDR conversion based on amount analysis
+- **Time Processing**: Hour extraction from timestamp for temporal analysis
+- **Data Validation**: Comprehensive validation and cleaning before AI processing
 
 ### Security Configuration
 
@@ -1199,13 +1276,44 @@ curl -X POST http://localhost:5000/predict \
   -d '{"transactions":[{"id":"1","amount":1500.00,"merchant":"Unknown","location":"Remote","timestamp":"2025-07-01T10:00:00Z"}]}'
 ```
 
-### Sample Test Data
+### **Enhanced Sample Test Data**
 
-File sample tersedia di `model/data/`:
+**Available Test Datasets in `model/data/`:**
 
-- `transactions_realistic_multi_feature.csv` - Dataset realistis dengan berbagai features
-- `bank_transactions_data_2.csv` - Data transaksi bank
-- `transactions_large.csv` - Dataset besar untuk testing performance
+- **`transactions_realistic_multi_feature.csv`** - Comprehensive dataset with all supported features
+- **`bank_transactions_data_2.csv`** - Banking transaction data with fraud patterns
+- **`transactions_large.csv`** - Large dataset for performance testing
+- **`transactions_normal_only.csv`** - Clean dataset for baseline training
+
+**Test Data Features:**
+- **Multi-currency Support**: Both USD and IDR transaction examples
+- **Complete Field Coverage**: All optional and required fields included
+- **Realistic Patterns**: Based on actual banking transaction patterns
+- **Anomaly Examples**: Pre-labeled suspicious transactions for validation
+- **Time Diversity**: Various time patterns for temporal analysis
+
+**Sample Test API Call:**
+
+```bash
+# Test with enhanced transaction data
+curl -X POST http://localhost:5000/predict \
+  -H "Content-Type: application/json" \
+  -d '{
+    "transactions": [
+      {
+        "id": "1",
+        "amount": 1500000,
+        "timestamp": "2025-07-01T02:30:00Z",
+        "merchant": "Unknown ATM",
+        "location": "Remote Location",
+        "user_id": "suspicious_user",
+        "transaction_type": "withdrawal",
+        "channel": "atm",
+        "device_type": "ATM"
+      }
+    ]
+  }'
+```
 
 ## 🛡️ Security Features
 
@@ -1305,61 +1413,6 @@ npx prisma db push
 npx prisma generate
 ```
 
-#### 3. **AI Model Issues**
-
-```bash
-# Model files missing
-Error: "Model or preprocessor not available"
-Solution:
-cd model
-python train.py  # Retrain model
-ls *.keras *.joblib  # Verify files exist
-
-# Python dependencies
-Error: "ModuleNotFoundError: No module named 'tensorflow'"
-Solution:
-pip install -r requirements.txt
-
-# AI service not running
-Error: "connect ECONNREFUSED 127.0.0.1:5000"
-Solution:
-cd model && python app.py
-```
-
-#### 4. **File Upload Issues**
-
-```bash
-# File format error
-Error: "Only CSV files are allowed"
-Solution: Ensure file has .csv extension and proper format
-
-# CSV parsing error
-Error: "Failed to process file"
-Solution:
-- Check CSV column headers match expected mapping
-- Ensure UTF-8 encoding
-- Verify numeric data types for amount fields
-- Remove special characters from headers
-
-# File size limit
-Error: "File too large. Maximum file size is 10MB"
-Solution: Reduce file size or split into smaller batches
-```
-
-#### 5. **Port Conflicts**
-
-Solution:
-sudo systemctl start postgresql
-sudo systemctl status postgresql
-
-# Wrong connection string
-
-Error: "password authentication failed"
-Solution: Verify .env DATABASE_URL
-DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
-
-````
-
 #### 3. AI Model Issues
 
 ```bash
@@ -1379,7 +1432,7 @@ pip install -r requirements.txt
 Error: "connect ECONNREFUSED 127.0.0.1:5000"
 Solution:
 cd model && python app.py
-````
+```
 
 #### 4. File Upload Issues
 
@@ -1493,7 +1546,62 @@ This project is licensed under the [MIT License](LICENSE), allowing for both com
 
 ### **Solo Developer with AI Coding Partners**
 
-The Fraud Detection System represents a modern approach to software development, combining human expertise with cutting-edge AI assistance to create a robust, production-ready application.
+Sistem Deteksi Fraud ini merupakan pendekatan modern dalam software development, yang menggabungkan keahlian manusia (human expertise) dengan bantuan AI mutakhir (cutting-edge AI assistance) untuk membangun aplikasi yang robust dan siap digunakan di lingkungan produksi (production-ready application).
+
+#### 👨‍💻 **Lead Developer**
+3. **Make your changes** following our coding standards
+4. **Test thoroughly** using our testing scripts
+5. **Commit** with clear messages: `git commit -am 'Add: brief description of your feature'`
+6. **Push** to your fork: `git push origin feature/your-feature-name`
+7. **Open a Pull Request** with detailed description
+
+### **Contribution Guidelines**
+
+**Code Quality:**
+
+- Follow existing code structure and naming conventions
+- Write clear, self-documenting code with appropriate comments
+- Ensure all new features include proper error handling
+- Test your changes thoroughly before submitting
+
+**Documentation:**
+
+- Update README.md if your changes affect user experience
+- Add inline code comments for complex logic
+- Update API documentation for new endpoints
+- Include examples for new features
+
+**Security:**
+
+- Follow security best practices for authentication and data handling
+- Validate all user inputs properly
+- Never commit sensitive information (API keys, passwords, etc.)
+- Test for common security vulnerabilities
+
+### **Areas for Contribution**
+
+- **🔐 Security Enhancements**: Multi-factor authentication, advanced session management
+- **🤖 AI Improvements**: Enhanced ML models, better anomaly detection algorithms
+- **🎨 UI/UX**: Improved user interface, better accessibility features
+- **📊 Analytics**: Advanced reporting, data visualization improvements
+- **🧪 Testing**: Comprehensive test coverage, automated testing pipelines
+- **📱 Mobile**: Progressive Web App features, mobile optimization
+
+**Questions?** Open an [Issue](https://github.com/hasib-ashari/fraud-detector/issues) for discussion!
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE), allowing for both commercial and non-commercial use with proper attribution.
+
+---
+
+## 👥 Development Team
+
+### **Solo Developer with AI Coding Partners**
+
+Sistem Deteksi Fraud ini merupakan pendekatan modern dalam software development, yang menggabungkan keahlian manusia (human expertise) dengan bantuan AI mutakhir (cutting-edge AI assistance) untuk membangun aplikasi yang robust dan siap digunakan di lingkungan produksi (production-ready application).
 
 #### 👨‍💻 **Lead Developer**
 
@@ -1567,8 +1675,8 @@ This project serves as a comprehensive learning resource for:
 
 ---
 
-> **💡 Learning Journey**: This project represents a successful exploration of modern software development practices, demonstrating how AI-assisted development can accelerate learning and improve code quality while maintaining human oversight and creative problem-solving.
+> **💡 Learning Journey**: Proyek ini menunjukkan integrasi AI-assisted development ke dalam alur kerja modern software engineering, yang mempercepat siklus pengembangan (development cycles) tanpa menghilangkan kontrol manusia dalam pengambilan keputusan, debugging, dan perancangan arsitektur (architectural design).
 >
-> **🚀 Future Ready**: Built with scalability and maintainability in mind, this system provides a solid foundation for further development and real-world deployment in fraud detection scenarios.
+> **🚀 Future Ready**: Sistem ini dibangun dengan pendekatan modular, scalable, dan maintainable, sehingga dapat menjadi baseline yang andal untuk use case deteksi fraud secara real-time, serta siap untuk deployment lintas environment di dunia nyata.
 
 ---

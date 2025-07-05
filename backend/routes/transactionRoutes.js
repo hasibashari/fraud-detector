@@ -143,7 +143,7 @@ const upload = multer({
 const MAPPER_CONFIG = {
   amount: ['transactionamount', 'amount', 'jumlah', 'nilai', 'TransactionAmount'],
   timestamp: ['transactiondate', 'timestamp', 'waktu', 'TransactionDate'],
-  merchant: ['merchantid', 'merchant', 'MerchantID', 'merchantname','MerchantName'],
+  merchant: ['merchantid', 'merchant', 'MerchantID', 'merchantname', 'MerchantName'],
   location: ['city', 'kota', 'lokasi', 'location', 'Location', 'City'],
   user_id: ['accountid', 'user_id', 'userid', 'AccountID', 'UserID'],
   transaction_type: ['transactiontype', 'jenis', 'tipe', 'TransactionType'],
@@ -1348,57 +1348,70 @@ ${allTransactions
       });
     }
 
-    // Analisis pattern waktu yang lebih comprehensive
-    const timePattern = anomalies.reduce((acc, t) => {
+    // === 8 Fitur Analisis ===
+    // Sort anomalies by anomalyScore (descending) and select top 20 for deep analysis
+    const sortedAnomalies = [...anomalies].sort(
+      (a, b) => (b.anomalyScore || 0) - (a.anomalyScore || 0)
+    );
+    const topAnomalies = sortedAnomalies.slice(0, 20);
+    // 1. Jam (hour)
+    const timePattern = topAnomalies.reduce((acc, t) => {
       const timeInfo = getTimeAnalysis(t.timestamp);
       acc[timeInfo.hour] = (acc[timeInfo.hour] || 0) + 1;
       return acc;
     }, {});
-
-    // Analisis berdasarkan hari dan kategori waktu
-    const dayPattern = anomalies.reduce((acc, t) => {
+    // 2. Hari & kategori waktu
+    const dayPattern = topAnomalies.reduce((acc, t) => {
       const timeInfo = getTimeAnalysis(t.timestamp);
       acc[timeInfo.dayName] = (acc[timeInfo.dayName] || 0) + 1;
       return acc;
     }, {});
-
-    const timeCategoryPattern = anomalies.reduce((acc, t) => {
+    const timeCategoryPattern = topAnomalies.reduce((acc, t) => {
       const timeInfo = getTimeAnalysis(t.timestamp);
       acc[timeInfo.timeCategory] = (acc[timeInfo.timeCategory] || 0) + 1;
       return acc;
     }, {});
-
-    // Hitung anomali di luar jam kerja vs jam kerja
-    const businessHourAnomalies = anomalies.filter(t =>
-      isBusinessHour(new Date(t.timestamp).getHours())
-    ).length;
-    const nonBusinessHourAnomalies = anomalies.length - businessHourAnomalies;
-
-    // Hitung anomali weekend vs weekday
-    const weekendAnomalies = anomalies.filter(t => {
-      const day = new Date(t.timestamp).getDay();
-      return day === 0 || day === 6;
-    }).length;
-    const weekdayAnomalies = anomalies.length - weekendAnomalies;
-
-    // Analisis merchant dan lokasi
-    const merchantPattern = anomalies.reduce((acc, t) => {
+    // 3. Device Type
+    const deviceTypePattern = topAnomalies.reduce((acc, t) => {
+      const device = t.device_type || 'Unknown';
+      acc[device] = (acc[device] || 0) + 1;
+      return acc;
+    }, {});
+    // 4. Channel
+    const channelPattern = topAnomalies.reduce((acc, t) => {
+      const channel = t.channel || 'Unknown';
+      acc[channel] = (acc[channel] || 0) + 1;
+      return acc;
+    }, {});
+    // 5. Transaction Type
+    const transactionTypePattern = topAnomalies.reduce((acc, t) => {
+      const type = t.transaction_type || 'Unknown';
+      acc[type] = (acc[type] || 0) + 1;
+      return acc;
+    }, {});
+    // 6. User ID
+    const userPattern = topAnomalies.reduce((acc, t) => {
+      const user = t.user_id || 'Unknown';
+      acc[user] = (acc[user] || 0) + 1;
+      return acc;
+    }, {});
+    // 7. Merchant
+    const merchantPattern = topAnomalies.reduce((acc, t) => {
       acc[t.merchant] = (acc[t.merchant] || 0) + 1;
       return acc;
     }, {});
-
-    const locationPattern = anomalies.reduce((acc, t) => {
+    // 8. Location
+    const locationPattern = topAnomalies.reduce((acc, t) => {
       const location = t.location || 'Unknown';
       acc[location] = (acc[location] || 0) + 1;
       return acc;
     }, {});
-
-    // Analisis amount ranges
+    // Amount ranges
     const amountRanges = {
-      'Under 100K': anomalies.filter(t => t.amount < 100000).length,
-      '100K-500K': anomalies.filter(t => t.amount >= 100000 && t.amount < 500000).length,
-      '500K-1M': anomalies.filter(t => t.amount >= 500000 && t.amount < 1000000).length,
-      'Over 1M': anomalies.filter(t => t.amount >= 1000000).length,
+      'Under 100K': topAnomalies.filter(t => t.amount < 100000).length,
+      '100K-500K': topAnomalies.filter(t => t.amount >= 100000 && t.amount < 500000).length,
+      '500K-1M': topAnomalies.filter(t => t.amount >= 500000 && t.amount < 1000000).length,
+      'Over 1M': topAnomalies.filter(t => t.amount >= 1000000).length,
     };
 
     const analysisData = `
@@ -1479,39 +1492,71 @@ ${anomalies
 
     const model = getGeminiModel();
 
-    // Simplified and more effective prompt
+    // Prompt dengan 8 fitur utama
+    // NOTE TO AI & USER: Only the top 20 anomalies (by anomaly score) are analyzed. If fewer than 20 exist, all available anomalies are used.
     const prompt = `
-Anda adalah Risk Analyst Senior Bank Indonesia. Analisis data fraud berikut dan berikan laporan profesional LENGKAP:
+CATATAN PENTING:
+Analisis ini hanya menggunakan ${
+      topAnomalies.length
+    } transaksi anomali dengan skor anomaly tertinggi (maksimal 20). Jika jumlah anomali kurang dari 20, semua anomali yang tersedia dianalisis. Penjelasan dan insight di bawah ini hanya berdasarkan data tersebut.
+Anda adalah Risk Analyst Senior Bank Indonesia. Analisis data fraud berikut dan berikan laporan profesional LENGKAP. Fokus pada 8 fitur utama berikut:
 
-DATA BATCH: ${batch.fileName}
-Total Transaksi: ${allTransactions.length}
-Anomali: ${anomalies.length} (${((anomalies.length / allTransactions.length) * 100).toFixed(2)}%)
+1. amount (nilai transaksi)
+2. hour (jam transaksi)
+3. user_id (pengguna)
+4. transaction_type (jenis transaksi)
+5. channel (channel transaksi)
+6. merchant (merchant)
+7. device_type (tipe perangkat)
+8. location (lokasi)
 
-MERCHANT BERISIKO:
-${Object.entries(merchantPattern)
-  .sort((a, b) => b[1] - a[1])
-  .slice(0, 3)
-  .map(([merchant, count]) => `${merchant}: ${count} anomali`)
-  .join('\n')}
+    DATA BATCH: ${batch.fileName}
+    Total Transaksi: ${allTransactions.length}
+    Anomali (total): ${anomalies.length} (${(
+      (anomalies.length / allTransactions.length) *
+      100
+    ).toFixed(2)}%)
+    Anomali yang dianalisis: ${topAnomalies.length} (top 20 berdasarkan skor anomaly)
 
-LOKASI BERISIKO:
-${Object.entries(locationPattern)
-  .sort((a, b) => b[1] - a[1])
-  .slice(0, 3)
-  .map(([location, count]) => `${location}: ${count} anomali`)
-  .join('\n')}
-
-WAKTU PUNCAK:
-${Object.entries(timePattern)
-  .sort((a, b) => b[1] - a[1])
-  .slice(0, 3)
-  .map(([hour, count]) => `Jam ${hour}:00 - ${count} anomali`)
-  .join('\n')}
-
-DISTRIBUSI NILAI:
-${Object.entries(amountRanges)
-  .map(([range, count]) => `${range}: ${count} transaksi`)
-  .join('\n')}
+STATISTIK FITUR ANOMALI:
+- Distribusi Amount: ${Object.entries(amountRanges)
+      .map(([range, count]) => `${range}: ${count} transaksi`)
+      .join(', ')}
+- Jam (hour) terbanyak: ${Object.entries(timePattern)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([hour, count]) => `Jam ${hour}:00 (${count})`)
+      .join(', ')}
+- User ID sering muncul: ${Object.entries(userPattern)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([user, count]) => `${user} (${count})`)
+      .join(', ')}
+- Transaction Type dominan: ${Object.entries(transactionTypePattern)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([type, count]) => `${type} (${count})`)
+      .join(', ')}
+- Channel dominan: ${Object.entries(channelPattern)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([ch, count]) => `${ch} (${count})`)
+      .join(', ')}
+- Merchant berisiko: ${Object.entries(merchantPattern)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([merchant, count]) => `${merchant} (${count})`)
+      .join(', ')}
+- Device Type dominan: ${Object.entries(deviceTypePattern)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([dev, count]) => `${dev} (${count})`)
+      .join(', ')}
+- Lokasi berisiko: ${Object.entries(locationPattern)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([loc, count]) => `${loc} (${count})`)
+      .join(', ')}
 
 BERIKAN ANALISIS LENGKAP DENGAN STRUKTUR SEBAGAI BERIKUT:
 
@@ -1540,7 +1585,7 @@ BERIKAN ANALISIS LENGKAP DENGAN STRUKTUR SEBAGAI BERIKUT:
 </ul>
 </div>
 
-PENTING: Gunakan struktur di atas dan bahasa Indonesia formal perbankan.`;
+PENTING: Gunakan struktur di atas dan bahasa Indonesia formal perbankan. Fokuskan insight pada 8 fitur utama di atas.`;
 
     // Use retry mechanism for better reliability
     const rawAnalysis = await callAIWithRetry(() => model.generateContent(prompt), 'Deep Analysis');

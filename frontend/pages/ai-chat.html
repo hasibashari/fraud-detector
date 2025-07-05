@@ -131,50 +131,68 @@
               </div>
               <div class="p-4">
                 <div class="space-y-3">
+                  <!-- 8 Fitur Quick Questions -->
                   <button
                     class="w-full text-left border border-blue-200 text-blue-700 py-3 px-4 rounded-lg text-sm hover:bg-blue-50 hover:border-blue-300 focus:bg-blue-50 focus:border-blue-300 focus:ring-2 focus:ring-blue-200 transition-all duration-200 quick-btn group"
-                    data-question="Berapa persentase transaksi anomali yang terdeteksi?"
-                    aria-label="Ask about anomaly statistics"
+                    data-question="Bagaimana distribusi nilai transaksi (amount) pada anomali?"
+                    aria-label="Ask about amount distribution in anomalies"
                   >
-                    <i class="fas fa-chart-pie mr-3 group-hover:text-blue-600"></i>Statistik Anomali
+                    <i class="fas fa-money-bill-wave mr-3 group-hover:text-blue-600"></i>Distribusi
+                    Amount
+                  </button>
+                  <button
+                    class="w-full text-left border border-teal-200 text-teal-700 py-3 px-4 rounded-lg text-sm hover:bg-teal-50 hover:border-teal-300 focus:bg-teal-50 focus:border-teal-300 focus:ring-2 focus:ring-teal-200 transition-all duration-200 quick-btn group"
+                    data-question="Pada jam berapa (hour) anomali paling sering terjadi?"
+                    aria-label="Ask about hour/time patterns of anomalies"
+                  >
+                    <i class="fas fa-clock mr-3 group-hover:text-teal-600"></i>Pola Jam Transaksi
+                  </button>
+                  <button
+                    class="w-full text-left border border-purple-200 text-purple-700 py-3 px-4 rounded-lg text-sm hover:bg-purple-50 hover:border-purple-300 focus:bg-purple-50 focus:border-purple-300 focus:ring-2 focus:ring-purple-200 transition-all duration-200 quick-btn group"
+                    data-question="User ID mana yang paling sering terlibat dalam anomali?"
+                    aria-label="Ask about user involvement in anomalies"
+                  >
+                    <i class="fas fa-user mr-3 group-hover:text-purple-600"></i>User Paling Sering
+                    Anomali
+                  </button>
+                  <button
+                    class="w-full text-left border border-orange-200 text-orange-700 py-3 px-4 rounded-lg text-sm hover:bg-orange-50 hover:border-orange-300 focus:bg-orange-50 focus:border-orange-300 focus:ring-2 focus:ring-orange-200 transition-all duration-200 quick-btn group"
+                    data-question="Jenis transaksi (transaction type) apa yang paling sering menjadi anomali?"
+                    aria-label="Ask about transaction type in anomalies"
+                  >
+                    <i class="fas fa-exchange-alt mr-3 group-hover:text-orange-600"></i>Jenis
+                    Transaksi Anomali
+                  </button>
+                  <button
+                    class="w-full text-left border border-green-200 text-green-700 py-3 px-4 rounded-lg text-sm hover:bg-green-50 hover:border-green-300 focus:bg-green-50 focus:border-green-300 focus:ring-2 focus:ring-green-200 transition-all duration-200 quick-btn group"
+                    data-question="Channel apa yang paling sering muncul pada transaksi anomali?"
+                    aria-label="Ask about channel in anomalies"
+                  >
+                    <i class="fas fa-network-wired mr-3 group-hover:text-green-600"></i>Channel
+                    Dominan
                   </button>
                   <button
                     class="w-full text-left border border-amber-200 text-amber-700 py-3 px-4 rounded-lg text-sm hover:bg-amber-50 hover:border-amber-300 focus:bg-amber-50 focus:border-amber-300 focus:ring-2 focus:ring-amber-200 transition-all duration-200 quick-btn group"
-                    data-question="Merchant mana yang paling berisiko?"
-                    aria-label="Ask about risky merchants"
+                    data-question="Merchant mana yang paling berisiko dalam anomali?"
+                    aria-label="Ask about risky merchants in anomalies"
                   >
                     <i class="fas fa-store mr-3 group-hover:text-amber-600"></i>Merchant Berisiko
                   </button>
                   <button
-                    class="w-full text-left border border-teal-200 text-teal-700 py-3 px-4 rounded-lg text-sm hover:bg-teal-50 hover:border-teal-300 focus:bg-teal-50 focus:border-teal-300 focus:ring-2 focus:ring-teal-200 transition-all duration-200 quick-btn group"
-                    data-question="Pada jam berapa anomali paling sering terjadi?"
-                    aria-label="Ask about time patterns of anomalies"
+                    class="w-full text-left border border-gray-400 text-gray-700 py-3 px-4 rounded-lg text-sm hover:bg-gray-50 hover:border-gray-400 focus:bg-gray-50 focus:border-gray-400 focus:ring-2 focus:ring-gray-200 transition-all duration-200 quick-btn group"
+                    data-question="Device type apa yang paling sering digunakan dalam transaksi anomali?"
+                    aria-label="Ask about device type in anomalies"
                   >
-                    <i class="fas fa-clock mr-3 group-hover:text-teal-600"></i>Pola Waktu
-                  </button>
-                  <button
-                    class="w-full text-left border border-green-200 text-green-700 py-3 px-4 rounded-lg text-sm hover:bg-green-50 hover:border-green-300 focus:bg-green-50 focus:border-green-300 focus:ring-2 focus:ring-green-200 transition-all duration-200 quick-btn group"
-                    data-question="Apa rekomendasi tindakan untuk mencegah fraud?"
-                    aria-label="Ask for fraud prevention recommendations"
-                  >
-                    <i class="fas fa-shield-alt mr-3 group-hover:text-green-600"></i>Rekomendasi
-                    Pencegahan
+                    <i class="fas fa-mobile-alt mr-3 group-hover:text-gray-600"></i>Device Type
+                    Dominan
                   </button>
                   <button
                     class="w-full text-left border border-red-200 text-red-700 py-3 px-4 rounded-lg text-sm hover:bg-red-50 hover:border-red-300 focus:bg-red-50 focus:border-red-300 focus:ring-2 focus:ring-red-200 transition-all duration-200 quick-btn group"
-                    data-question="Lokasi mana yang memiliki transaksi paling mencurigakan?"
-                    aria-label="Ask about location analysis for suspicious transactions"
+                    data-question="Lokasi mana yang memiliki transaksi anomali paling banyak?"
+                    aria-label="Ask about location in anomalies"
                   >
-                    <i class="fas fa-map-marker-alt mr-3 group-hover:text-red-600"></i>Analisis
-                    Lokasi
-                  </button>
-                  <button
-                    class="w-full text-left border border-gray-200 text-gray-700 py-3 px-4 rounded-lg text-sm hover:bg-gray-50 hover:border-gray-300 focus:bg-gray-50 focus:border-gray-300 focus:ring-2 focus:ring-gray-200 transition-all duration-200 quick-btn group"
-                    data-question="Bagaimana perbandingan nilai transaksi normal vs anomali?"
-                    aria-label="Ask about value comparison between normal and anomalous transactions"
-                  >
-                    <i class="fas fa-balance-scale mr-3 group-hover:text-gray-600"></i>Perbandingan
-                    Nilai
+                    <i class="fas fa-map-marker-alt mr-3 group-hover:text-red-600"></i>Lokasi
+                    Berisiko
                   </button>
                 </div>
               </div>

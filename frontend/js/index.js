@@ -1072,7 +1072,7 @@ class DashboardManager {
           ${new Date(result.timestamp).toLocaleString()}
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-          $${parseFloat(result.amount).toLocaleString()}
+          Rp ${parseFloat(result.amount).toLocaleString()}
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
           ${result.merchant}
